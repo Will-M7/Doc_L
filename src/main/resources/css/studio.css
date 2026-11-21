@@ -1,0 +1,291 @@
+/* Document modules use the original app.css and AtlantaFX Primer palette. */
+.page {
+    -fx-background-color: transparent;
+}
+
+.toolbar {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10;
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 16;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 16;
+    -fx-padding: 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 18, 0, 0, 4);
+}
+
+.toolbar .button {
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-graphic-text-gap: 7;
+}
+
+.side-panel,
+.catalog-form,
+.generator-form {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 16;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 16;
+    -fx-padding: 16;
+    -fx-spacing: 16;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 18, 0, 0, 4);
+}
+
+.side-panel {
+    -fx-min-width: 0;
+}
+
+.catalog-form,
+.generator-form {
+    -fx-max-width: infinity;
+}
+
+.side-panel > .label:first-child,
+.catalog-form > .label,
+.generator-form > .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.field-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.paper-scroll,
+.paper-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.paper {
+    -fx-background-color: -color-bg-default;
+    -fx-padding: 28 50 60 50;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 18, 0, 0, 4);
+}
+
+.format-bar {
+    -fx-padding: 0 0 16 0;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.doc-paragraph {
+    -fx-min-height: 27;
+    -fx-padding: 2 0;
+}
+
+.run-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 3 0;
+    -fx-text-fill: -color-fg-default;
+}
+
+.run-field:focused {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-muted;
+}
+
+.token {
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent-fg;
+    -fx-padding: 3 6;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.list-cell.library-associated:filled {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: transparent transparent transparent -color-accent-muted;
+    -fx-border-width: 0 0 0 3;
+}
+
+.doc-table {
+    -fx-border-color: -color-border-default;
+    -fx-padding: 2;
+}
+
+.doc-cell {
+    -fx-border-color: -color-border-muted;
+    -fx-padding: 6;
+    -fx-min-width: 90;
+}
+
+.preview {
+    -fx-background-color: -color-bg-default;
+    -fx-padding: 20;
+}
+
+/* All colors remain semantic AtlantaFX Primer colors in either theme. */
+.button, .menu-button {
+    -fx-min-height: 36px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-text-fill: -color-fg-default;
+    -fx-graphic-text-gap: 7;
+    -fx-cursor: hand;
+}
+.button:hover, .menu-button:hover, .button.secondary-btn:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-fg-muted;
+}
+.button:focused, .menu-button:focused {
+    -fx-border-color: -color-accent-fg;
+}
+.button.secondary-btn {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-text-fill: -color-fg-default;
+}
+.button.primary-btn {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-text-fill: -color-fg-emphasis;
+    -fx-font-weight: bold;
+}
+.button.primary-btn:hover {
+    -fx-background-color: -color-accent-fg;
+    -fx-border-color: -color-accent-fg;
+}
+.button.primary-btn .ikonli-font-icon {
+    -fx-icon-color: -color-fg-emphasis;
+}
+.button.danger-btn {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-danger-muted;
+    -fx-text-fill: -color-danger-fg;
+}
+.button.danger-btn:hover {
+    -fx-background-color: -color-danger-subtle;
+    -fx-border-color: -color-danger-fg;
+}
+.button.danger-btn .ikonli-font-icon {
+    -fx-icon-color: -color-danger-fg;
+}
+.button:disabled { -fx-opacity: 0.5; }
+.sidebar { -fx-padding: 20 10 16 10; }
+.sidebar .nav-item {
+    -fx-padding: 9 8;
+    -fx-font-size: 12.5px;
+    -fx-graphic-text-gap: 8;
+}
+.pagina { -fx-padding: 22 24; -fx-spacing: 16; }
+.pagina-titulo { -fx-font-size: 24px; }
+.content-scroll, .content-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+.content-scroll > .scroll-bar:horizontal, .list-view .scroll-bar:horizontal {
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-opacity: 0;
+}
+.list-view .list-cell { -fx-padding: 10 12; }
+.side-panel, .catalog-form, .generator-form { -fx-background-radius: 12; -fx-border-radius: 12; }
+.binding-card, .result-field {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 8;
+    -fx-padding: 12;
+}
+.transfer-card, .preview-panel {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 12;
+    -fx-padding: 16;
+}
+.transfer-card > .label { -fx-font-weight: bold; -fx-font-size: 15px; }
+.transfer-card > .field-label { -fx-font-weight: normal; -fx-font-size: 12px; }
+.action-bar {
+    -fx-padding: 12 0 0 0;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-border-color: -color-border-muted transparent transparent transparent;
+}
+.automatic-save { -fx-text-fill: -color-success-fg; }
+.editor-toolbar { -fx-padding: 8 10; -fx-background-radius: 8; -fx-border-radius: 8; }
+.editor-toolbar .button { -fx-padding: 8 10; }
+
+.generator-actions .button { -fx-font-size: 12px; -fx-padding: 8 6; }
+
+.button.lookup-button { -fx-padding: 8; }
+
+/* Compact ribbon, scoped to the template editor and semantic Primer colors. */
+.editor-ribbon {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-tab-min-height: 25;
+    -fx-tab-max-height: 25;
+}
+.editor-ribbon .tab-header-area { -fx-padding: 0 6 0 6; }
+.editor-ribbon .tab-header-background { -fx-background-color: -color-bg-subtle; }
+.editor-ribbon .ribbon-tab { -fx-padding: 2 14; -fx-background-insets: 0; }
+.editor-ribbon .ribbon-tab:selected { -fx-background-color: -color-bg-default; }
+.editor-ribbon .ribbon-tab .tab-label { -fx-text-fill: -color-fg-default; -fx-font-size: 12px; }
+.editor-ribbon .tab-content-area { -fx-padding: 0; }
+.ribbon-strip, .ribbon-strip > .viewport { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0; }
+.ribbon-strip > .scroll-bar:horizontal { -fx-pref-height: 7; }
+.ribbon-group { -fx-padding: 4 5 2 5; -fx-min-height: 54; }
+.ribbon-caption { -fx-font-size: 10px; -fx-text-fill: -color-fg-muted; }
+.ribbon-sep { -fx-padding: 5 1; }
+.ribbon-sep .line { -fx-border-color: transparent -color-border-muted transparent transparent; -fx-border-width: 0 1 0 0; }
+.editor-toolbar .ribbon-btn, .editor-ribbon .ribbon-btn, .ribbon-context .ribbon-btn {
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-padding: 4 6;
+    -fx-font-size: 12px;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-fg-default;
+    -fx-graphic-text-gap: 5;
+}
+.editor-toolbar .ribbon-btn:hover, .editor-ribbon .ribbon-btn:hover, .ribbon-context .ribbon-btn:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-muted;
+}
+.editor-ribbon .ribbon-btn:selected { -fx-background-color: -color-accent-subtle; -fx-border-color: -color-accent-muted; }
+.editor-toolbar .ribbon-btn:focused, .editor-ribbon .ribbon-btn:focused, .ribbon-context .ribbon-btn:focused { -fx-border-color: -color-accent-fg; }
+.editor-toolbar .ribbon-btn.primary-btn { -fx-background-color: -color-accent-emphasis; -fx-text-fill: -color-fg-emphasis; }
+.editor-toolbar .ribbon-btn.primary-btn:hover { -fx-background-color: -color-accent-fg; }
+.editor-ribbon .ikonli-font-icon, .ribbon-context .ikonli-font-icon, .editor-toolbar .ikonli-font-icon { -fx-icon-size: 14px; -fx-icon-color: -color-fg-default; }
+.editor-toolbar .primary-btn .ikonli-font-icon { -fx-icon-color: -color-fg-emphasis; }
+.editor-ribbon .color-picker { -fx-color-label-visible: false; -fx-padding: 3; }
+.editor-ribbon .ribbon-grid-cell { -fx-padding: 0; }
+.ribbon-context { -fx-alignment: CENTER_LEFT; -fx-padding: 3 8; -fx-background-color: -color-bg-default; -fx-border-color: -color-border-muted; -fx-background-radius: 4; -fx-border-radius: 4; }
+.editor-save-status { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
+.editor-toolbar .combo-box > .list-cell, .editor-ribbon .combo-box > .list-cell, .ribbon-context .combo-box > .list-cell {
+    -fx-padding: 0 2;
+    -fx-font-size: 12px;
+}
+.editor-toolbar .menu-button > .label, .editor-ribbon .menu-button > .label, .ribbon-context .menu-button > .label {
+    -fx-padding: 0;
+    -fx-text-fill: -color-fg-default;
+}
+
+/* Selection state uses theme colors shared by PrimerLight and PrimerDark. */
+.editor-ribbon .ribbon-btn.ribbon-btn-active,
+.editor-ribbon .ribbon-btn.ribbon-btn-active:hover {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-fg;
+    -fx-text-fill: -color-accent-fg;
+}
+.editor-ribbon .ribbon-btn-active .ikonli-font-icon { -fx-icon-color: -color-accent-fg; }
+
+.generator-variables-panel { -fx-padding: 8; -fx-min-width: 0; }
+.generator-variables-panel.collapsed { -fx-padding: 8 2 8 2; }
+.client-panel-heading { -fx-padding: 0 0 12 0; }
+.client-update-banner { -fx-padding: 10; -fx-background-color: -color-accent-subtle; -fx-background-radius: 6; -fx-font-weight: bold; }

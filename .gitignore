@@ -1,0 +1,39 @@
+# Compilados y caché de Maven / IDE
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+.serena/
+
+# Bases de datos, secretos y configuraciones locales (CERO DATOS)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.secret
+*.key
+.env
+.env.*
+.document-studio/
+
+# Documentos generados, respaldos e informes internos
+*.docx
+*.doc
+*.docm
+*.dot
+*.dotx
+*.dotm
+*.pdf
+*.zip
+*.dsbk2
+AUDITORIA_PROYECTO.md
+INFORME-*.md
