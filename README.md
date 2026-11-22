@@ -44,6 +44,10 @@ No necesitas instalar Java: ya viene incluido.
 2. **Plantillas**: crea un grupo y agrega tus plantillas.
 3. **Generador**: elige el grupo y la plantilla, llena los datos y guarda el documento.
 
+### Plantillas de ejemplo
+
+En la carpeta [`plantillas-ejemplo`](plantillas-ejemplo) hay 4 plantillas listas para importar (carta poder, contrato de arrendamiento, declaración jurada de domicilio y solicitud a empresa). En [`ejemplos-llenos`](plantillas-ejemplo/ejemplos-llenos) puedes ver cómo queda cada una ya generada, en DOCX y PDF, con datos ficticios.
+
 ### Formato de las variables
 
 | Marcador | Uso |

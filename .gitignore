@@ -37,3 +37,8 @@
 *.dsbk2
 AUDITORIA_PROYECTO.md
 INFORME-*.md
+
+# Plantillas de ejemplo para probar la app (sí se versionan)
+!plantillas-ejemplo/
+!plantillas-ejemplo/**/*.docx
+!plantillas-ejemplo/**/*.pdf
