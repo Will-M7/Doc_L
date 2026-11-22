@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 where jpackage >nul 2>nul
 if errorlevel 1 (
-  echo Se requiere JDK 21 con jpackage en PATH.
+  echo Se requiere JDK 17 o superior con jpackage en el PATH.
   exit /b 1
 )
 

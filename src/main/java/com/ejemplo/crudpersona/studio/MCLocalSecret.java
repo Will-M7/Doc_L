@@ -43,7 +43,7 @@ public final class MCLocalSecret {
     }
     private static byte[] mcDpapi(byte[] mcInput,boolean mcEncrypt)throws Exception{
         String mcOperation=mcEncrypt?"Protect":"Unprotect";
-        String mcScript="$b=[Convert]::FromBase64String([Console]::In.ReadToEnd());$o=[Security.Cryptography.ProtectedData]::"+mcOperation+"($b,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser);[Console]::Out.Write([Convert]::ToBase64String($o))";
+        String mcScript="Add-Type -AssemblyName System.Security;$b=[Convert]::FromBase64String([Console]::In.ReadToEnd());$o=[Security.Cryptography.ProtectedData]::"+mcOperation+"($b,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser);[Console]::Out.Write([Convert]::ToBase64String($o))";
         Process mcProcess=new ProcessBuilder("powershell.exe","-NoProfile","-NonInteractive","-Command",mcScript).start();
         try(var mcOut=mcProcess.getOutputStream()){mcOut.write(Base64.getEncoder().encode(mcInput));}
         if(!mcProcess.waitFor(15,TimeUnit.SECONDS)){mcProcess.destroyForcibly();throw new IllegalStateException("DPAPI no respondió.");}

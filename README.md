@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/alejandrochino2006/Estudio-Documental/releases/latest">
+  <a href="https://github.com/Will-M7/Doc_L/releases/latest">
     <img src="https://img.shields.io/badge/Descargar-Windows-2563eb?style=for-the-badge&logo=windows" alt="Descargar para Windows">
   </a>
 </p>
@@ -18,7 +18,7 @@
 
 ## Descarga e instalación (Windows)
 
-1. Entra a **[Releases](https://github.com/alejandrochino2006/Estudio-Documental/releases/latest)** y descarga `EstudioDocumental-1.0.0-windows.zip`.
+1. Entra a **[Releases](https://github.com/Will-M7/Doc_L/releases/latest)** y descarga `EstudioDocumental-1.0.0-windows.zip`.
 2. Descomprímelo: clic derecho → **Extraer todo**.
 3. Abre la carpeta `EstudioDocumental` y ejecuta **`EstudioDocumental.exe`**.
 
@@ -44,10 +44,6 @@ No necesitas instalar Java: ya viene incluido.
 2. **Plantillas**: crea un grupo y agrega tus plantillas.
 3. **Generador**: elige el grupo y la plantilla, llena los datos y guarda el documento.
 
-### Plantillas de ejemplo
-
-En la carpeta [`plantillas-ejemplo`](plantillas-ejemplo) hay 4 plantillas listas para importar (carta poder, contrato de arrendamiento, declaración jurada de domicilio y solicitud a empresa). En [`ejemplos-llenos`](plantillas-ejemplo/ejemplos-llenos) puedes ver cómo queda cada una ya generada, en DOCX y PDF, con datos ficticios.
-
 ### Formato de las variables
 
 | Marcador | Uso |
@@ -60,9 +56,13 @@ Los nombres solo pueden tener letras sin tilde, números y `_`, y deben empezar 
 
 ## Para desarrolladores
 
-Requisitos: **JDK 17 o superior**. No hace falta instalar Maven: el proyecto trae el wrapper `mvnw`.
+Requisitos: **JDK 17 o superior** y **Git**. No hace falta instalar Maven: el proyecto trae el wrapper `mvnw`.
 
 ```bash
+# Descargar el proyecto
+git clone https://github.com/Will-M7/Doc_L.git
+cd Doc_L
+
 # Ejecutar la aplicación
 ./mvnw javafx:run          # Windows: .\mvnw.cmd javafx:run
 
