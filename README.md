@@ -82,7 +82,7 @@ Versión portable sin WiX (requiere `jpackage` del JDK en el PATH):
 ```bat
 mvnw.cmd -DskipTests package org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target\package-input
 copy target\estudio-documental-1.0.0.jar.original target\package-input\studio.jar
-jpackage --type app-image --name EstudioDocumental --app-version 1.0.0 --input target\package-input --dest target\app --main-jar studio.jar --main-class com.ejemplo.crudpersona.Launcher --icon img\logo.ico
+jpackage --type app-image --name EstudioDocumental --app-version 1.0.0 --input target\package-input --dest target\app --main-jar studio.jar --main-class com.ejemplo.crudpersona.MCLauncher --icon img\logo.ico
 ```
 
 ### Tecnologías

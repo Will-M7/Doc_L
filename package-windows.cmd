@@ -16,7 +16,7 @@ copy /Y target\estudio-documental-1.0.0.jar.original target\package-input\studio
 if errorlevel 1 exit /b 1
 
 if not exist target\installer mkdir target\installer
-jpackage --type exe --name EstudioDocumental --app-version 1.0.0 --input target\package-input --dest target\installer --main-jar studio.jar --main-class com.ejemplo.crudpersona.Launcher --icon img\logo.ico --win-menu --win-shortcut
+jpackage --type exe --name EstudioDocumental --app-version 1.0.0 --input target\package-input --dest target\installer --main-jar studio.jar --main-class com.ejemplo.crudpersona.MCLauncher --icon img\logo.ico --win-menu --win-shortcut
 if errorlevel 1 exit /b 1
 
 echo Instalador creado en target\installer
