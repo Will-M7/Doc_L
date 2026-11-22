@@ -6,36 +6,35 @@ import org.apache.poi.xwpf.usermodel.*;
 
 import java.io.*;
 
-/** @author MC */
 public final class MCDocxPdfExporter {
     private MCDocxPdfExporter(){}
-    public static byte[] mcRender(byte[] mcDocx)throws Exception{
-        try(XWPFDocument mcSource=MCDocumentEngine.mcOpen(mcDocx);ByteArrayOutputStream mcOutput=new ByteArrayOutputStream()){
-            Rectangle mcPage=PageSize.A4;float mcLeft=54,mcRight=54,mcTop=54,mcBottom=54;
-            var mcSection=mcSource.getDocument().getBody().getSectPr();
-            if(mcSection!=null){
-                if(mcSection.getPgSz()!=null){float mcWidth=mcTwips(mcSection.getPgSz().getW()),mcHeight=mcTwips(mcSection.getPgSz().getH());if(mcWidth>100&&mcHeight>100)mcPage=new Rectangle(mcWidth,mcHeight);}
-                if(mcSection.getPgMar()!=null){var mcM=mcSection.getPgMar();if(mcM.getLeft()!=null)mcLeft=mcTwips(mcM.getLeft());if(mcM.getRight()!=null)mcRight=mcTwips(mcM.getRight());if(mcM.getTop()!=null)mcTop=mcTwips(mcM.getTop());if(mcM.getBottom()!=null)mcBottom=mcTwips(mcM.getBottom());}
+    public static byte[] MCrender(byte[] MCdocx)throws Exception{
+        try(XWPFDocument MCsource=MCDocumentEngine.MCopen(MCdocx);ByteArrayOutputStream MCoutput=new ByteArrayOutputStream()){
+            Rectangle MCpage=PageSize.A4;float MCleft=54,MCright=54,MCtop=54,MCbottom=54;
+            var MCsection=MCsource.getDocument().getBody().getSectPr();
+            if(MCsection!=null){
+                if(MCsection.getPgSz()!=null){float MCwidth=MCtwips(MCsection.getPgSz().getW()),MCheight=MCtwips(MCsection.getPgSz().getH());if(MCwidth>100&&MCheight>100)MCpage=new Rectangle(MCwidth,MCheight);}
+                if(MCsection.getPgMar()!=null){var MCm=MCsection.getPgMar();if(MCm.getLeft()!=null)MCleft=MCtwips(MCm.getLeft());if(MCm.getRight()!=null)MCright=MCtwips(MCm.getRight());if(MCm.getTop()!=null)MCtop=MCtwips(MCm.getTop());if(MCm.getBottom()!=null)MCbottom=MCtwips(MCm.getBottom());}
             }
-            com.lowagie.text.Document mcPdf=new com.lowagie.text.Document(mcPage,mcLeft,mcRight,mcTop,mcBottom);PdfWriter.getInstance(mcPdf,mcOutput);mcPdf.open();
-            for(XWPFHeader mcHeader:mcSource.getHeaderList())for(XWPFParagraph mcP:mcHeader.getParagraphs())mcPdf.add(mcParagraph(mcP));
-            for(IBodyElement mcElement:mcSource.getBodyElements()){
-                if(mcElement instanceof XWPFParagraph mcP){if(mcP.isPageBreak())mcPdf.newPage();mcPdf.add(mcParagraph(mcP));for(XWPFRun mcRun:mcP.getRuns())for(XWPFPicture mcPicture:mcRun.getEmbeddedPictures())mcAddImage(mcPdf,mcPicture);}
-                else if(mcElement instanceof XWPFTable mcTable)mcPdf.add(mcTable(mcTable));
+            com.lowagie.text.Document MCpdf=new com.lowagie.text.Document(MCpage,MCleft,MCright,MCtop,MCbottom);PdfWriter.getInstance(MCpdf,MCoutput);MCpdf.open();
+            for(XWPFHeader MCheader:MCsource.getHeaderList())for(XWPFParagraph MCp:MCheader.getParagraphs())MCpdf.add(MCparagraph(MCp));
+            for(IBodyElement MCelement:MCsource.getBodyElements()){
+                if(MCelement instanceof XWPFParagraph MCp){if(MCp.isPageBreak())MCpdf.newPage();MCpdf.add(MCparagraph(MCp));for(XWPFRun MCrun:MCp.getRuns())for(XWPFPicture MCpicture:MCrun.getEmbeddedPictures())MCaddImage(MCpdf,MCpicture);}
+                else if(MCelement instanceof XWPFTable MCtable)MCpdf.add(MCtable(MCtable));
             }
-            for(XWPFFooter mcFooter:mcSource.getFooterList())for(XWPFParagraph mcP:mcFooter.getParagraphs())mcPdf.add(mcParagraph(mcP));
-            mcPdf.close();
-            byte[] mcResult=mcOutput.toByteArray();
-            if(mcResult.length<100||!new String(mcResult,0,Math.min(5,mcResult.length),java.nio.charset.StandardCharsets.US_ASCII).startsWith("%PDF-"))throw new IOException("No se generó un PDF válido.");
-            return mcResult;
+            for(XWPFFooter MCfooter:MCsource.getFooterList())for(XWPFParagraph MCp:MCfooter.getParagraphs())MCpdf.add(MCparagraph(MCp));
+            MCpdf.close();
+            byte[] MCresult=MCoutput.toByteArray();
+            if(MCresult.length<100||!new String(MCresult,0,Math.min(5,MCresult.length),java.nio.charset.StandardCharsets.US_ASCII).startsWith("%PDF-"))throw new IOException("No se generó un PDF válido.");
+            return MCresult;
         }
     }
-    private static float mcTwips(Object mcValue){return Float.parseFloat(mcValue.toString())/20f;}
-    private static Paragraph mcParagraph(XWPFParagraph mcP){Paragraph mcOut=new Paragraph();mcOut.setAlignment(switch(mcP.getAlignment()){case CENTER->Element.ALIGN_CENTER;case RIGHT->Element.ALIGN_RIGHT;case BOTH,DISTRIBUTE->Element.ALIGN_JUSTIFIED;default->Element.ALIGN_LEFT;});mcOut.setSpacingBefore(Math.max(0,mcP.getSpacingBefore()/20f));mcOut.setSpacingAfter(Math.max(0,mcP.getSpacingAfter()/20f));mcOut.setIndentationLeft(Math.max(0,mcP.getIndentationLeft()/20f));mcOut.setIndentationRight(Math.max(0,mcP.getIndentationRight()/20f));mcOut.setFirstLineIndent(mcP.getIndentationFirstLine()/20f);
-        for(XWPFRun mcRun:mcP.getRuns()){String mcText=mcRun.text();if(mcText==null||mcText.isEmpty())continue;int mcStyle=(mcRun.isBold()?Font.BOLD:0)|(mcRun.isItalic()?Font.ITALIC:0);float mcSize=mcRun.getFontSize()>0?mcRun.getFontSize():11;Font mcFont=FontFactory.getFont(FontFactory.HELVETICA,"Cp1252",false,mcSize,mcStyle);mcOut.add(new Chunk(mcText,mcFont));}return mcOut;}
-    private static PdfPTable mcTable(XWPFTable mcSource)throws DocumentException{
-        int mcColumns=mcSource.getRows().stream().mapToInt(mcRow->mcRow.getTableCells().size()).max().orElse(1);PdfPTable mcOut=new PdfPTable(mcColumns);mcOut.setWidthPercentage(100);mcOut.setSpacingBefore(5);mcOut.setSpacingAfter(5);
-        for(XWPFTableRow mcRow:mcSource.getRows()){int mcCount=0;for(XWPFTableCell mcCell:mcRow.getTableCells()){PdfPCell mcTarget=new PdfPCell();mcTarget.setPadding(5);for(XWPFParagraph mcP:mcCell.getParagraphs())mcTarget.addElement(mcParagraph(mcP));for(XWPFTable mcNested:mcCell.getTables())mcTarget.addElement(mcTable(mcNested));mcOut.addCell(mcTarget);mcCount++;}while(mcCount++<mcColumns)mcOut.addCell(new PdfPCell());}return mcOut;
+    private static float MCtwips(Object MCvalue){return Float.parseFloat(MCvalue.toString())/20f;}
+    private static Paragraph MCparagraph(XWPFParagraph MCp){Paragraph MCout=new Paragraph();MCout.setAlignment(switch(MCp.getAlignment()){case CENTER->Element.ALIGN_CENTER;case RIGHT->Element.ALIGN_RIGHT;case BOTH,DISTRIBUTE->Element.ALIGN_JUSTIFIED;default->Element.ALIGN_LEFT;});MCout.setSpacingBefore(Math.max(0,MCp.getSpacingBefore()/20f));MCout.setSpacingAfter(Math.max(0,MCp.getSpacingAfter()/20f));MCout.setIndentationLeft(Math.max(0,MCp.getIndentationLeft()/20f));MCout.setIndentationRight(Math.max(0,MCp.getIndentationRight()/20f));MCout.setFirstLineIndent(MCp.getIndentationFirstLine()/20f);
+        for(XWPFRun MCrun:MCp.getRuns()){String MCtext=MCrun.text();if(MCtext==null||MCtext.isEmpty())continue;int MCstyle=(MCrun.isBold()?Font.BOLD:0)|(MCrun.isItalic()?Font.ITALIC:0);float MCsize=MCrun.getFontSize()>0?MCrun.getFontSize():11;Font MCfont=FontFactory.getFont(FontFactory.HELVETICA,"Cp1252",false,MCsize,MCstyle);MCout.add(new Chunk(MCtext,MCfont));}return MCout;}
+    private static PdfPTable MCtable(XWPFTable MCsource)throws DocumentException{
+        int MCcolumns=MCsource.getRows().stream().mapToInt(MCrow->MCrow.getTableCells().size()).max().orElse(1);PdfPTable MCout=new PdfPTable(MCcolumns);MCout.setWidthPercentage(100);MCout.setSpacingBefore(5);MCout.setSpacingAfter(5);
+        for(XWPFTableRow MCrow:MCsource.getRows()){int MCcount=0;for(XWPFTableCell MCcell:MCrow.getTableCells()){PdfPCell MCtarget=new PdfPCell();MCtarget.setPadding(5);for(XWPFParagraph MCp:MCcell.getParagraphs())MCtarget.addElement(MCparagraph(MCp));for(XWPFTable MCnested:MCcell.getTables())MCtarget.addElement(MCtable(MCnested));MCout.addCell(MCtarget);MCcount++;}while(MCcount++<MCcolumns)MCout.addCell(new PdfPCell());}return MCout;
     }
-    private static void mcAddImage(com.lowagie.text.Document mcPdf,XWPFPicture mcPicture)throws Exception{Image mcImage=Image.getInstance(mcPicture.getPictureData().getData());mcImage.scaleToFit(mcPdf.right()-mcPdf.left(),mcPdf.top()-mcPdf.bottom());mcPdf.add(mcImage);}
+    private static void MCaddImage(com.lowagie.text.Document MCpdf,XWPFPicture MCpicture)throws Exception{Image MCimage=Image.getInstance(MCpicture.getPictureData().getData());MCimage.scaleToFit(MCpdf.right()-MCpdf.left(),MCpdf.top()-MCpdf.bottom());MCpdf.add(MCimage);}
 }

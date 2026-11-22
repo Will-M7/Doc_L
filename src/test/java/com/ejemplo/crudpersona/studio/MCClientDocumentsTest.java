@@ -9,52 +9,51 @@ import java.nio.file.Path;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
-/** @author MC */
 class MCClientDocumentsTest {
-    @TempDir Path mcDirectory;
-    private MCContact mcClient(MCStudioData mcData,String mcGiven,String mcFamily,String mcNumber)throws Exception{
-        return mcData.mcSaveContact(new MCContact(0,"Persona",mcGiven,mcFamily,mcNumber.isEmpty()?"":"DNI",mcNumber,"","","{}"));
+    @TempDir Path MCdirectory;
+    private MCContact MCclient(MCStudioData MCdata,String MCgiven,String MCfamily,String MCnumber)throws Exception{
+        return MCdata.MCsaveContact(new MCContact(0,"Persona",MCgiven,MCfamily,MCnumber.isEmpty()?"":"DNI",MCnumber,"","","{}"));
     }
-    private byte[] mcWord(String mcText)throws Exception{try(XWPFDocument mcDoc=new XWPFDocument()){mcDoc.createParagraph().createRun().setText(mcText);return MCDocumentEngine.mcBytes(mcDoc);}}
+    private byte[] MCword(String MCtext)throws Exception{try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText(MCtext);return MCDocumentEngine.MCbytes(MCdoc);}}
 
-    @Test void mcUploadingAndReplacingUpdatesTheSameRowAndSurvivesReopening()throws Exception{
-        new MCDocumentStore(mcDirectory);MCStudioData mcData=new MCStudioData(mcDirectory);MCContact mcClient=mcClient(mcData,"Luisito","","");
-        MCClientDocument mcOriginal=mcData.mcAddClientDocument(mcClient.mcId(),"Antiguo","antiguo.docx","DOCX",mcWord("Antes"));
-        byte[] mcReplacement="%PDF-Nuevo".getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        mcData.mcReplaceClientDocument(mcOriginal.mcId(),"Nuevo","nuevo.pdf","PDF",mcReplacement,"UPLOADED");
-        List<MCClientDocument> mcFound=new MCStudioData(mcDirectory).mcClientDocuments(mcClient.mcId());
-        assertThat(mcFound).hasSize(1);MCClientDocument mcResult=mcFound.get(0);
-        assertThat(mcResult.mcId()).isEqualTo(mcOriginal.mcId());assertThat(mcResult.mcFileName()).isEqualTo("nuevo.pdf");assertThat(mcResult.mcTitle()).isEqualTo("Nuevo");assertThat(mcResult.mcExtension()).isEqualTo("pdf");assertThat(mcResult.mcContentBytes()).isEqualTo(mcReplacement);assertThat(mcResult.mcSourceType()).isEqualTo("UPLOADED");assertThat(mcResult.mcUpdatedAt()).isNotEqualTo(mcOriginal.mcUpdatedAt());
-        mcData.mcDeleteContact(mcClient.mcId());assertThat(mcData.mcClientDocuments(mcClient.mcId())).isEmpty();
-        try(var mcConnection=java.sql.DriverManager.getConnection("jdbc:sqlite:"+mcData.mcDatabase());var mcS=mcConnection.createStatement();var mcR=mcS.executeQuery("SELECT COUNT(*) FROM client_document")){assertThat(mcR.next()).isTrue();assertThat(mcR.getInt(1)).isZero();}
-    }
-
-    @Test void mcGeneratedHistoryIsMatchedAcrossPeopleAndNeverRestoresAReplacedFile()throws Exception{
-        MCDocumentStore mcStore=new MCDocumentStore(mcDirectory);MCStudioData mcData=new MCStudioData(mcDirectory);
-        MCContact mcAna=mcClient(mcData,"Ana","Pérez","12345678"),mcLuis=mcClient(mcData,"Luisito","",""),mcUnrelated=mcClient(mcData,"Otra persona","","");
-        byte[] mcSource=mcWord("Carta original");MCTemplate mcTemplate=mcStore.mcSaveTemplate(new MCTemplate(0,"Carta",mcSource,mcSource));
-        MCHistory mcHistory=mcData.mcSaveHistory(new MCHistory(0,"Carta",mcTemplate.mcId(),1,null,"{\"Persona_1.DNI\":\"12345678\",\"Persona_1.nombres\":\"Ana\",\"Persona_1.apellidos\":\"Pérez\",\"Persona_2.Dirigido\":\"Luisito\"}",null,null,mcSource,"%PDF-original".getBytes()));
-        try(var mcConnection=java.sql.DriverManager.getConnection("jdbc:sqlite:"+mcData.mcDatabase());var mcS=mcConnection.createStatement();var mcR=mcS.executeQuery("SELECT COUNT(*) FROM client_document")){assertThat(mcR.next()).isTrue();assertThat(mcR.getInt(1)).isEqualTo(4);}
-        assertThat(mcData.mcClientDocuments(mcAna.mcId())).hasSize(2);assertThat(mcData.mcClientDocuments(mcLuis.mcId())).hasSize(2);assertThat(mcData.mcClientDocuments(mcUnrelated.mcId())).isEmpty();
-        MCClientDocument mcOriginal=mcData.mcClientDocuments(mcAna.mcId()).stream().filter(mcD->mcD.mcExtension().equals("docx")).findFirst().orElseThrow();
-        byte[] mcNewer=mcWord("Carta actualizada");mcData.mcReplaceClientDocument(mcOriginal.mcId(),"Carta actualizada","carta.docx","docx",mcNewer,"GENERATED");
-        for(int mcI=0;mcI<3;mcI++){List<MCClientDocument> mcFound=mcData.mcClientDocuments(mcAna.mcId());assertThat(mcFound).hasSize(2);assertThat(mcFound.stream().filter(mcD->mcD.mcId()==mcOriginal.mcId()).findFirst().orElseThrow().mcContentBytes()).isEqualTo(mcNewer);}
-        assertThat(mcData.mcHistory().get(0).mcDocx()).isEqualTo(mcSource);
-        MCClientDocument mcPdf=mcData.mcClientDocuments(mcAna.mcId()).stream().filter(mcD->mcD.mcExtension().equals("pdf")).findFirst().orElseThrow();
-        mcData.mcReplaceClientDocument(mcPdf.mcId(),"Otro archivo","nuevo.txt","txt",new byte[]{1},"UPLOADED");
-        assertThat(mcData.mcClientDocuments(mcAna.mcId())).hasSize(2).extracting(MCClientDocument::mcExtension).containsExactlyInAnyOrder("txt","docx");
-        mcData.mcDeleteHistory(mcHistory.mcId());assertThat(mcData.mcClientDocuments(mcAna.mcId())).hasSize(2);
+    @Test void MCuploadingAndReplacingUpdatesTheSameRowAndSurvivesReopening()throws Exception{
+        new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
+        MCClientDocument MCoriginal=MCdata.MCaddClientDocument(MCclient.MCid(),"Antiguo","antiguo.docx","DOCX",MCword("Antes"));
+        byte[] MCreplacement="%PDF-Nuevo".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        MCdata.MCreplaceClientDocument(MCoriginal.MCid(),"Nuevo","nuevo.pdf","PDF",MCreplacement,"UPLOADED");
+        List<MCClientDocument> MCfound=new MCStudioData(MCdirectory).MCclientDocuments(MCclient.MCid());
+        assertThat(MCfound).hasSize(1);MCClientDocument MCresult=MCfound.get(0);
+        assertThat(MCresult.MCid()).isEqualTo(MCoriginal.MCid());assertThat(MCresult.MCfileName()).isEqualTo("nuevo.pdf");assertThat(MCresult.MCtitle()).isEqualTo("Nuevo");assertThat(MCresult.MCextension()).isEqualTo("pdf");assertThat(MCresult.MCcontentBytes()).isEqualTo(MCreplacement);assertThat(MCresult.MCsourceType()).isEqualTo("UPLOADED");assertThat(MCresult.MCupdatedAt()).isNotEqualTo(MCoriginal.MCupdatedAt());
+        MCdata.MCdeleteContact(MCclient.MCid());assertThat(MCdata.MCclientDocuments(MCclient.MCid())).isEmpty();
+        try(var MCconnection=java.sql.DriverManager.getConnection("jdbc:sqlite:"+MCdata.MCdatabase());var MCs=MCconnection.createStatement();var MCr=MCs.executeQuery("SELECT COUNT(*) FROM client_document")){assertThat(MCr.next()).isTrue();assertThat(MCr.getInt(1)).isZero();}
     }
 
-    @Test void mcExplicitContactIdentityAndIndependentFieldsAreKeptSeparate()throws Exception{
-        MCDocumentStore mcStore=new MCDocumentStore(mcDirectory);MCStudioData mcData=new MCStudioData(mcDirectory);MCContact mcClient=mcClient(mcData,"Luisito","","");
-        byte[] mcBytes=mcWord("Sin variables");MCTemplate mcTemplate=mcStore.mcSaveTemplate(new MCTemplate(0,"Carta",mcBytes,mcBytes));
-        MCDefinition mcIndependent=mcStore.mcSaveDefinition(new MCDefinition(0,"Dirigido","Global","Texto corto",""));
-        mcStore.mcSaveDefinition(new MCDefinition(mcIndependent.mcId(),mcIndependent.mcKey(),mcIndependent.mcLabel(),mcIndependent.mcType(),mcIndependent.mcDefaultValue(),false,"dd/MM/yyyy",false));
-        mcData.mcSaveHistory(new MCHistory(0,"Global",mcTemplate.mcId(),1,null,"{\"Dirigido\":\"Luisito\"}",null,null,mcBytes,null));
-        assertThat(mcData.mcClientDocuments(mcClient.mcId())).isEmpty();
-        MCHistory mcDirect=mcData.mcSaveHistory(new MCHistory(0,"Asociación directa",mcTemplate.mcId(),1,null,"{\"Persona.contact_id\":\""+mcClient.mcId()+"\"}",null,null,mcBytes,null));
-        assertThat(mcData.mcClientDocuments(mcClient.mcId())).hasSize(1);
-        mcData.mcLinkHistoryToContacts(mcDirect.mcId(),List.of(mcClient.mcId(),mcClient.mcId()));assertThat(mcData.mcClientDocuments(mcClient.mcId())).hasSize(1);
+    @Test void MCgeneratedHistoryIsMatchedAcrossPeopleAndNeverRestoresAReplacedFile()throws Exception{
+        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);
+        MCContact MCana=MCclient(MCdata,"Ana","Pérez","12345678"),MCluis=MCclient(MCdata,"Luisito","",""),MCunrelated=MCclient(MCdata,"Otra persona","","");
+        byte[] MCsource=MCword("Carta original");MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Carta",MCsource,MCsource));
+        MCHistory MChistory=MCdata.MCsaveHistory(new MCHistory(0,"Carta",MCtemplate.MCid(),1,null,"{\"Persona_1.DNI\":\"12345678\",\"Persona_1.nombres\":\"Ana\",\"Persona_1.apellidos\":\"Pérez\",\"Persona_2.Dirigido\":\"Luisito\"}",null,null,MCsource,"%PDF-original".getBytes()));
+        try(var MCconnection=java.sql.DriverManager.getConnection("jdbc:sqlite:"+MCdata.MCdatabase());var MCs=MCconnection.createStatement();var MCr=MCs.executeQuery("SELECT COUNT(*) FROM client_document")){assertThat(MCr.next()).isTrue();assertThat(MCr.getInt(1)).isEqualTo(4);}
+        assertThat(MCdata.MCclientDocuments(MCana.MCid())).hasSize(2);assertThat(MCdata.MCclientDocuments(MCluis.MCid())).hasSize(2);assertThat(MCdata.MCclientDocuments(MCunrelated.MCid())).isEmpty();
+        MCClientDocument MCoriginal=MCdata.MCclientDocuments(MCana.MCid()).stream().filter(MCd->MCd.MCextension().equals("docx")).findFirst().orElseThrow();
+        byte[] MCnewer=MCword("Carta actualizada");MCdata.MCreplaceClientDocument(MCoriginal.MCid(),"Carta actualizada","carta.docx","docx",MCnewer,"GENERATED");
+        for(int MCi=0;MCi<3;MCi++){List<MCClientDocument> MCfound=MCdata.MCclientDocuments(MCana.MCid());assertThat(MCfound).hasSize(2);assertThat(MCfound.stream().filter(MCd->MCd.MCid()==MCoriginal.MCid()).findFirst().orElseThrow().MCcontentBytes()).isEqualTo(MCnewer);}
+        assertThat(MCdata.MChistory().get(0).MCdocx()).isEqualTo(MCsource);
+        MCClientDocument MCpdf=MCdata.MCclientDocuments(MCana.MCid()).stream().filter(MCd->MCd.MCextension().equals("pdf")).findFirst().orElseThrow();
+        MCdata.MCreplaceClientDocument(MCpdf.MCid(),"Otro archivo","nuevo.txt","txt",new byte[]{1},"UPLOADED");
+        assertThat(MCdata.MCclientDocuments(MCana.MCid())).hasSize(2).extracting(MCClientDocument::MCextension).containsExactlyInAnyOrder("txt","docx");
+        MCdata.MCdeleteHistory(MChistory.MCid());assertThat(MCdata.MCclientDocuments(MCana.MCid())).hasSize(2);
+    }
+
+    @Test void MCexplicitContactIdentityAndIndependentFieldsAreKeptSeparate()throws Exception{
+        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
+        byte[] MCbytes=MCword("Sin variables");MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Carta",MCbytes,MCbytes));
+        MCDefinition MCindependent=MCstore.MCsaveDefinition(new MCDefinition(0,"Dirigido","Global","Texto corto",""));
+        MCstore.MCsaveDefinition(new MCDefinition(MCindependent.MCid(),MCindependent.MCkey(),MCindependent.MClabel(),MCindependent.MCtype(),MCindependent.MCdefaultValue(),false,"dd/MM/yyyy",false));
+        MCdata.MCsaveHistory(new MCHistory(0,"Global",MCtemplate.MCid(),1,null,"{\"Dirigido\":\"Luisito\"}",null,null,MCbytes,null));
+        assertThat(MCdata.MCclientDocuments(MCclient.MCid())).isEmpty();
+        MCHistory MCdirect=MCdata.MCsaveHistory(new MCHistory(0,"Asociación directa",MCtemplate.MCid(),1,null,"{\"Persona.contact_id\":\""+MCclient.MCid()+"\"}",null,null,MCbytes,null));
+        assertThat(MCdata.MCclientDocuments(MCclient.MCid())).hasSize(1);
+        MCdata.MClinkHistoryToContacts(MCdirect.MCid(),List.of(MCclient.MCid(),MCclient.MCid()));assertThat(MCdata.MCclientDocuments(MCclient.MCid())).hasSize(1);
     }
 }

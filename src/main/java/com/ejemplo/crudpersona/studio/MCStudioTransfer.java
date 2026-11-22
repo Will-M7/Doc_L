@@ -22,296 +22,293 @@ import java.sql.*;
 import java.util.*;
 import java.util.zip.*;
 
-/** @author MC */
 public final class MCStudioTransfer {
-    /** @author MC */
     public enum MCConflict {KEEP,REPLACE}
-    /** @author MC */
-    public record MCImportResult(@com.fasterxml.jackson.annotation.JsonProperty("templates") int mcTemplates,@com.fasterxml.jackson.annotation.JsonProperty("kinds") int mcKinds,@com.fasterxml.jackson.annotation.JsonProperty("conflicts") int mcConflicts,@com.fasterxml.jackson.annotation.JsonProperty("clients") int mcClients){
-        public MCImportResult(int mcTemplates,int mcKinds,int mcConflicts){this(mcTemplates,mcKinds,mcConflicts,0);}
+    public record MCImportResult(@com.fasterxml.jackson.annotation.JsonProperty("templates") int MCtemplates,@com.fasterxml.jackson.annotation.JsonProperty("kinds") int MCkinds,@com.fasterxml.jackson.annotation.JsonProperty("conflicts") int MCconflicts,@com.fasterxml.jackson.annotation.JsonProperty("clients") int MCclients){
+        public MCImportResult(int MCtemplates,int MCkinds,int MCconflicts){this(MCtemplates,MCkinds,MCconflicts,0);}
     }
-    private static final ObjectMapper mcJSON=new ObjectMapper();
-    private static final byte[] mcMAGIC="DSBK1".getBytes(StandardCharsets.US_ASCII),mcMAGIC_V2="DSBK2".getBytes(StandardCharsets.US_ASCII);
-    private final MCDocumentStore mcStore;private final MCStudioData mcData;
-    public MCStudioTransfer(MCDocumentStore mcStore,MCStudioData mcData){this.mcStore=mcStore;this.mcData=mcData;}
+    private static final ObjectMapper MCJSON=new ObjectMapper();
+    private static final byte[] MCMAGIC="DSBK1".getBytes(StandardCharsets.US_ASCII),MCMAGIC_V2="DSBK2".getBytes(StandardCharsets.US_ASCII);
+    private final MCDocumentStore MCstore;private final MCStudioData MCdata;
+    public MCStudioTransfer(MCDocumentStore MCstore,MCStudioData MCdata){this.MCstore=MCstore;this.MCdata=MCdata;}
 
-    public void mcExportConfiguration(Path mcDestination)throws Exception{
-        mcExportConfiguration(mcDestination,null);
+    public void MCexportConfiguration(Path MCdestination)throws Exception{
+        MCexportConfiguration(MCdestination,null);
     }
 
-    public void mcExportConfiguration(Path mcDestination,Collection<Long> mcTemplateIds)throws Exception{
-        List<MCTemplate> mcAll=mcStore.mcTemplates();
-        List<MCTemplate> mcTargets=mcTemplateIds==null?mcAll:mcAll.stream().filter(mcT->mcTemplateIds.contains(mcT.mcId())).toList();
-        Set<Long> mcTargetIds=new HashSet<>();for(MCTemplate mcT:mcTargets)mcTargetIds.add(mcT.mcId());
+    public void MCexportConfiguration(Path MCdestination,Collection<Long> MCtemplateIds)throws Exception{
+        List<MCTemplate> MCall=MCstore.MCtemplates();
+        List<MCTemplate> MCtargets=MCtemplateIds==null?MCall:MCall.stream().filter(MCt->MCtemplateIds.contains(MCt.MCid())).toList();
+        Set<Long> MCtargetIds=new HashSet<>();for(MCTemplate MCt:MCtargets)MCtargetIds.add(MCt.MCid());
 
-        Set<Long> mcTargetGroupIds=new HashSet<>();
-        for(MCTemplate mcT:mcTargets)mcTargetGroupIds.addAll(mcStore.mcGroupIds(mcT.mcId()));
-        List<MCDocumentStore.MCTemplateGroup> mcTargetGroups=mcStore.mcGroups().stream().filter(mcG->mcTargetGroupIds.contains(mcG.mcId())).toList();
+        Set<Long> MCtargetGroupIds=new HashSet<>();
+        for(MCTemplate MCt:MCtargets)MCtargetGroupIds.addAll(MCstore.MCgroupIds(MCt.MCid()));
+        List<MCDocumentStore.MCTemplateGroup> MCtargetGroups=MCstore.MCgroups().stream().filter(MCg->MCtargetGroupIds.contains(MCg.MCid())).toList();
 
-        if(mcTemplateIds!=null&&!mcTargetIds.containsAll(mcTemplateIds))throw new IOException("La selección contiene plantillas inexistentes.");
-        Map<Long,List<MCVariable>> mcTargetVariables=new LinkedHashMap<>();
-        Set<Long> mcTargetDefIds=new LinkedHashSet<>();
-        List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();
-        for(MCTemplate mcT:mcTargets){
-            List<MCVariable> mcVariables=new ArrayList<>(mcStore.mcVariables(mcT.mcId()));
-            Set<String> mcKnown=new HashSet<>();for(MCVariable mcV:mcVariables){mcKnown.add(mcV.mcKey());mcTargetDefIds.add(mcStore.mcDefinitionId(mcV.mcId()));}
-            try(XWPFDocument mcDocument=MCDocumentEngine.mcOpen(mcT.mcEdited())){
-                Set<String> mcMarkers=MCDocumentEngine.mcMarkers(mcDocument);
-                for(String mcMarker:mcMarkers)for(MCDefinition mcD:mcDefinitions)if(MCDocumentEngine.mcBaseKey(mcMarker).equals(mcD.mcKey())&&mcKnown.add(mcMarker)){
-                    mcVariables.add(new MCVariable(-mcD.mcId(),mcT.mcId(),mcMarker,mcD.mcLabel(),mcD.mcType(),mcD.mcDefaultValue(),false,mcVariables.size()+1));
-                    mcTargetDefIds.add(mcD.mcId());
+        if(MCtemplateIds!=null&&!MCtargetIds.containsAll(MCtemplateIds))throw new IOException("La selección contiene plantillas inexistentes.");
+        Map<Long,List<MCVariable>> MCtargetVariables=new LinkedHashMap<>();
+        Set<Long> MCtargetDefIds=new LinkedHashSet<>();
+        List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();
+        for(MCTemplate MCt:MCtargets){
+            List<MCVariable> MCvariables=new ArrayList<>(MCstore.MCvariables(MCt.MCid()));
+            Set<String> MCknown=new HashSet<>();for(MCVariable MCv:MCvariables){MCknown.add(MCv.MCkey());MCtargetDefIds.add(MCstore.MCdefinitionId(MCv.MCid()));}
+            try(XWPFDocument MCdocument=MCDocumentEngine.MCopen(MCt.MCedited())){
+                Set<String> MCmarkers=MCDocumentEngine.MCmarkers(MCdocument);
+                for(String MCmarker:MCmarkers)for(MCDefinition MCd:MCdefinitions)if(MCDocumentEngine.MCbaseKey(MCmarker).equals(MCd.MCkey())&&MCknown.add(MCmarker)){
+                    MCvariables.add(new MCVariable(-MCd.MCid(),MCt.MCid(),MCmarker,MCd.MClabel(),MCd.MCtype(),MCd.MCdefaultValue(),false,MCvariables.size()+1));
+                    MCtargetDefIds.add(MCd.MCid());
                 }
             }
-            mcTargetVariables.put(mcT.mcId(),mcVariables);
+            MCtargetVariables.put(MCt.MCid(),MCvariables);
         }
-        boolean mcExpanded;List<MCComplement> mcAllComplements=mcStore.mcComplements();
-        do{mcExpanded=false;for(MCComplement mcLink:mcAllComplements)if(mcTargetDefIds.contains(mcLink.mcSourceDefId())||mcTargetDefIds.contains(mcLink.mcTargetDefId())){mcExpanded|=mcTargetDefIds.add(mcLink.mcSourceDefId());mcExpanded|=mcTargetDefIds.add(mcLink.mcTargetDefId());}}while(mcExpanded);
-        List<MCDefinition> mcTargetDefs=mcDefinitions.stream().filter(mcD->mcTargetDefIds.contains(mcD.mcId())).toList();
-        List<MCApiBinding> mcTargetBindings=mcData.mcApiBindings().stream().filter(mcB->mcTargetDefIds.contains(mcB.mcDefinitionId())).toList();
+        boolean MCexpanded;List<MCComplement> MCallComplements=MCstore.MCcomplements();
+        do{MCexpanded=false;for(MCComplement MClink:MCallComplements)if(MCtargetDefIds.contains(MClink.MCsourceDefId())||MCtargetDefIds.contains(MClink.MCtargetDefId())){MCexpanded|=MCtargetDefIds.add(MClink.MCsourceDefId());MCexpanded|=MCtargetDefIds.add(MClink.MCtargetDefId());}}while(MCexpanded);
+        List<MCDefinition> MCtargetDefs=MCdefinitions.stream().filter(MCd->MCtargetDefIds.contains(MCd.MCid())).toList();
+        List<MCApiBinding> MCtargetBindings=MCdata.MCapiBindings().stream().filter(MCb->MCtargetDefIds.contains(MCb.MCdefinitionId())).toList();
 
-        ObjectNode mcRoot=mcJSON.createObjectNode();
-        mcRoot.put("format","document-studio-config");
-        mcRoot.put("version",9);
-        mcRoot.set("definitions",mcJSON.valueToTree(mcTargetDefs));
-        mcRoot.set("complements",mcJSON.valueToTree(mcAllComplements.stream().filter(mcLink->mcTargetDefIds.contains(mcLink.mcSourceDefId())&&mcTargetDefIds.contains(mcLink.mcTargetDefId())).toList()));
-        mcRoot.set("apiBindings",mcJSON.valueToTree(mcTargetBindings));
-        mcRoot.set("groups",mcJSON.valueToTree(mcTargetGroups.stream().map(mcG->new MCTemplateGroup(mcG.mcId(),mcG.mcName(),(int)mcTargets.stream().filter(mcT->{try{return mcStore.mcInGroup(mcT.mcId(),mcG.mcId());}catch(SQLException mcE){throw new IllegalStateException(mcE);}}).count())).toList()));
-        ArrayNode mcTemplates=mcRoot.putArray("templates");
-        for(MCTemplate mcT:mcTargets){
-            ObjectNode mcN=mcTemplates.addObject();
-            mcN.put("id",mcT.mcId());
-            mcN.put("name",mcT.mcName());
-            mcN.put("original",Base64.getEncoder().encodeToString(mcT.mcOriginal()));
-            mcN.put("edited",Base64.getEncoder().encodeToString(mcT.mcEdited()));
-            mcN.set("groupIds",mcJSON.valueToTree(mcStore.mcGroupIds(mcT.mcId())));
-            mcN.set("personas",mcJSON.valueToTree(mcStore.mcPersonas(mcT.mcId())));
-            ArrayNode mcVariables=mcN.putArray("variables");
-            for(MCVariable mcV:mcTargetVariables.get(mcT.mcId())){
-                ObjectNode mcVariable=(ObjectNode)mcJSON.valueToTree(mcV);
-                mcVariable.put("definitionId",mcV.mcId()<0?-mcV.mcId():mcStore.mcDefinitionId(mcV.mcId()));
-                mcVariables.add(mcVariable);
+        ObjectNode MCroot=MCJSON.createObjectNode();
+        MCroot.put("format","document-studio-config");
+        MCroot.put("version",9);
+        MCroot.set("definitions",MCJSON.valueToTree(MCtargetDefs));
+        MCroot.set("complements",MCJSON.valueToTree(MCallComplements.stream().filter(MClink->MCtargetDefIds.contains(MClink.MCsourceDefId())&&MCtargetDefIds.contains(MClink.MCtargetDefId())).toList()));
+        MCroot.set("apiBindings",MCJSON.valueToTree(MCtargetBindings));
+        MCroot.set("groups",MCJSON.valueToTree(MCtargetGroups.stream().map(MCg->new MCTemplateGroup(MCg.MCid(),MCg.MCname(),(int)MCtargets.stream().filter(MCt->{try{return MCstore.MCinGroup(MCt.MCid(),MCg.MCid());}catch(SQLException MCe){throw new IllegalStateException(MCe);}}).count())).toList()));
+        ArrayNode MCtemplates=MCroot.putArray("templates");
+        for(MCTemplate MCt:MCtargets){
+            ObjectNode MCn=MCtemplates.addObject();
+            MCn.put("id",MCt.MCid());
+            MCn.put("name",MCt.MCname());
+            MCn.put("original",Base64.getEncoder().encodeToString(MCt.MCoriginal()));
+            MCn.put("edited",Base64.getEncoder().encodeToString(MCt.MCedited()));
+            MCn.set("groupIds",MCJSON.valueToTree(MCstore.MCgroupIds(MCt.MCid())));
+            MCn.set("personas",MCJSON.valueToTree(MCstore.MCpersonas(MCt.MCid())));
+            ArrayNode MCvariables=MCn.putArray("variables");
+            for(MCVariable MCv:MCtargetVariables.get(MCt.MCid())){
+                ObjectNode MCvariable=(ObjectNode)MCJSON.valueToTree(MCv);
+                MCvariable.put("definitionId",MCv.MCid()<0?-MCv.MCid():MCstore.MCdefinitionId(MCv.MCid()));
+                MCvariables.add(MCvariable);
             }
-            mcN.set("mappings",mcJSON.valueToTree(mcData.mcMappings(mcT.mcId())));
-            mcN.set("contactBindings",mcJSON.valueToTree(mcData.mcContactBindings(mcT.mcId())));
-            mcN.set("apiContexts",mcJSON.valueToTree(mcData.mcApiContexts(mcT.mcId())));
+            MCn.set("mappings",MCJSON.valueToTree(MCdata.MCmappings(MCt.MCid())));
+            MCn.set("contactBindings",MCJSON.valueToTree(MCdata.MCcontactBindings(MCt.MCid())));
+            MCn.set("apiContexts",MCJSON.valueToTree(MCdata.MCapiContexts(MCt.MCid())));
         }
-        ArrayNode mcKinds=mcRoot.putArray("kinds");
-        for(MCKind mcK:mcStore.mcKinds()){
-            if(mcTargetIds.contains(mcK.mcTemplateId())){
-                ObjectNode mcKind=(ObjectNode)mcJSON.valueToTree(mcK);
-                mcKind.set("requirements",mcJSON.valueToTree(mcStore.mcKindRequirements(mcK.mcId())));
-                mcKind.set("defaults",mcJSON.valueToTree(mcStore.mcKindDefaults(mcK.mcId())));
-                mcKinds.add(mcKind);
+        ArrayNode MCkinds=MCroot.putArray("kinds");
+        for(MCKind MCk:MCstore.MCkinds()){
+            if(MCtargetIds.contains(MCk.MCtemplateId())){
+                ObjectNode MCkind=(ObjectNode)MCJSON.valueToTree(MCk);
+                MCkind.set("requirements",MCJSON.valueToTree(MCstore.MCkindRequirements(MCk.MCid())));
+                MCkind.set("defaults",MCJSON.valueToTree(MCstore.MCkindDefaults(MCk.MCid())));
+                MCkinds.add(MCkind);
             }
         }
-        try(ZipOutputStream mcZip=new ZipOutputStream(Files.newOutputStream(mcDestination))){
-            mcZip.putNextEntry(new ZipEntry("configuration.json"));
-            mcZip.write(mcJSON.writeValueAsBytes(mcRoot));
-            mcZip.closeEntry();
+        try(ZipOutputStream MCzip=new ZipOutputStream(Files.newOutputStream(MCdestination))){
+            MCzip.putNextEntry(new ZipEntry("configuration.json"));
+            MCzip.write(MCJSON.writeValueAsBytes(MCroot));
+            MCzip.closeEntry();
         }
     }
 
-    public void mcExportClients(Path mcDestination)throws Exception{
-        ObjectNode mcRoot=mcJSON.createObjectNode();
-        mcRoot.put("format","document-studio-clients");
-        mcRoot.put("version",1);
-        ArrayNode mcArr=mcRoot.putArray("clients");
-        for(MCContact mcC:mcData.mcContacts()){
-            ObjectNode mcN=mcArr.addObject();
-            mcN.put("kind",mcC.mcKind());
-            mcN.put("given",mcC.mcGiven());
-            mcN.put("family",mcC.mcFamily());
-            mcN.put("documentType",mcC.mcDocumentType());
-            mcN.put("number",mcC.mcNumber());
-            mcN.put("address",mcC.mcAddress());
-            mcN.put("representatives",mcC.mcRepresentatives());
-            mcN.put("extrasJson",mcC.mcExtrasJson());
+    public void MCexportClients(Path MCdestination)throws Exception{
+        ObjectNode MCroot=MCJSON.createObjectNode();
+        MCroot.put("format","document-studio-clients");
+        MCroot.put("version",1);
+        ArrayNode MCarr=MCroot.putArray("clients");
+        for(MCContact MCc:MCdata.MCcontacts()){
+            ObjectNode MCn=MCarr.addObject();
+            MCn.put("kind",MCc.MCkind());
+            MCn.put("given",MCc.MCgiven());
+            MCn.put("family",MCc.MCfamily());
+            MCn.put("documentType",MCc.MCdocumentType());
+            MCn.put("number",MCc.MCnumber());
+            MCn.put("address",MCc.MCaddress());
+            MCn.put("representatives",MCc.MCrepresentatives());
+            MCn.put("extrasJson",MCc.MCextrasJson());
         }
-        try(ZipOutputStream mcZip=new ZipOutputStream(Files.newOutputStream(mcDestination))){
-            mcZip.putNextEntry(new ZipEntry("clients.json"));
-            mcZip.write(mcJSON.writeValueAsBytes(mcRoot));
-            mcZip.closeEntry();
+        try(ZipOutputStream MCzip=new ZipOutputStream(Files.newOutputStream(MCdestination))){
+            MCzip.putNextEntry(new ZipEntry("clients.json"));
+            MCzip.write(MCJSON.writeValueAsBytes(MCroot));
+            MCzip.closeEntry();
         }
     }
 
-    public MCImportResult mcImportConfiguration(Path mcSource,MCConflict mcConflict)throws Exception{
-        Map<String,byte[]> mcEntriesByName=new HashMap<>();
-        long mcTotal=0;
-        try(ZipInputStream mcZip=new ZipInputStream(Files.newInputStream(mcSource))){
-            ZipEntry mcE;
-            while((mcE=mcZip.getNextEntry())!=null){
-                if(mcE.isDirectory())continue;
-                String mcName=mcE.getName();
-                if(!List.of("configuration.json","clients.json").contains(mcName)){
-                    throw new IOException("El paquete contiene una entrada desconocida: "+mcName);
+    public MCImportResult MCimportConfiguration(Path MCsource,MCConflict MCconflict)throws Exception{
+        Map<String,byte[]> MCentriesByName=new HashMap<>();
+        long MCtotal=0;
+        try(ZipInputStream MCzip=new ZipInputStream(Files.newInputStream(MCsource))){
+            ZipEntry MCe;
+            while((MCe=MCzip.getNextEntry())!=null){
+                if(MCe.isDirectory())continue;
+                String MCname=MCe.getName();
+                if(!List.of("configuration.json","clients.json").contains(MCname)){
+                    throw new IOException("El paquete contiene una entrada desconocida: "+MCname);
                 }
-                ByteArrayOutputStream mcOut=new ByteArrayOutputStream();
-                byte[] mcChunk=new byte[8192];
-                int mcN;
-                while((mcN=mcZip.read(mcChunk))!=-1){
-                    mcTotal+=mcN;
-                    if(mcTotal>200_000_000)throw new IOException("Paquete demasiado grande.");
-                    mcOut.write(mcChunk,0,mcN);
+                ByteArrayOutputStream MCout=new ByteArrayOutputStream();
+                byte[] MCchunk=new byte[8192];
+                int MCn;
+                while((MCn=MCzip.read(MCchunk))!=-1){
+                    MCtotal+=MCn;
+                    if(MCtotal>200_000_000)throw new IOException("Paquete demasiado grande.");
+                    MCout.write(MCchunk,0,MCn);
                 }
-                if(mcEntriesByName.putIfAbsent(mcName,mcOut.toByteArray())!=null)throw new IOException("Entrada ZIP duplicada: "+mcName);
+                if(MCentriesByName.putIfAbsent(MCname,MCout.toByteArray())!=null)throw new IOException("Entrada ZIP duplicada: "+MCname);
             }
         }
-        if(!mcEntriesByName.containsKey("configuration.json")&&!mcEntriesByName.containsKey("clients.json")){
+        if(!MCentriesByName.containsKey("configuration.json")&&!MCentriesByName.containsKey("clients.json")){
             throw new IOException("Falta configuration.json o clients.json en el paquete.");
         }
 
-        List<MCContact> mcClients=mcEntriesByName.containsKey("clients.json")?mcReadClients(mcEntriesByName.get("clients.json")):List.of();
+        List<MCContact> MCclients=MCentriesByName.containsKey("clients.json")?MCreadClients(MCentriesByName.get("clients.json")):List.of();
 
-        int mcTemplateCount=0,mcKindCount=0,mcConflicts=0,mcClientCount=0;
+        int MCtemplateCount=0,MCkindCount=0,MCconflicts=0,MCclientCount=0;
 
-        if(mcEntriesByName.containsKey("configuration.json")){
-            byte[] mcContent=mcEntriesByName.get("configuration.json");
-            JsonNode mcRoot=mcJSON.readTree(mcContent);
-            int mcVersion=mcRoot.path("version").asInt();
-            if(mcRoot==null||!"document-studio-config".equals(mcRoot.path("format").asText())||(mcVersion<1||mcVersion>9)||!mcRoot.path("templates").isArray()||!mcRoot.path("kinds").isArray()||(mcVersion>=2&&!mcRoot.path("definitions").isArray())||(mcVersion>=3&&!mcRoot.path("groups").isArray())||(mcVersion>=4&&!mcRoot.path("apiBindings").isArray()))throw new IOException("Formato de configuración inválido.");
-            Set<Long> mcGroupIds=new HashSet<>();if(mcVersion>=3)for(JsonNode mcG:mcRoot.path("groups"))if(mcG.path("id").asLong()<=0||!mcGroupIds.add(mcG.path("id").asLong())||mcG.path("name").asText().isBlank())throw new IOException("Grupo inválido.");
-            Set<Long> mcDefinitionIds=new HashSet<>();if(mcVersion>=2)for(JsonNode mcD:mcRoot.path("definitions")){long mcId=mcD.path("id").asLong();if(mcId<=0||!mcDefinitionIds.add(mcId)||!mcD.path("key").asText().matches("[a-zA-Z][a-zA-Z0-9_]*")||mcD.path("label").asText().isBlank()||mcD.path("type").asText().isBlank())throw new IOException("Definición inválida.");}
-            if(mcVersion>=9)for(JsonNode mcD:mcRoot.path("definitions"))if(!mcD.path("bindToClient").isBoolean())throw new IOException("Alcance de variable inválido.");
-            if(mcVersion>=8)for(JsonNode mcD:mcRoot.path("definitions"))if(!mcD.path("autoCurrentDate").isBoolean()||!MCDocumentStore.mcDATE_FORMATS.contains(mcD.path("dateFormat").asText()))throw new IOException("Configuración de fecha inválida.");
-            if(mcVersion>=4)for(JsonNode mcB:mcRoot.path("apiBindings"))if(!mcDefinitionIds.contains(mcB.path("definitionId").asLong())||!mcB.path("path").asText().matches("(?:field:[a-z_][a-z0-9_]*|data(?:\\.[a-zA-Z_][a-zA-Z0-9_]*|\\[\\d+])+)")||mcB.path("service").asText().isBlank())throw new IOException("Vinculación API inválida.");
-            if(mcVersion>=7){if(!mcRoot.path("complements").isArray())throw new IOException("Faltan complementos.");Set<String> mcPairs=new HashSet<>();for(JsonNode mcLink:mcRoot.path("complements")){long mcA=mcLink.path("sourceDefId").asLong(),mcB=mcLink.path("targetDefId").asLong();if(mcA==mcB||!mcDefinitionIds.contains(mcA)||!mcDefinitionIds.contains(mcB)||!mcLink.path("bidirectional").isBoolean()||!mcPairs.add(mcA+":"+mcB))throw new IOException("Complemento inválido.");}}
-            List<JsonNode> mcEntries=new ArrayList<>();Set<Long> mcIds=new HashSet<>();Map<Long,Set<String>> mcKeys=new HashMap<>();
-            for(JsonNode mcN:mcRoot.path("templates")){
-                long mcId=mcN.path("id").asLong();
-                if(mcId<=0||!mcIds.add(mcId)||mcN.path("name").asText().isBlank()||!mcN.path("variables").isArray()||!mcN.path("mappings").isArray())throw new IOException("Plantilla inválida o duplicada.");
-                if(mcVersion>=3&&mcN.has("groupId")&&!mcGroupIds.contains(mcN.path("groupId").asLong()))throw new IOException("Plantilla con grupo inexistente.");
-                if(mcVersion>=5){if(!mcN.path("groupIds").isArray())throw new IOException("Faltan grupos de plantilla.");for(JsonNode mcGroup:mcN.path("groupIds"))if(!mcGroupIds.contains(mcGroup.asLong()))throw new IOException("Plantilla con grupo inexistente.");}
-                if(mcVersion>=8){if(!mcN.path("personas").isArray())throw new IOException("Faltan personas de plantilla.");Set<String> mcPersonas=new HashSet<>();for(JsonNode mcP:mcN.path("personas"))if(!mcP.path("personaKey").asText().matches("[a-zA-Z][a-zA-Z0-9_]*")||!mcPersonas.add(mcP.path("personaKey").asText())||mcP.path("displayName").asText().isBlank())throw new IOException("Persona inválida.");}
-                byte[] mcOriginal=mcDecode(mcN,"original"),mcEdited=mcDecode(mcN,"edited");
-                try(XWPFDocument mcA=MCDocumentEngine.mcOpen(mcOriginal);XWPFDocument mcB=MCDocumentEngine.mcOpen(mcEdited)){}
-                Set<String> mcTemplateKeys=new HashSet<>();
-                for(JsonNode mcV:mcN.path("variables")){
-                    String mcKey=mcV.path("key").asText();
-                    if(!MCDocumentEngine.mcValidKey(mcKey)||!mcTemplateKeys.add(mcKey)||mcV.path("label").asText().isBlank())throw new IOException("Variable inválida o duplicada.");
-                    if(mcVersion>=2&&!mcDefinitionIds.contains(mcV.path("definitionId").asLong()))throw new IOException("Variable con definición inexistente.");
+        if(MCentriesByName.containsKey("configuration.json")){
+            byte[] MCcontent=MCentriesByName.get("configuration.json");
+            JsonNode MCroot=MCJSON.readTree(MCcontent);
+            int MCversion=MCroot.path("version").asInt();
+            if(MCroot==null||!"document-studio-config".equals(MCroot.path("format").asText())||(MCversion<1||MCversion>9)||!MCroot.path("templates").isArray()||!MCroot.path("kinds").isArray()||(MCversion>=2&&!MCroot.path("definitions").isArray())||(MCversion>=3&&!MCroot.path("groups").isArray())||(MCversion>=4&&!MCroot.path("apiBindings").isArray()))throw new IOException("Formato de configuración inválido.");
+            Set<Long> MCgroupIds=new HashSet<>();if(MCversion>=3)for(JsonNode MCg:MCroot.path("groups"))if(MCg.path("id").asLong()<=0||!MCgroupIds.add(MCg.path("id").asLong())||MCg.path("name").asText().isBlank())throw new IOException("Grupo inválido.");
+            Set<Long> MCdefinitionIds=new HashSet<>();if(MCversion>=2)for(JsonNode MCd:MCroot.path("definitions")){long MCid=MCd.path("id").asLong();if(MCid<=0||!MCdefinitionIds.add(MCid)||!MCd.path("key").asText().matches("[a-zA-Z][a-zA-Z0-9_]*")||MCd.path("label").asText().isBlank()||MCd.path("type").asText().isBlank())throw new IOException("Definición inválida.");}
+            if(MCversion>=9)for(JsonNode MCd:MCroot.path("definitions"))if(!MCd.path("bindToClient").isBoolean())throw new IOException("Alcance de variable inválido.");
+            if(MCversion>=8)for(JsonNode MCd:MCroot.path("definitions"))if(!MCd.path("autoCurrentDate").isBoolean()||!MCDocumentStore.MCDATE_FORMATS.contains(MCd.path("dateFormat").asText()))throw new IOException("Configuración de fecha inválida.");
+            if(MCversion>=4)for(JsonNode MCb:MCroot.path("apiBindings"))if(!MCdefinitionIds.contains(MCb.path("definitionId").asLong())||!MCb.path("path").asText().matches("(?:field:[a-z_][a-z0-9_]*|data(?:\\.[a-zA-Z_][a-zA-Z0-9_]*|\\[\\d+])+)")||MCb.path("service").asText().isBlank())throw new IOException("Vinculación API inválida.");
+            if(MCversion>=7){if(!MCroot.path("complements").isArray())throw new IOException("Faltan complementos.");Set<String> MCpairs=new HashSet<>();for(JsonNode MClink:MCroot.path("complements")){long MCa=MClink.path("sourceDefId").asLong(),MCb=MClink.path("targetDefId").asLong();if(MCa==MCb||!MCdefinitionIds.contains(MCa)||!MCdefinitionIds.contains(MCb)||!MClink.path("bidirectional").isBoolean()||!MCpairs.add(MCa+":"+MCb))throw new IOException("Complemento inválido.");}}
+            List<JsonNode> MCentries=new ArrayList<>();Set<Long> MCids=new HashSet<>();Map<Long,Set<String>> MCkeys=new HashMap<>();
+            for(JsonNode MCn:MCroot.path("templates")){
+                long MCid=MCn.path("id").asLong();
+                if(MCid<=0||!MCids.add(MCid)||MCn.path("name").asText().isBlank()||!MCn.path("variables").isArray()||!MCn.path("mappings").isArray())throw new IOException("Plantilla inválida o duplicada.");
+                if(MCversion>=3&&MCn.has("groupId")&&!MCgroupIds.contains(MCn.path("groupId").asLong()))throw new IOException("Plantilla con grupo inexistente.");
+                if(MCversion>=5){if(!MCn.path("groupIds").isArray())throw new IOException("Faltan grupos de plantilla.");for(JsonNode MCgroup:MCn.path("groupIds"))if(!MCgroupIds.contains(MCgroup.asLong()))throw new IOException("Plantilla con grupo inexistente.");}
+                if(MCversion>=8){if(!MCn.path("personas").isArray())throw new IOException("Faltan personas de plantilla.");Set<String> MCpersonas=new HashSet<>();for(JsonNode MCp:MCn.path("personas"))if(!MCp.path("personaKey").asText().matches("[a-zA-Z][a-zA-Z0-9_]*")||!MCpersonas.add(MCp.path("personaKey").asText())||MCp.path("displayName").asText().isBlank())throw new IOException("Persona inválida.");}
+                byte[] MCoriginal=MCdecode(MCn,"original"),MCedited=MCdecode(MCn,"edited");
+                try(XWPFDocument MCa=MCDocumentEngine.MCopen(MCoriginal);XWPFDocument MCb=MCDocumentEngine.MCopen(MCedited)){}
+                Set<String> MCtemplateKeys=new HashSet<>();
+                for(JsonNode MCv:MCn.path("variables")){
+                    String MCkey=MCv.path("key").asText();
+                    if(!MCDocumentEngine.MCvalidKey(MCkey)||!MCtemplateKeys.add(MCkey)||MCv.path("label").asText().isBlank())throw new IOException("Variable inválida o duplicada.");
+                    if(MCversion>=2&&!MCdefinitionIds.contains(MCv.path("definitionId").asLong()))throw new IOException("Variable con definición inexistente.");
                 }
-                for(JsonNode mcM:mcN.path("mappings"))if(!mcTemplateKeys.contains(mcM.path("sourceKey").asText())||!mcTemplateKeys.contains(mcM.path("targetKey").asText())||mcM.path("apiField").asText().isBlank())throw new IOException("Correspondencia inválida.");
-                if(mcVersion>=2){if(!mcN.path("contactBindings").isArray())throw new IOException("Faltan asociaciones de contactos.");for(JsonNode mcB:mcN.path("contactBindings"))if(!mcTemplateKeys.contains(mcB.path("variableKey").asText())||mcB.path("groupKey").asText().isBlank()||!List.of("Persona","Empresa").contains(mcB.path("kind").asText()))throw new IOException("Asociación de contacto inválida.");}
-                if(mcVersion>=6){if(!mcN.path("apiContexts").isArray())throw new IOException("Faltan grupos de consulta.");for(JsonNode mcB:mcN.path("apiContexts"))if(!mcTemplateKeys.contains(mcB.path("variableKey").asText())||mcB.path("groupKey").asText().isBlank()||!List.of("DNI","RUC").contains(mcB.path("service").asText()))throw new IOException("Grupo de consulta inválido.");}
-                mcKeys.put(mcId,mcTemplateKeys);mcEntries.add(mcN);
+                for(JsonNode MCm:MCn.path("mappings"))if(!MCtemplateKeys.contains(MCm.path("sourceKey").asText())||!MCtemplateKeys.contains(MCm.path("targetKey").asText())||MCm.path("apiField").asText().isBlank())throw new IOException("Correspondencia inválida.");
+                if(MCversion>=2){if(!MCn.path("contactBindings").isArray())throw new IOException("Faltan asociaciones de contactos.");for(JsonNode MCb:MCn.path("contactBindings"))if(!MCtemplateKeys.contains(MCb.path("variableKey").asText())||MCb.path("groupKey").asText().isBlank()||!List.of("Persona","Empresa").contains(MCb.path("kind").asText()))throw new IOException("Asociación de contacto inválida.");}
+                if(MCversion>=6){if(!MCn.path("apiContexts").isArray())throw new IOException("Faltan grupos de consulta.");for(JsonNode MCb:MCn.path("apiContexts"))if(!MCtemplateKeys.contains(MCb.path("variableKey").asText())||MCb.path("groupKey").asText().isBlank()||!List.of("DNI","RUC").contains(MCb.path("service").asText()))throw new IOException("Grupo de consulta inválido.");}
+                MCkeys.put(MCid,MCtemplateKeys);MCentries.add(MCn);
             }
-            for(JsonNode mcK:mcRoot.path("kinds")){
-                long mcTemplateId=mcK.path("templateId").asLong();
-                if(!mcIds.contains(mcTemplateId)||mcK.path("title").asText().isBlank())throw new IOException("Tipo documental sin plantilla válida.");
-                for(String mcField:mcK.path("fields").asText("").split(","))if(!mcField.isBlank()&&!mcKeys.get(mcTemplateId).contains(mcField))throw new IOException("Formulario con variable inexistente.");
+            for(JsonNode MCk:MCroot.path("kinds")){
+                long MCtemplateId=MCk.path("templateId").asLong();
+                if(!MCids.contains(MCtemplateId)||MCk.path("title").asText().isBlank())throw new IOException("Tipo documental sin plantilla válida.");
+                for(String MCfield:MCk.path("fields").asText("").split(","))if(!MCfield.isBlank()&&!MCkeys.get(MCtemplateId).contains(MCfield))throw new IOException("Formulario con variable inexistente.");
             }
-            Map<Long,Long> mcDefinitionMap=new HashMap<>();if(mcVersion>=2)for(JsonNode mcD:mcRoot.path("definitions")){MCDefinition mcSaved=mcStore.mcImportDefinition(new MCDefinition(0,mcD.path("key").asText(),mcD.path("label").asText(),mcD.path("type").asText(),mcD.path("defaultValue").asText(""),mcD.path("autoCurrentDate").asBoolean(false),mcD.path("dateFormat").asText("dd/MM/yyyy"),mcD.path("bindToClient").asBoolean(true)));mcDefinitionMap.put(mcD.path("id").asLong(),mcSaved.mcId());}
-            if(mcVersion>=4)for(JsonNode mcB:mcRoot.path("apiBindings")){long mcId=mcDefinitionMap.get(mcB.path("definitionId").asLong());MCApiBinding mcExisting=mcData.mcApiBinding(mcId);if(mcExisting==null||mcConflict==MCConflict.REPLACE)mcData.mcSaveApiBinding(new MCApiBinding(mcId,mcB.path("service").asText(),mcB.path("path").asText()));}
-            if(mcVersion>=7)for(JsonNode mcLink:mcRoot.path("complements")){long mcA=mcDefinitionMap.get(mcLink.path("sourceDefId").asLong()),mcB=mcDefinitionMap.get(mcLink.path("targetDefId").asLong());if(mcConflict==MCConflict.REPLACE||mcStore.mcComplements().stream().noneMatch(mcX->mcX.mcSourceDefId()==mcA&&mcX.mcTargetDefId()==mcB))mcStore.mcSaveComplement(mcA,mcB,mcLink.path("bidirectional").asBoolean());}
-            Map<Long,Long> mcGroupMap=new HashMap<>();if(mcVersion>=3)for(JsonNode mcG:mcRoot.path("groups")){MCDocumentStore.MCTemplateGroup mcExisting=mcStore.mcGroups().stream().filter(mcX->mcX.mcName().equalsIgnoreCase(mcG.path("name").asText())).findFirst().orElse(null);MCDocumentStore.MCTemplateGroup mcSaved=mcExisting==null?mcStore.mcSaveGroup(0,mcG.path("name").asText()):mcExisting;mcGroupMap.put(mcG.path("id").asLong(),mcSaved.mcId());}
-            Map<Long,Long> mcIdMap=new HashMap<>();Set<Long> mcKeptTemplates=new HashSet<>();
-            for(JsonNode mcN:mcEntries){
-                long mcOldId=mcN.path("id").asLong();
-                String mcName=mcN.path("name").asText();
-                MCTemplate mcExisting=mcStore.mcTemplates().stream().filter(mcT->mcT.mcName().equalsIgnoreCase(mcName)).findFirst().orElse(null);
-                if(mcExisting!=null){mcConflicts++;if(mcConflict==MCConflict.KEEP){mcIdMap.put(mcOldId,mcExisting.mcId());mcKeptTemplates.add(mcOldId);continue;}}
-                byte[] mcOriginal=mcDecode(mcN,"original"),mcEdited=mcDecode(mcN,"edited");
-                MCTemplate mcSaved=mcExisting==null?mcStore.mcSaveTemplate(new MCTemplate(0,mcName,mcOriginal,mcEdited)):mcStore.mcReplaceTemplate(new MCTemplate(mcExisting.mcId(),mcName,mcOriginal,mcEdited));
-                mcIdMap.put(mcOldId,mcSaved.mcId());
-                if(mcExisting!=null){mcStore.mcClearVariables(mcSaved.mcId());mcData.mcClearMappings(mcSaved.mcId());mcData.mcClearContactBindings(mcSaved.mcId());mcData.mcClearApiContexts(mcSaved.mcId());}
-                if(mcExisting!=null)for(MCPersona mcPerson:mcStore.mcPersonas(mcSaved.mcId()))mcStore.mcDeletePersona(mcPerson.mcId());
-                if(mcVersion>=8)for(JsonNode mcP:mcN.path("personas"))mcStore.mcAddPersona(mcSaved.mcId(),mcP.path("personaKey").asText(),mcP.path("displayName").asText(),mcP.path("sortOrder").asInt());
-                for(JsonNode mcV:mcN.path("variables")){
-                    String mcKey=mcV.path("key").asText();
-                    MCVariable mcBinding=mcStore.mcSaveVariable(new MCVariable(0,mcSaved.mcId(),mcKey,mcV.path("label").asText(),mcV.path("type").asText(),mcV.path("defaultValue").asText(""),mcV.path("required").asBoolean(),mcV.path("position").asInt(1)));
-                    if(mcVersion>=2)mcStore.mcLinkDefinition(mcBinding.mcId(),mcDefinitionMap.get(mcV.path("definitionId").asLong()));
+            Map<Long,Long> MCdefinitionMap=new HashMap<>();if(MCversion>=2)for(JsonNode MCd:MCroot.path("definitions")){MCDefinition MCsaved=MCstore.MCimportDefinition(new MCDefinition(0,MCd.path("key").asText(),MCd.path("label").asText(),MCd.path("type").asText(),MCd.path("defaultValue").asText(""),MCd.path("autoCurrentDate").asBoolean(false),MCd.path("dateFormat").asText("dd/MM/yyyy"),MCd.path("bindToClient").asBoolean(true)));MCdefinitionMap.put(MCd.path("id").asLong(),MCsaved.MCid());}
+            if(MCversion>=4)for(JsonNode MCb:MCroot.path("apiBindings")){long MCid=MCdefinitionMap.get(MCb.path("definitionId").asLong());MCApiBinding MCexisting=MCdata.MCapiBinding(MCid);if(MCexisting==null||MCconflict==MCConflict.REPLACE)MCdata.MCsaveApiBinding(new MCApiBinding(MCid,MCb.path("service").asText(),MCb.path("path").asText()));}
+            if(MCversion>=7)for(JsonNode MClink:MCroot.path("complements")){long MCa=MCdefinitionMap.get(MClink.path("sourceDefId").asLong()),MCb=MCdefinitionMap.get(MClink.path("targetDefId").asLong());if(MCconflict==MCConflict.REPLACE||MCstore.MCcomplements().stream().noneMatch(MCx->MCx.MCsourceDefId()==MCa&&MCx.MCtargetDefId()==MCb))MCstore.MCsaveComplement(MCa,MCb,MClink.path("bidirectional").asBoolean());}
+            Map<Long,Long> MCgroupMap=new HashMap<>();if(MCversion>=3)for(JsonNode MCg:MCroot.path("groups")){MCDocumentStore.MCTemplateGroup MCexisting=MCstore.MCgroups().stream().filter(MCx->MCx.MCname().equalsIgnoreCase(MCg.path("name").asText())).findFirst().orElse(null);MCDocumentStore.MCTemplateGroup MCsaved=MCexisting==null?MCstore.MCsaveGroup(0,MCg.path("name").asText()):MCexisting;MCgroupMap.put(MCg.path("id").asLong(),MCsaved.MCid());}
+            Map<Long,Long> MCidMap=new HashMap<>();Set<Long> MCkeptTemplates=new HashSet<>();
+            for(JsonNode MCn:MCentries){
+                long MColdId=MCn.path("id").asLong();
+                String MCname=MCn.path("name").asText();
+                MCTemplate MCexisting=MCstore.MCtemplates().stream().filter(MCt->MCt.MCname().equalsIgnoreCase(MCname)).findFirst().orElse(null);
+                if(MCexisting!=null){MCconflicts++;if(MCconflict==MCConflict.KEEP){MCidMap.put(MColdId,MCexisting.MCid());MCkeptTemplates.add(MColdId);continue;}}
+                byte[] MCoriginal=MCdecode(MCn,"original"),MCedited=MCdecode(MCn,"edited");
+                MCTemplate MCsaved=MCexisting==null?MCstore.MCsaveTemplate(new MCTemplate(0,MCname,MCoriginal,MCedited)):MCstore.MCreplaceTemplate(new MCTemplate(MCexisting.MCid(),MCname,MCoriginal,MCedited));
+                MCidMap.put(MColdId,MCsaved.MCid());
+                if(MCexisting!=null){MCstore.MCclearVariables(MCsaved.MCid());MCdata.MCclearMappings(MCsaved.MCid());MCdata.MCclearContactBindings(MCsaved.MCid());MCdata.MCclearApiContexts(MCsaved.MCid());}
+                if(MCexisting!=null)for(MCPersona MCperson:MCstore.MCpersonas(MCsaved.MCid()))MCstore.MCdeletePersona(MCperson.MCid());
+                if(MCversion>=8)for(JsonNode MCp:MCn.path("personas"))MCstore.MCaddPersona(MCsaved.MCid(),MCp.path("personaKey").asText(),MCp.path("displayName").asText(),MCp.path("sortOrder").asInt());
+                for(JsonNode MCv:MCn.path("variables")){
+                    String MCkey=MCv.path("key").asText();
+                    MCVariable MCbinding=MCstore.MCsaveVariable(new MCVariable(0,MCsaved.MCid(),MCkey,MCv.path("label").asText(),MCv.path("type").asText(),MCv.path("defaultValue").asText(""),MCv.path("required").asBoolean(),MCv.path("position").asInt(1)));
+                    if(MCversion>=2)MCstore.MClinkDefinition(MCbinding.MCid(),MCdefinitionMap.get(MCv.path("definitionId").asLong()));
                 }
-                for(JsonNode mcM:mcN.path("mappings"))mcData.mcSaveMapping(new MCMapping(0,mcSaved.mcId(),mcM.path("sourceKey").asText(),mcM.path("apiField").asText(),mcM.path("targetKey").asText()));
-                if(mcVersion>=2)for(JsonNode mcB:mcN.path("contactBindings"))mcData.mcSaveContactBinding(new MCContactBinding(0,mcSaved.mcId(),mcB.path("groupKey").asText(),mcB.path("kind").asText(),mcB.path("field").asText(),mcB.path("variableKey").asText()));
-                if(mcVersion>=6)for(JsonNode mcB:mcN.path("apiContexts"))mcData.mcSaveApiContext(new MCStudioData.MCApiContext(mcSaved.mcId(),mcB.path("variableKey").asText(),mcB.path("groupKey").asText(),mcB.path("service").asText(),mcB.path("source").asBoolean()));
-                mcData.mcRecordRevision(mcSaved.mcId(),mcEdited);
-                mcTemplateCount++;
+                for(JsonNode MCm:MCn.path("mappings"))MCdata.MCsaveMapping(new MCMapping(0,MCsaved.MCid(),MCm.path("sourceKey").asText(),MCm.path("apiField").asText(),MCm.path("targetKey").asText()));
+                if(MCversion>=2)for(JsonNode MCb:MCn.path("contactBindings"))MCdata.MCsaveContactBinding(new MCContactBinding(0,MCsaved.MCid(),MCb.path("groupKey").asText(),MCb.path("kind").asText(),MCb.path("field").asText(),MCb.path("variableKey").asText()));
+                if(MCversion>=6)for(JsonNode MCb:MCn.path("apiContexts"))MCdata.MCsaveApiContext(new MCStudioData.MCApiContext(MCsaved.MCid(),MCb.path("variableKey").asText(),MCb.path("groupKey").asText(),MCb.path("service").asText(),MCb.path("source").asBoolean()));
+                MCdata.MCrecordRevision(MCsaved.MCid(),MCedited);
+                MCtemplateCount++;
             }
-            if(mcVersion>=3)for(JsonNode mcN:mcEntries){
-                if(mcKeptTemplates.contains(mcN.path("id").asLong()))continue;
-                List<Long> mcTargets=new ArrayList<>();
-                if(mcVersion>=5)for(JsonNode mcId:mcN.path("groupIds")){Long mcTarget=mcGroupMap.get(mcId.asLong());if(mcTarget!=null)mcTargets.add(mcTarget);}
-                else{Long mcTarget=mcGroupMap.get(mcN.path("groupId").asLong());if(mcTarget!=null)mcTargets.add(mcTarget);}
-                mcStore.mcSetTemplateGroups(mcIdMap.get(mcN.path("id").asLong()),mcTargets);
+            if(MCversion>=3)for(JsonNode MCn:MCentries){
+                if(MCkeptTemplates.contains(MCn.path("id").asLong()))continue;
+                List<Long> MCtargets=new ArrayList<>();
+                if(MCversion>=5)for(JsonNode MCid:MCn.path("groupIds")){Long MCtarget=MCgroupMap.get(MCid.asLong());if(MCtarget!=null)MCtargets.add(MCtarget);}
+                else{Long MCtarget=MCgroupMap.get(MCn.path("groupId").asLong());if(MCtarget!=null)MCtargets.add(MCtarget);}
+                MCstore.MCsetTemplateGroups(MCidMap.get(MCn.path("id").asLong()),MCtargets);
             }
-            for(JsonNode mcN:mcRoot.path("kinds")){
-                long mcTemplateId=mcIdMap.get(mcN.path("templateId").asLong());
-                String mcTitle=mcN.path("title").asText();
-                MCKind mcExisting=mcStore.mcKinds().stream().filter(mcK->mcK.mcTitle().equalsIgnoreCase(mcTitle)).findFirst().orElse(null);
-                if(mcExisting!=null){mcConflicts++;if(mcConflict==MCConflict.KEEP)continue;}
-                MCKind mcSaved=mcStore.mcSaveKind(new MCKind(mcExisting==null?0:mcExisting.mcId(),mcTitle,mcN.path("category").asText(""),mcN.path("description").asText(""),mcTemplateId,mcN.path("fields").asText(""),mcN.path("active").asBoolean(true)));
-                if(mcVersion>=2&&mcN.path("requirements").isObject()){
-                    Map<String,Boolean> mcRequirements=new HashMap<>();mcN.path("requirements").fields().forEachRemaining(mcE->mcRequirements.put(mcE.getKey(),mcE.getValue().asBoolean()));
-                    Map<String,String> mcDefaults=new HashMap<>();mcN.path("defaults").fields().forEachRemaining(mcE->mcDefaults.put(mcE.getKey(),mcE.getValue().asText()));
-                    mcStore.mcSaveKindFieldRules(mcSaved.mcId(),mcRequirements,mcDefaults);
+            for(JsonNode MCn:MCroot.path("kinds")){
+                long MCtemplateId=MCidMap.get(MCn.path("templateId").asLong());
+                String MCtitle=MCn.path("title").asText();
+                MCKind MCexisting=MCstore.MCkinds().stream().filter(MCk->MCk.MCtitle().equalsIgnoreCase(MCtitle)).findFirst().orElse(null);
+                if(MCexisting!=null){MCconflicts++;if(MCconflict==MCConflict.KEEP)continue;}
+                MCKind MCsaved=MCstore.MCsaveKind(new MCKind(MCexisting==null?0:MCexisting.MCid(),MCtitle,MCn.path("category").asText(""),MCn.path("description").asText(""),MCtemplateId,MCn.path("fields").asText(""),MCn.path("active").asBoolean(true)));
+                if(MCversion>=2&&MCn.path("requirements").isObject()){
+                    Map<String,Boolean> MCrequirements=new HashMap<>();MCn.path("requirements").fields().forEachRemaining(MCe->MCrequirements.put(MCe.getKey(),MCe.getValue().asBoolean()));
+                    Map<String,String> MCdefaults=new HashMap<>();MCn.path("defaults").fields().forEachRemaining(MCe->MCdefaults.put(MCe.getKey(),MCe.getValue().asText()));
+                    MCstore.MCsaveKindFieldRules(MCsaved.MCid(),MCrequirements,MCdefaults);
                 }
-                mcKindCount++;
+                MCkindCount++;
             }
         }
 
-        for(MCContact mcIncoming:mcClients){
-            MCContact mcExisting=mcData.mcMatchingContact(mcIncoming);
-            if(mcExisting!=null){mcConflicts++;if(mcConflict==MCConflict.KEEP)continue;}
-            mcData.mcSaveContact(new MCContact(mcExisting==null?0:mcExisting.mcId(),mcIncoming.mcKind(),mcIncoming.mcGiven(),mcIncoming.mcFamily(),mcIncoming.mcDocumentType(),mcIncoming.mcNumber(),mcIncoming.mcAddress(),mcIncoming.mcRepresentatives(),mcIncoming.mcExtrasJson()));
-            mcClientCount++;
+        for(MCContact MCincoming:MCclients){
+            MCContact MCexisting=MCdata.MCmatchingContact(MCincoming);
+            if(MCexisting!=null){MCconflicts++;if(MCconflict==MCConflict.KEEP)continue;}
+            MCdata.MCsaveContact(new MCContact(MCexisting==null?0:MCexisting.MCid(),MCincoming.MCkind(),MCincoming.MCgiven(),MCincoming.MCfamily(),MCincoming.MCdocumentType(),MCincoming.MCnumber(),MCincoming.MCaddress(),MCincoming.MCrepresentatives(),MCincoming.MCextrasJson()));
+            MCclientCount++;
         }
 
-        return new MCImportResult(mcTemplateCount,mcKindCount,mcConflicts,mcClientCount);
+        return new MCImportResult(MCtemplateCount,MCkindCount,MCconflicts,MCclientCount);
     }
 
-    private static List<MCContact> mcReadClients(byte[] mcContent)throws IOException{
-        JsonNode mcRoot=mcJSON.readTree(mcContent);
-        if(mcRoot==null||!"document-studio-clients".equals(mcRoot.path("format").asText())||mcRoot.path("version").asInt()!=1||!mcRoot.path("clients").isArray())throw new IOException("Formato de clients.json inválido.");
-        List<MCContact> mcClients=new ArrayList<>();
-        for(JsonNode mcN:mcRoot.path("clients")){
-            String mcKind=mcN.path("kind").asText(),mcGiven=mcN.path("given").asText("");
-            if(!List.of("Persona","Empresa").contains(mcKind))throw new IOException("Tipo de cliente inválido.");
-            String mcExtras=mcN.path("extrasJson").asText("{}");JsonNode mcParsed=mcJSON.readTree(mcExtras);
-            if(mcParsed==null||!mcParsed.isObject())throw new IOException("Datos adicionales de cliente inválidos.");
-            mcClients.add(new MCContact(0,mcKind,mcGiven,mcN.path("family").asText(""),mcN.path("documentType").asText(""),mcN.path("number").asText(""),mcN.path("address").asText(""),mcN.path("representatives").asText(""),mcExtras));
+    private static List<MCContact> MCreadClients(byte[] MCcontent)throws IOException{
+        JsonNode MCroot=MCJSON.readTree(MCcontent);
+        if(MCroot==null||!"document-studio-clients".equals(MCroot.path("format").asText())||MCroot.path("version").asInt()!=1||!MCroot.path("clients").isArray())throw new IOException("Formato de clients.json inválido.");
+        List<MCContact> MCclients=new ArrayList<>();
+        for(JsonNode MCn:MCroot.path("clients")){
+            String MCkind=MCn.path("kind").asText(),MCgiven=MCn.path("given").asText("");
+            if(!List.of("Persona","Empresa").contains(MCkind))throw new IOException("Tipo de cliente inválido.");
+            String MCextras=MCn.path("extrasJson").asText("{}");JsonNode MCparsed=MCJSON.readTree(MCextras);
+            if(MCparsed==null||!MCparsed.isObject())throw new IOException("Datos adicionales de cliente inválidos.");
+            MCclients.add(new MCContact(0,MCkind,MCgiven,MCn.path("family").asText(""),MCn.path("documentType").asText(""),MCn.path("number").asText(""),MCn.path("address").asText(""),MCn.path("representatives").asText(""),MCextras));
         }
-        return mcClients;
+        return MCclients;
     }
 
-    private static byte[] mcDecode(JsonNode mcN,String mcField)throws IOException{
+    private static byte[] MCdecode(JsonNode MCn,String MCfield)throws IOException{
         try{
-            byte[] mcB=Base64.getDecoder().decode(mcN.path(mcField).asText());
-            if(mcB.length==0||mcB.length>100_000_000)throw new IOException("DOCX vacío o demasiado grande.");
-            return mcB;
-        }catch(IllegalArgumentException mcE){
-            throw new IOException("Contenido DOCX inválido.",mcE);
+            byte[] MCb=Base64.getDecoder().decode(MCn.path(MCfield).asText());
+            if(MCb.length==0||MCb.length>100_000_000)throw new IOException("DOCX vacío o demasiado grande.");
+            return MCb;
+        }catch(IllegalArgumentException MCe){
+            throw new IOException("Contenido DOCX inválido.",MCe);
         }
     }
 
-    public void mcBackup(Path mcDestination,char[] mcPassword)throws Exception{
+    public void MCbackup(Path MCdestination,char[] MCpassword)throws Exception{
         try{
-            if(mcPassword.length<8)throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
-            byte[] mcPayload=Files.readAllBytes(mcData.mcDatabase());
-            byte[] mcSalt=new byte[16],mcIv=new byte[12];SecureRandom mcRandom=new SecureRandom();mcRandom.nextBytes(mcSalt);mcRandom.nextBytes(mcIv);
-            Cipher mcCipher=Cipher.getInstance("AES/GCM/NoPadding");mcCipher.init(Cipher.ENCRYPT_MODE,mcKey(mcPassword,mcSalt),new GCMParameterSpec(128,mcIv));byte[] mcEncrypted=mcCipher.doFinal(mcPayload);
-            try(OutputStream mcOut=Files.newOutputStream(mcDestination)){mcOut.write(mcMAGIC);mcOut.write(mcSalt);mcOut.write(mcIv);mcOut.write(mcEncrypted);}
-        }finally{Arrays.fill(mcPassword,'\0');}
+            if(MCpassword.length<8)throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
+            byte[] MCpayload=Files.readAllBytes(MCdata.MCdatabase());
+            byte[] MCsalt=new byte[16],MCiv=new byte[12];SecureRandom MCrandom=new SecureRandom();MCrandom.nextBytes(MCsalt);MCrandom.nextBytes(MCiv);
+            Cipher MCcipher=Cipher.getInstance("AES/GCM/NoPadding");MCcipher.init(Cipher.ENCRYPT_MODE,MCkey(MCpassword,MCsalt),new GCMParameterSpec(128,MCiv));byte[] MCencrypted=MCcipher.doFinal(MCpayload);
+            try(OutputStream MCout=Files.newOutputStream(MCdestination)){MCout.write(MCMAGIC);MCout.write(MCsalt);MCout.write(MCiv);MCout.write(MCencrypted);}
+        }finally{Arrays.fill(MCpassword,'\0');}
     }
-    public void mcRestore(Path mcSource,char[] mcPassword)throws Exception{
+    public void MCrestore(Path MCsource,char[] MCpassword)throws Exception{
         try{
-            byte[] mcAll=Files.readAllBytes(mcSource);if(mcAll.length<45)throw new IOException("Respaldo inválido.");boolean mcV2=Arrays.equals(Arrays.copyOfRange(mcAll,0,5),mcMAGIC_V2);if(!mcV2&&!Arrays.equals(Arrays.copyOfRange(mcAll,0,5),mcMAGIC))throw new IOException("Respaldo inválido.");
-            byte[] mcSalt=Arrays.copyOfRange(mcAll,5,21),mcIv=Arrays.copyOfRange(mcAll,21,33);Cipher mcCipher=Cipher.getInstance("AES/GCM/NoPadding");mcCipher.init(Cipher.DECRYPT_MODE,mcKey(mcPassword,mcSalt),new GCMParameterSpec(128,mcIv));byte[] mcDecrypted=mcCipher.doFinal(mcAll,33,mcAll.length-33);
-            byte[] mcDb=mcDecrypted;JsonNode mcRestoredSecrets=mcJSON.createObjectNode();
-            if(mcV2){byte[] mcExtractedDb=null;try(ZipInputStream mcZip=new ZipInputStream(new ByteArrayInputStream(mcDecrypted))){ZipEntry mcEntry;while((mcEntry=mcZip.getNextEntry())!=null){if(!List.of("studio.db","credentials.json").contains(mcEntry.getName()))throw new IOException("Entrada no permitida en el respaldo.");byte[] mcBytes=mcZip.readAllBytes();if(mcBytes.length>500_000_000)throw new IOException("Respaldo demasiado grande.");if(mcEntry.getName().equals("studio.db"))mcExtractedDb=mcBytes;else mcRestoredSecrets=mcJSON.readTree(mcBytes);}}if(mcExtractedDb==null||mcRestoredSecrets==null||!mcRestoredSecrets.isObject())throw new IOException("Respaldo incompleto.");mcDb=mcExtractedDb;}
-            Path mcTemp=Files.createTempFile(mcData.mcDatabase().getParent(),"restore-",".db");
+            byte[] MCall=Files.readAllBytes(MCsource);if(MCall.length<45)throw new IOException("Respaldo inválido.");boolean MCv2=Arrays.equals(Arrays.copyOfRange(MCall,0,5),MCMAGIC_V2);if(!MCv2&&!Arrays.equals(Arrays.copyOfRange(MCall,0,5),MCMAGIC))throw new IOException("Respaldo inválido.");
+            byte[] MCsalt=Arrays.copyOfRange(MCall,5,21),MCiv=Arrays.copyOfRange(MCall,21,33);Cipher MCcipher=Cipher.getInstance("AES/GCM/NoPadding");MCcipher.init(Cipher.DECRYPT_MODE,MCkey(MCpassword,MCsalt),new GCMParameterSpec(128,MCiv));byte[] MCdecrypted=MCcipher.doFinal(MCall,33,MCall.length-33);
+            byte[] MCdb=MCdecrypted;JsonNode MCrestoredSecrets=MCJSON.createObjectNode();
+            if(MCv2){byte[] MCextractedDb=null;try(ZipInputStream MCzip=new ZipInputStream(new ByteArrayInputStream(MCdecrypted))){ZipEntry MCentry;while((MCentry=MCzip.getNextEntry())!=null){if(!List.of("studio.db","credentials.json").contains(MCentry.getName()))throw new IOException("Entrada no permitida en el respaldo.");byte[] MCbytes=MCzip.readAllBytes();if(MCbytes.length>500_000_000)throw new IOException("Respaldo demasiado grande.");if(MCentry.getName().equals("studio.db"))MCextractedDb=MCbytes;else MCrestoredSecrets=MCJSON.readTree(MCbytes);}}if(MCextractedDb==null||MCrestoredSecrets==null||!MCrestoredSecrets.isObject())throw new IOException("Respaldo incompleto.");MCdb=MCextractedDb;}
+            Path MCtemp=Files.createTempFile(MCdata.MCdatabase().getParent(),"restore-",".db");
             try{
-                Files.write(mcTemp,mcDb);
-                try(Connection mcC=DriverManager.getConnection("jdbc:sqlite:"+mcTemp);Statement mcS=mcC.createStatement();ResultSet mcR=mcS.executeQuery("PRAGMA integrity_check")){
-                    if(!mcR.next()||!"ok".equalsIgnoreCase(mcR.getString(1)))throw new IOException("Base de datos dañada.");
+                Files.write(MCtemp,MCdb);
+                try(Connection MCc=DriverManager.getConnection("jdbc:sqlite:"+MCtemp);Statement MCs=MCc.createStatement();ResultSet MCr=MCs.executeQuery("PRAGMA integrity_check")){
+                    if(!MCr.next()||!"ok".equalsIgnoreCase(MCr.getString(1)))throw new IOException("Base de datos dañada.");
                 }
-                try(Connection mcC=DriverManager.getConnection("jdbc:sqlite:"+mcTemp);Statement mcS=mcC.createStatement();ResultSet mcR=mcS.executeQuery("SELECT name FROM sqlite_master WHERE type='table'")){
-                    Set<String> mcTables=new HashSet<>();while(mcR.next())mcTables.add(mcR.getString(1));
-                    if(!mcTables.containsAll(Set.of("template","variable","kind","contact","template_revision","document_history","field_mapping")))throw new IOException("El respaldo no contiene todas las tablas del sistema.");
+                try(Connection MCc=DriverManager.getConnection("jdbc:sqlite:"+MCtemp);Statement MCs=MCc.createStatement();ResultSet MCr=MCs.executeQuery("SELECT name FROM sqlite_master WHERE type='table'")){
+                    Set<String> MCtables=new HashSet<>();while(MCr.next())MCtables.add(MCr.getString(1));
+                    if(!MCtables.containsAll(Set.of("template","variable","kind","contact","template_revision","document_history","field_mapping")))throw new IOException("El respaldo no contiene todas las tablas del sistema.");
                 }
-                try{Files.move(mcTemp,mcData.mcDatabase(),StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}catch(AtomicMoveNotSupportedException mcE){Files.move(mcTemp,mcData.mcDatabase(),StandardCopyOption.REPLACE_EXISTING);}
+                try{Files.move(MCtemp,MCdata.MCdatabase(),StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}catch(AtomicMoveNotSupportedException MCe){Files.move(MCtemp,MCdata.MCdatabase(),StandardCopyOption.REPLACE_EXISTING);}
 
-            }finally{Files.deleteIfExists(mcTemp);}
-        }finally{Arrays.fill(mcPassword,'\0');}
+            }finally{Files.deleteIfExists(MCtemp);}
+        }finally{Arrays.fill(MCpassword,'\0');}
     }
-    private static SecretKeySpec mcKey(char[] mcPassword,byte[] mcSalt)throws Exception{PBEKeySpec mcSpec=new PBEKeySpec(mcPassword,mcSalt,200_000,256);byte[] mcMaterial=SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(mcSpec).getEncoded();mcSpec.clearPassword();return new SecretKeySpec(mcMaterial,"AES");}
+    private static SecretKeySpec MCkey(char[] MCpassword,byte[] MCsalt)throws Exception{PBEKeySpec MCspec=new PBEKeySpec(MCpassword,MCsalt,200_000,256);byte[] MCmaterial=SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(MCspec).getEncoded();MCspec.clearPassword();return new SecretKeySpec(MCmaterial,"AES");}
 }

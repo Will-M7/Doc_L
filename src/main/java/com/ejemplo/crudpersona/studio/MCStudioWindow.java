@@ -55,288 +55,285 @@ import java.util.*;
 import java.util.regex.*;
 import java.time.LocalDate;
 
-/** @author MC */
 public final class MCStudioWindow {
-    private static final Pattern mcTOKEN = Pattern.compile("\\{\\{([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?)}}");
-    private static final List<String> mcTYPES = MCVariableInput.mcTYPES;
-    private final Stage mcStage;
-    private final MCDocumentStore mcStore;
-    private final MCStudioData mcData;
-    private final MCApiCredentialStore mcCredentials;
-    private final MCLookupRouter mcLookupRouter;
-    private final MCStudioTransfer mcTransfer;
-    private final MCDocumentActions mcDocumentActions;
-    private final ObjectMapper mcJson=new ObjectMapper();
-    private final BorderPane mcRoot = new BorderPane();
-    private final StackPane mcWorkspace = new StackPane();
-    private final Label mcStatus = new Label("Datos locales · Sin conexión requerida");
-    private final ToggleGroup mcMenu = new ToggleGroup();
-    private final List<ToggleButton> mcNavigation = new ArrayList<>();
-    private final List<Node> mcMenuTexts = new ArrayList<>();
-    private VBox mcSidebar;
-    private VBox mcBrandTexts;
-    private Region mcIndicator;
-    private Button mcThemeButton, mcCollapseButton;
-    private ToggleButton mcGenerateNavigation;
-    private boolean mcDarkTheme, mcCollapsed;
-    private final ComboBox<MCTemplate> mcTemplateChoice = new ComboBox<>();
-    private BorderPane mcLibraryPage;
-    private final ListView<MCTemplate> mcLibraryList=new ListView<>();
-    private final ListView<MCTemplateGroup> mcGroupList=new ListView<>();
-    private final TextField mcLibrarySearch=new TextField();
-    private final ComboBox<String> mcLibrarySort=new ComboBox<>();
-    private final Label mcLibraryGroups=new Label("Sin grupos");
-    private Button mcAddToGroup,mcRemoveFromGroup;
-    private Map<Long,List<Long>> mcLibraryMemberships=Map.of();
-    private Map<Long,String> mcLibraryGroupNames=Map.of(),mcLibraryModifiedDates=Map.of();
-    private boolean mcRefreshingLibrary;
-    private final ListView<MCDefinition> mcVariableList = new ListView<>();
-    private final VBox mcPaper = new VBox(10);
-    private final ScrollPane mcDocumentScroll = new ScrollPane();
-    private final WebView mcRichEditor = new WebView();
-    private MCContinuousDocxEditor mcRichModel;
-    private boolean mcEditorReady;
-    private final MCEditorBridge mcEditorBridge=new MCEditorBridge();
-    private boolean mcUpdatingToolbarFromSelection;
-    private final ComboBox<Integer> mcFontSizeChoice=new ComboBox<>();
-    private final ColorPicker mcEditorTextColor=new ColorPicker(Color.BLACK),mcEditorHighlightColor=new ColorPicker(Color.YELLOW);
-    private final Map<String,Button> mcSelectionFormatButtons=new LinkedHashMap<>();
-    private double mcEditorLeft=72,mcEditorRight=72,mcEditorTop=72,mcEditorBottom=72;
-    private final Label mcPageIndicator = new Label("Página 1");
-    private final ComboBox<String> mcZoomChoice = new ComboBox<>();
-    private final TextField mcPaletteSearch = new TextField();
-    private VBox mcPalettePanel;
-    private Button mcPaletteToggle;
-    private TabPane mcEditorTabs;
-    private HBox mcTableTools;
-    private HBox mcImageTools;
-    private final Scale mcPaperScale = new Scale(1,1);
-    private double mcPageWidth = 794, mcPageHeight = 1123;
-    private String mcZoomMode = "Ancho";
-    private double mcEditorZoom=1;
-    private final Label mcZoomPercent=new Label("100%"),mcEditorSaveStatus=new Label("Sin plantilla");
-    private ToggleButton mcGuidesView,mcRulersView,mcVariablesView;
-    private boolean mcReadingPageSize;
-    private final TextField mcTemplateName = new TextField();
-    private BorderPane mcDefinitionsPage;
-    private final ListView<MCDefinition> mcDefinitionList=new ListView<>();
-    private final TextField mcDefinitionSearch=new TextField(),mcDefinitionKey=new TextField(),mcDefinitionLabel=new TextField(),mcDefinitionDefault=new TextField();
-    private final ComboBox<String> mcDefinitionType=new ComboBox<>();
-    private final CheckBox mcDefinitionApiEnabled=new CheckBox("Vincular con API");
-    private final ComboBox<String> mcDefinitionApiService=new ComboBox<>(),mcDefinitionApiField=new ComboBox<>();
-    private final Label mcDefinitionApiPath=new Label("Consulta automática cuando haya conexión · Ingreso manual disponible");
-    private VBox mcDefinitionApiOptions;
-    private MCDefinition mcSelectedDefinition;
-    private final ComboBox<MCDocumentStore.MCPersona> mcEditorPersona=new ComboBox<>();
-    private final Map<String,String> mcEditorPersonaNames=new LinkedHashMap<>();
-    private long mcPersonaTemplateId;
-    private final ToggleGroup mcVariableScope=new ToggleGroup();
-    private final RadioButton mcClientScope=new RadioButton("Amarrada a cliente / persona"),mcGlobalScope=new RadioButton("Variable independiente (global / sin cliente)");
-    private final CheckBox mcAutoCurrentDate=new CheckBox("Amarrar esta variable a la fecha actual del sistema");
-    private final ComboBox<String> mcCurrentDateFormat=new ComboBox<>();
-    private final Label mcCurrentDatePreview=new Label();
-    private final Map<String,MCDefinition> mcFormDefinitions=new HashMap<>();
-    private final ComboBox<MCDefinition> mcComplementChoice=new ComboBox<>(),mcContactExtraChoice=new ComboBox<>();
-    private final CheckBox mcComplementBoth=new CheckBox("Autocompletar en ambos sentidos (bidireccional)");
-    private final VBox mcComplementLinks=new VBox(6);
-    private final TableView<MCContactExtra> mcContactVariableTable=new TableView<>();
-    private final TextField mcContactExtraValue=new TextField();
-    private final Map<String,Set<String>> mcComplementTargets=new LinkedHashMap<>();
-    private final Map<String,ContextMenu> mcComplementMenus=new HashMap<>();
-    private final Map<String,PauseTransition> mcComplementDelays=new HashMap<>();
-    private final List<MCDefinition> mcActiveComplementDefinitions=new ArrayList<>();
-    private final List<MCDocumentStore.MCComplement> mcActiveComplementLinks=new ArrayList<>();
-    private boolean mcApplyingComplements,mcCompletingMissingComplements;
-    private final ComboBox<String> mcFontChoice = new ComboBox<>();
-    private final ComboBox<String> mcPaperChoice = new ComboBox<>();
-    private MCTemplate mcCurrentTemplate;
-    private boolean mcUpdatingTemplates;
-    private XWPFDocument mcDocument;
-    private boolean mcDirty;
-    private XWPFRun mcSelectedRun;
-    private XWPFParagraph mcSelectedParagraph;
-    private TextField mcSelectedText;
-    private XWPFRun mcDragSourceRun;
-    private String mcDragSourceToken;
-    private int mcDragSourceOffset;
-    private XWPFRun mcDragTargetRun;
-    private int mcDragTargetOffset;
+    private static final Pattern MCTOKEN = Pattern.compile("\\{\\{([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?)}}");
+    private static final List<String> MCTYPES = MCVariableInput.MCTYPES;
+    private final Stage MCstage;
+    private final MCDocumentStore MCstore;
+    private final MCStudioData MCdata;
+    private final MCApiCredentialStore MCcredentials;
+    private final MCLookupRouter MClookupRouter;
+    private final MCStudioTransfer MCtransfer;
+    private final MCDocumentActions MCdocumentActions;
+    private final ObjectMapper MCjson=new ObjectMapper();
+    private final BorderPane MCroot = new BorderPane();
+    private final StackPane MCworkspace = new StackPane();
+    private final Label MCstatus = new Label("Datos locales · Sin conexión requerida");
+    private final ToggleGroup MCmenu = new ToggleGroup();
+    private final List<ToggleButton> MCnavigation = new ArrayList<>();
+    private final List<Node> MCmenuTexts = new ArrayList<>();
+    private VBox MCsidebar;
+    private VBox MCbrandTexts;
+    private Region MCindicator;
+    private Button MCthemeButton, MCcollapseButton;
+    private ToggleButton MCgenerateNavigation;
+    private boolean MCdarkTheme, MCcollapsed;
+    private final ComboBox<MCTemplate> MCtemplateChoice = new ComboBox<>();
+    private BorderPane MClibraryPage;
+    private final ListView<MCTemplate> MClibraryList=new ListView<>();
+    private final ListView<MCTemplateGroup> MCgroupList=new ListView<>();
+    private final TextField MClibrarySearch=new TextField();
+    private final ComboBox<String> MClibrarySort=new ComboBox<>();
+    private final Label MClibraryGroups=new Label("Sin grupos");
+    private Button MCaddToGroup,MCremoveFromGroup;
+    private Map<Long,List<Long>> MClibraryMemberships=Map.of();
+    private Map<Long,String> MClibraryGroupNames=Map.of(),MClibraryModifiedDates=Map.of();
+    private boolean MCrefreshingLibrary;
+    private final ListView<MCDefinition> MCvariableList = new ListView<>();
+    private final VBox MCpaper = new VBox(10);
+    private final ScrollPane MCdocumentScroll = new ScrollPane();
+    private final WebView MCrichEditor = new WebView();
+    private MCContinuousDocxEditor MCrichModel;
+    private boolean MCeditorReady;
+    private final MCEditorBridge MCeditorBridge=new MCEditorBridge();
+    private boolean MCupdatingToolbarFromSelection;
+    private final ComboBox<Integer> MCfontSizeChoice=new ComboBox<>();
+    private final ColorPicker MCeditorTextColor=new ColorPicker(Color.BLACK),MCeditorHighlightColor=new ColorPicker(Color.YELLOW);
+    private final Map<String,Button> MCselectionFormatButtons=new LinkedHashMap<>();
+    private double MCeditorLeft=72,MCeditorRight=72,MCeditorTop=72,MCeditorBottom=72;
+    private final Label MCpageIndicator = new Label("Página 1");
+    private final ComboBox<String> MCzoomChoice = new ComboBox<>();
+    private final TextField MCpaletteSearch = new TextField();
+    private VBox MCpalettePanel;
+    private Button MCpaletteToggle;
+    private TabPane MCeditorTabs;
+    private HBox MCtableTools;
+    private HBox MCimageTools;
+    private final Scale MCpaperScale = new Scale(1,1);
+    private double MCpageWidth = 794, MCpageHeight = 1123;
+    private String MCzoomMode = "Ancho";
+    private double MCeditorZoom=1;
+    private final Label MCzoomPercent=new Label("100%"),MCeditorSaveStatus=new Label("Sin plantilla");
+    private ToggleButton MCguidesView,MCrulersView,MCvariablesView;
+    private boolean MCreadingPageSize;
+    private final TextField MCtemplateName = new TextField();
+    private BorderPane MCdefinitionsPage;
+    private final ListView<MCDefinition> MCdefinitionList=new ListView<>();
+    private final TextField MCdefinitionSearch=new TextField(),MCdefinitionKey=new TextField(),MCdefinitionLabel=new TextField(),MCdefinitionDefault=new TextField();
+    private final ComboBox<String> MCdefinitionType=new ComboBox<>();
+    private final CheckBox MCdefinitionApiEnabled=new CheckBox("Vincular con API");
+    private final ComboBox<String> MCdefinitionApiService=new ComboBox<>(),MCdefinitionApiField=new ComboBox<>();
+    private final Label MCdefinitionApiPath=new Label("Consulta automática cuando haya conexión · Ingreso manual disponible");
+    private VBox MCdefinitionApiOptions;
+    private MCDefinition MCselectedDefinition;
+    private final ComboBox<MCDocumentStore.MCPersona> MCeditorPersona=new ComboBox<>();
+    private final Map<String,String> MCeditorPersonaNames=new LinkedHashMap<>();
+    private long MCpersonaTemplateId;
+    private final ToggleGroup MCvariableScope=new ToggleGroup();
+    private final RadioButton MCclientScope=new RadioButton("Amarrada a cliente / persona"),MCglobalScope=new RadioButton("Variable independiente (global / sin cliente)");
+    private final CheckBox MCautoCurrentDate=new CheckBox("Amarrar esta variable a la fecha actual del sistema");
+    private final ComboBox<String> MCcurrentDateFormat=new ComboBox<>();
+    private final Label MCcurrentDatePreview=new Label();
+    private final Map<String,MCDefinition> MCformDefinitions=new HashMap<>();
+    private final ComboBox<MCDefinition> MCcomplementChoice=new ComboBox<>(),MCcontactExtraChoice=new ComboBox<>();
+    private final CheckBox MCcomplementBoth=new CheckBox("Autocompletar en ambos sentidos (bidireccional)");
+    private final VBox MCcomplementLinks=new VBox(6);
+    private final TableView<MCContactExtra> MCcontactVariableTable=new TableView<>();
+    private final TextField MCcontactExtraValue=new TextField();
+    private final Map<String,Set<String>> MCcomplementTargets=new LinkedHashMap<>();
+    private final Map<String,ContextMenu> MCcomplementMenus=new HashMap<>();
+    private final Map<String,PauseTransition> MCcomplementDelays=new HashMap<>();
+    private final List<MCDefinition> MCactiveComplementDefinitions=new ArrayList<>();
+    private final List<MCDocumentStore.MCComplement> MCactiveComplementLinks=new ArrayList<>();
+    private boolean MCapplyingComplements,MCcompletingMissingComplements;
+    private final ComboBox<String> MCfontChoice = new ComboBox<>();
+    private final ComboBox<String> MCpaperChoice = new ComboBox<>();
+    private MCTemplate MCcurrentTemplate;
+    private boolean MCupdatingTemplates;
+    private XWPFDocument MCdocument;
+    private boolean MCdirty;
+    private XWPFRun MCselectedRun;
+    private XWPFParagraph MCselectedParagraph;
+    private TextField MCselectedText;
+    private XWPFRun MCdragSourceRun;
+    private String MCdragSourceToken;
+    private int MCdragSourceOffset;
+    private XWPFRun MCdragTargetRun;
+    private int MCdragTargetOffset;
 
-    private final ListView<MCKind> mcKindList = new ListView<>();
-    private final TextField mcKindSearch = new TextField(), mcKindTitle = new TextField(), mcKindCategory = new TextField();
-    private final TextArea mcKindDescription = new TextArea();
-    private final ComboBox<MCTemplate> mcKindTemplate = new ComboBox<>();
-    private final CheckBox mcKindActive = new CheckBox("Activo");
-    private final ListView<MCVariable> mcFieldList = new ListView<>();
-    private final ComboBox<MCVariable> mcAddFieldChoice = new ComboBox<>();
-    private final CheckBox mcFieldRequired=new CheckBox("Obligatorio en este documento");
-    private final Map<String,Boolean> mcKindRequiredChoices=new HashMap<>();
-    private final TextField mcFieldDefault=new TextField();
-    private final Map<String,String> mcKindDefaultChoices=new HashMap<>();
-    private boolean mcLoadingFieldRequired;
-    private final TextField mcBindingGroup=new TextField();
-    private final ComboBox<String> mcBindingKind=new ComboBox<>(),mcBindingField=new ComboBox<>();
-    private final ComboBox<MCVariable> mcBindingVariable=new ComboBox<>();
-    private final ListView<MCContactBinding> mcBindingList=new ListView<>();
-    private MCKind mcCurrentKind;
+    private final ListView<MCKind> MCkindList = new ListView<>();
+    private final TextField MCkindSearch = new TextField(), MCkindTitle = new TextField(), MCkindCategory = new TextField();
+    private final TextArea MCkindDescription = new TextArea();
+    private final ComboBox<MCTemplate> MCkindTemplate = new ComboBox<>();
+    private final CheckBox MCkindActive = new CheckBox("Activo");
+    private final ListView<MCVariable> MCfieldList = new ListView<>();
+    private final ComboBox<MCVariable> MCaddFieldChoice = new ComboBox<>();
+    private final CheckBox MCfieldRequired=new CheckBox("Obligatorio en este documento");
+    private final Map<String,Boolean> MCkindRequiredChoices=new HashMap<>();
+    private final TextField MCfieldDefault=new TextField();
+    private final Map<String,String> MCkindDefaultChoices=new HashMap<>();
+    private boolean MCloadingFieldRequired;
+    private final TextField MCbindingGroup=new TextField();
+    private final ComboBox<String> MCbindingKind=new ComboBox<>(),MCbindingField=new ComboBox<>();
+    private final ComboBox<MCVariable> MCbindingVariable=new ComboBox<>();
+    private final ListView<MCContactBinding> MCbindingList=new ListView<>();
+    private MCKind MCcurrentKind;
 
-    private final ComboBox<MCTemplate> mcGenerateTemplate = new ComboBox<>();
-    private boolean mcRefreshingGenerator;
-    private final Map<String,PauseTransition> mcLookupDelays=new HashMap<>();
-    private final ComboBox<MCTemplateGroup> mcGenerateGroup=new ComboBox<>();
-    private final TextField mcGenerateSearch=new TextField();
-    private final VBox mcGeneratedForm = new VBox(15);
-    private final Map<String, Control> mcInputs = new LinkedHashMap<>();
-    private final Map<String,MCVariable> mcFormVariables=new LinkedHashMap<>();
-    private final Set<String> mcManuallyEdited=new HashSet<>();
-    private boolean mcApplyingApi;
-    private final Map<String,String> mcLocalValueOverrides=new HashMap<>();
-    private final WebView mcPreview = new WebView();
-    private XWPFDocument mcGenerationDocument;
-    private MCContinuousDocxEditor mcGenerationModel;
-    private boolean mcGenerationReady;
-    private Map<String,String> mcGenerationDisplayValues=Map.of();
-    private final Map<String,String> mcGenerationValueAliases=new LinkedHashMap<>();
-    private final MCGenerationBridge mcGenerationBridge=new MCGenerationBridge();
-    private MCClientDocument mcUpdatingClientDocument;
-    private MCContact mcUpdatingClient;
-    private final Label mcUpdateDocumentBanner=new Label();
-    private final Button mcUpdateDocumentButton=new Button("Actualizar documento");
-    private final ListView<MCClientDocument> mcClientDocumentList=new ListView<>();
-    private final BorderPane mcClientDocumentsPane=new BorderPane();
-    private BorderPane mcClientDetailsPane;
-    private final Button mcClientDetailsToggle=new Button("Ver detalles del cliente");
-    private final Label mcClientPanelTitle=new Label("Documentos del cliente");
-    private boolean mcShowingClientDetails;
-    private boolean mcGeneratorVariablesCollapsed;
-    private VBox mcGeneratorVariablesPanel;
-    private GridPane mcGeneratorColumns;
-    private ColumnConstraints mcGeneratorFormColumn,mcGeneratorDocumentColumn;
-    private final Button mcGeneratorVariablesToggle=new Button();
-    private byte[] mcGeneratedBytes;
-    private byte[] mcGeneratedPdf;
-    private Map<String,String> mcGeneratedValues=Map.of();
-    private long mcGeneratedHistoryId;
-    private byte[] mcHistoricalTemplate;
-    private String mcContactSaveSummary="";
-    private BorderPane mcContactsPage,mcHistoryPage,mcApiPage,mcSettingsPage;
-    private final ListView<MCContact> mcContactList=new ListView<>();
-    private final TextField mcContactSearch=new TextField(),mcContactGiven=new TextField(),mcContactFamily=new TextField(),mcContactDocType=new TextField(),mcContactNumber=new TextField(),mcContactAddress=new TextField();
-    private final TextArea mcContactRepresentatives=new TextArea(),mcContactExtras=new TextArea();
-    private final ComboBox<String> mcContactKind=new ComboBox<>();
-    private MCContact mcSelectedContact;
-    private final PasswordField mcApiToken=new PasswordField();
-    private final ListView<MCApiCredentialStore.MCCredential> mcCredentialList=new ListView<>();
-    private final TextField mcCredentialName=new TextField();
-    private final ComboBox<String> mcCredentialProvider=new ComboBox<>();
-    private final CheckBox mcCredentialEnabled=new CheckBox("Habilitada");
-    private final Label mcCredentialStats=new Label("Sin credencial seleccionada");
-    private final ComboBox<String> mcApiType=new ComboBox<>();
-    private final TextField mcApiNumber=new TextField();
-    private final Label mcApiState=new Label("Sin consulta");
-    private boolean mcApiQueryRunning;
-    private final VBox mcApiResultBox=new VBox(8);
-    private final ComboBox<MCTemplate> mcMapTemplate=new ComboBox<>();
-    private final ComboBox<MCVariable> mcMapSource=new ComboBox<>(),mcMapTarget=new ComboBox<>();
-    private final ComboBox<String> mcMapApiField=new ComboBox<>();
-    private final ListView<MCMapping> mcMappingList=new ListView<>();
-    private final ListView<MCHistory> mcHistoryList=new ListView<>();
-    private final TextField mcHistorySearch=new TextField();
-    private final DatePicker mcHistoryDate=new DatePicker();
-    private final ComboBox<String> mcImportConflict=new ComboBox<>(),mcExportScope=new ComboBox<>();
-    private final ComboBox<MCTemplate> mcExportTemplate=new ComboBox<>();
-    private final ComboBox<MCTemplateGroup> mcExportGroup=new ComboBox<>();
-    private final Label mcApiSaved=new Label();
+    private final ComboBox<MCTemplate> MCgenerateTemplate = new ComboBox<>();
+    private boolean MCrefreshingGenerator;
+    private final Map<String,PauseTransition> MClookupDelays=new HashMap<>();
+    private final ComboBox<MCTemplateGroup> MCgenerateGroup=new ComboBox<>();
+    private final TextField MCgenerateSearch=new TextField();
+    private final VBox MCgeneratedForm = new VBox(15);
+    private final Map<String, Control> MCinputs = new LinkedHashMap<>();
+    private final Map<String,MCVariable> MCformVariables=new LinkedHashMap<>();
+    private final Set<String> MCmanuallyEdited=new HashSet<>();
+    private boolean MCapplyingApi;
+    private final Map<String,String> MClocalValueOverrides=new HashMap<>();
+    private final WebView MCpreview = new WebView();
+    private XWPFDocument MCgenerationDocument;
+    private MCContinuousDocxEditor MCgenerationModel;
+    private boolean MCgenerationReady;
+    private Map<String,String> MCgenerationDisplayValues=Map.of();
+    private final Map<String,String> MCgenerationValueAliases=new LinkedHashMap<>();
+    private final MCGenerationBridge MCgenerationBridge=new MCGenerationBridge();
+    private MCClientDocument MCupdatingClientDocument;
+    private MCContact MCupdatingClient;
+    private final Label MCupdateDocumentBanner=new Label();
+    private final Button MCupdateDocumentButton=new Button("Actualizar documento");
+    private final ListView<MCClientDocument> MCclientDocumentList=new ListView<>();
+    private final BorderPane MCclientDocumentsPane=new BorderPane();
+    private BorderPane MCclientDetailsPane;
+    private final Button MCclientDetailsToggle=new Button("Ver detalles del cliente");
+    private final Label MCclientPanelTitle=new Label("Documentos del cliente");
+    private boolean MCshowingClientDetails;
+    private boolean MCgeneratorVariablesCollapsed;
+    private VBox MCgeneratorVariablesPanel;
+    private GridPane MCgeneratorColumns;
+    private ColumnConstraints MCgeneratorFormColumn,MCgeneratorDocumentColumn;
+    private final Button MCgeneratorVariablesToggle=new Button();
+    private byte[] MCgeneratedBytes;
+    private byte[] MCgeneratedPdf;
+    private Map<String,String> MCgeneratedValues=Map.of();
+    private long MCgeneratedHistoryId;
+    private byte[] MChistoricalTemplate;
+    private String MCcontactSaveSummary="";
+    private BorderPane MCcontactsPage,MChistoryPage,MCapiPage,MCsettingsPage;
+    private final ListView<MCContact> MCcontactList=new ListView<>();
+    private final TextField MCcontactSearch=new TextField(),MCcontactGiven=new TextField(),MCcontactFamily=new TextField(),MCcontactDocType=new TextField(),MCcontactNumber=new TextField(),MCcontactAddress=new TextField();
+    private final TextArea MCcontactRepresentatives=new TextArea(),MCcontactExtras=new TextArea();
+    private final ComboBox<String> MCcontactKind=new ComboBox<>();
+    private MCContact MCselectedContact;
+    private final PasswordField MCapiToken=new PasswordField();
+    private final ListView<MCApiCredentialStore.MCCredential> MCcredentialList=new ListView<>();
+    private final TextField MCcredentialName=new TextField();
+    private final ComboBox<String> MCcredentialProvider=new ComboBox<>();
+    private final CheckBox MCcredentialEnabled=new CheckBox("Habilitada");
+    private final Label MCcredentialStats=new Label("Sin credencial seleccionada");
+    private final ComboBox<String> MCapiType=new ComboBox<>();
+    private final TextField MCapiNumber=new TextField();
+    private final Label MCapiState=new Label("Sin consulta");
+    private boolean MCapiQueryRunning;
+    private final VBox MCapiResultBox=new VBox(8);
+    private final ComboBox<MCTemplate> MCmapTemplate=new ComboBox<>();
+    private final ComboBox<MCVariable> MCmapSource=new ComboBox<>(),MCmapTarget=new ComboBox<>();
+    private final ComboBox<String> MCmapApiField=new ComboBox<>();
+    private final ListView<MCMapping> MCmappingList=new ListView<>();
+    private final ListView<MCHistory> MChistoryList=new ListView<>();
+    private final TextField MChistorySearch=new TextField();
+    private final DatePicker MChistoryDate=new DatePicker();
+    private final ComboBox<String> MCimportConflict=new ComboBox<>(),MCexportScope=new ComboBox<>();
+    private final ComboBox<MCTemplate> MCexportTemplate=new ComboBox<>();
+    private final ComboBox<MCTemplateGroup> MCexportGroup=new ComboBox<>();
+    private final Label MCapiSaved=new Label();
 
-    public MCStudioWindow(Stage mcStage, MCDocumentStore mcStore) throws Exception {
-        this(mcStage,mcStore,null);
+    public MCStudioWindow(Stage MCstage, MCDocumentStore MCstore) throws Exception {
+        this(MCstage,MCstore,null);
     }
-    MCStudioWindow(Stage mcStage, MCDocumentStore mcStore,MCLookupRouter mcRouter) throws Exception {
-        this(mcStage,mcStore,mcRouter,new MCSystemDocumentActions());
+    MCStudioWindow(Stage MCstage, MCDocumentStore MCstore,MCLookupRouter MCrouter) throws Exception {
+        this(MCstage,MCstore,MCrouter,new MCSystemDocumentActions());
     }
-    MCStudioWindow(Stage mcStage,MCDocumentStore mcStore,MCLookupRouter mcRouter,MCDocumentActions mcDocumentActions)throws Exception{
-        this.mcStage=mcStage; this.mcStore=mcStore;
-        this.mcDocumentActions=mcDocumentActions;
-        mcData=new MCStudioData(mcStore.mcDirectory());mcCredentials=new MCApiCredentialStore(mcStore.mcDirectory());mcLookupRouter=mcRouter==null?new MCLookupRouter(mcCredentials,List.of(new MCFactilizaProvider(),new MCApisPeruProvider())):mcRouter;mcTransfer=new MCStudioTransfer(mcStore,mcData);
-        mcBuildShell();
-        mcBuildDefinitions();
-        mcBuildEditor();
-        mcBuildLibrary();
-        mcBuildGenerator();
-        mcBuildContacts();mcBuildHistory();mcBuildApi();mcBuildSettings();
-        mcMenu.selectToggle(mcGenerateNavigation);
-        Platform.runLater(() -> mcMoveIndicator(mcGenerateNavigation));
+    MCStudioWindow(Stage MCstage,MCDocumentStore MCstore,MCLookupRouter MCrouter,MCDocumentActions MCdocumentActions)throws Exception{
+        this.MCstage=MCstage; this.MCstore=MCstore;
+        this.MCdocumentActions=MCdocumentActions;
+        MCdata=new MCStudioData(MCstore.MCdirectory());MCcredentials=new MCApiCredentialStore(MCstore.MCdirectory());MClookupRouter=MCrouter==null?new MCLookupRouter(MCcredentials,List.of(new MCFactilizaProvider(),new MCApisPeruProvider())):MCrouter;MCtransfer=new MCStudioTransfer(MCstore,MCdata);
+        MCbuildShell();
+        MCbuildDefinitions();
+        MCbuildEditor();
+        MCbuildLibrary();
+        MCbuildGenerator();
+        MCbuildContacts();MCbuildHistory();MCbuildApi();MCbuildSettings();
+        MCmenu.selectToggle(MCgenerateNavigation);
+        Platform.runLater(() -> MCmoveIndicator(MCgenerateNavigation));
     }
-    public Parent mcRoot() { return mcRoot; }
+    public Parent MCroot() { return MCroot; }
 
-    /** @author MC */
     interface MCDocumentActions {
-        void mcOpen(Path mcDocument)throws Exception;
-        void mcPrint(Path mcDocument)throws Exception;
+        void MCopen(Path MCdocument)throws Exception;
+        void MCprint(Path MCdocument)throws Exception;
     }
-    /** @author MC */
     private static final class MCSystemDocumentActions implements MCDocumentActions {
-        @Override public void mcOpen(Path mcDocument)throws Exception{
-            try{if(Desktop.isDesktopSupported()&&Desktop.getDesktop().isSupported(Desktop.Action.OPEN)){Desktop.getDesktop().open(mcDocument.toFile());return;}}catch(IOException|UnsupportedOperationException mcIgnored){}
-            String mcOs=System.getProperty("os.name","").toLowerCase(Locale.ROOT);
-            ProcessBuilder mcCommand;
-            if(mcOs.contains("win"))mcCommand=new ProcessBuilder("cmd","/c","start","",mcDocument.toAbsolutePath().toString());
-            else if(mcOs.contains("linux"))mcCommand=new ProcessBuilder("xdg-open",mcDocument.toAbsolutePath().toString());
+        @Override public void MCopen(Path MCdocument)throws Exception{
+            try{if(Desktop.isDesktopSupported()&&Desktop.getDesktop().isSupported(Desktop.Action.OPEN)){Desktop.getDesktop().open(MCdocument.toFile());return;}}catch(IOException|UnsupportedOperationException MCignored){}
+            String MCos=System.getProperty("os.name","").toLowerCase(Locale.ROOT);
+            ProcessBuilder MCcommand;
+            if(MCos.contains("win"))MCcommand=new ProcessBuilder("cmd","/c","start","",MCdocument.toAbsolutePath().toString());
+            else if(MCos.contains("linux"))MCcommand=new ProcessBuilder("xdg-open",MCdocument.toAbsolutePath().toString());
             else throw new IOException("No hay un procesador de texto disponible para abrir el DOCX.");
-            Process mcProcess=mcCommand.redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
-            if(mcProcess.waitFor(3,java.util.concurrent.TimeUnit.SECONDS)&&mcProcess.exitValue()!=0)throw new IOException("No se pudo abrir el DOCX en el procesador de texto del sistema.");
+            Process MCprocess=MCcommand.redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+            if(MCprocess.waitFor(3,java.util.concurrent.TimeUnit.SECONDS)&&MCprocess.exitValue()!=0)throw new IOException("No se pudo abrir el DOCX en el procesador de texto del sistema.");
         }
-        @Override public void mcPrint(Path mcDocument)throws Exception{
-            try{if(Desktop.isDesktopSupported()&&Desktop.getDesktop().isSupported(Desktop.Action.PRINT)){Desktop.getDesktop().print(mcDocument.toFile());return;}}catch(IOException|UnsupportedOperationException mcIgnored){}
-            String mcOs=System.getProperty("os.name","").toLowerCase(Locale.ROOT);ProcessBuilder mcCommand;
-            if(mcOs.contains("linux"))mcCommand=new ProcessBuilder("lp",mcDocument.toAbsolutePath().toString());
-            else if(mcOs.contains("win")){
-                mcCommand=new ProcessBuilder("powershell.exe","-NoProfile","-NonInteractive","-Command","Start-Process -FilePath $env:STUDIO_PRINT_FILE -Verb Print -ErrorAction Stop");
-                mcCommand.environment().put("STUDIO_PRINT_FILE",mcDocument.toAbsolutePath().toString());
+        @Override public void MCprint(Path MCdocument)throws Exception{
+            try{if(Desktop.isDesktopSupported()&&Desktop.getDesktop().isSupported(Desktop.Action.PRINT)){Desktop.getDesktop().print(MCdocument.toFile());return;}}catch(IOException|UnsupportedOperationException MCignored){}
+            String MCos=System.getProperty("os.name","").toLowerCase(Locale.ROOT);ProcessBuilder MCcommand;
+            if(MCos.contains("linux"))MCcommand=new ProcessBuilder("lp",MCdocument.toAbsolutePath().toString());
+            else if(MCos.contains("win")){
+                MCcommand=new ProcessBuilder("powershell.exe","-NoProfile","-NonInteractive","-Command","Start-Process -FilePath $env:STUDIO_PRINT_FILE -Verb Print -ErrorAction Stop");
+                MCcommand.environment().put("STUDIO_PRINT_FILE",MCdocument.toAbsolutePath().toString());
             }else throw new IOException("La impresión directa no está disponible en este sistema.");
-            Process mcProcess=mcCommand.redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
-            if(!mcProcess.waitFor(10,java.util.concurrent.TimeUnit.SECONDS)){mcProcess.destroy();throw new IOException("El sistema de impresión no respondió.");}
-            if(mcProcess.exitValue()!=0)throw new IOException("No se pudo enviar el PDF a la impresora predeterminada. Revise la impresora del sistema.");
+            Process MCprocess=MCcommand.redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+            if(!MCprocess.waitFor(10,java.util.concurrent.TimeUnit.SECONDS)){MCprocess.destroy();throw new IOException("El sistema de impresión no respondió.");}
+            if(MCprocess.exitValue()!=0)throw new IOException("No se pudo enviar el PDF a la impresora predeterminada. Revise la impresora del sistema.");
         }
     }
 
-    private void mcBuildShell() {
-        mcRoot.getStyleClass().add("app");
-        mcSidebar=new VBox(6);mcSidebar.getStyleClass().add("sidebar");mcSidebar.setPrefWidth(242);mcSidebar.setMinWidth(242);
-        ImageView mcLogoImage=new ImageView(new Image(MCStudioWindow.class.getResourceAsStream("/img/icon-128.png")));mcLogoImage.setFitWidth(34);mcLogoImage.setFitHeight(34);mcLogoImage.setPreserveRatio(true);mcLogoImage.setSmooth(true);
-        StackPane mcLogo=new StackPane(mcLogoImage);mcLogo.getStyleClass().add("marca-logo");
-        mcBrandTexts=new VBox(1,new Label("Gestion"),new Label("Panel administrativo"));
-        mcBrandTexts.getChildren().get(0).getStyleClass().add("marca-titulo");mcBrandTexts.getChildren().get(1).getStyleClass().add("marca-subtitulo");
-        HBox mcBrand=new HBox(12,mcLogo,mcBrandTexts);mcBrand.getStyleClass().add("marca");mcSidebar.getChildren().add(mcBrand);
-        mcIndicator=new Region();mcIndicator.getStyleClass().add("nav-indicador");mcIndicator.setPrefHeight(42);mcIndicator.setMaxHeight(42);
-        VBox mcItems=new VBox(3);
-        mcAddSection(mcItems,"GENERAL");mcGenerateNavigation=mcAddNavigation(mcItems,"Generar documentos","fth-file-text",this::mcShowGenerator);
-        mcAddSection(mcItems,"DOCUMENTOS");mcAddNavigation(mcItems,"Variables","fth-tag",this::mcShowDefinitions);mcAddNavigation(mcItems,"Plantillas","fth-folder",this::mcShowLibrary);mcAddNavigation(mcItems,"Editor de plantillas","fth-edit-3",this::mcShowEditor);
-        mcAddSection(mcItems,"REGISTROS");mcAddNavigation(mcItems,"Clientes","fth-users",this::mcShowContacts);mcAddNavigation(mcItems,"Historial","fth-clock",this::mcShowHistory);
-        mcAddSection(mcItems,"SISTEMA");mcAddNavigation(mcItems,"Conexiones API","fth-link",this::mcShowApi);mcAddNavigation(mcItems,"Configuración y respaldos","fth-settings",this::mcShowSettings);
-        StackPane mcMenuPane=new StackPane(mcIndicator,mcItems);mcMenuPane.setAlignment(Pos.TOP_LEFT);mcSidebar.getChildren().add(mcMenuPane);
-        Region mcSpacer=new Region();VBox.setVgrow(mcSpacer,Priority.ALWAYS);mcSidebar.getChildren().add(mcSpacer);
-        Separator mcSeparator=new Separator();mcSeparator.getStyleClass().add("nav-separador");mcSidebar.getChildren().add(mcSeparator);
-        mcThemeButton=mcSidebarAction("Modo oscuro","fth-moon",this::mcChangeTheme);
-        mcCollapseButton=mcSidebarAction("Contraer menú","fth-chevrons-left",this::mcCollapseMenu);
-        mcSidebar.getChildren().addAll(mcThemeButton,mcCollapseButton);
-        mcMenu.selectedToggleProperty().addListener((mcO,mcPrevious,mcCurrent)->{
-            if(mcCurrent==null){mcMenu.selectToggle(mcPrevious);return;}
-            Runnable mcAction=(Runnable)((ToggleButton)mcCurrent).getUserData();
-            mcAction.run();mcMoveIndicator(mcCurrent);
+    private void MCbuildShell() {
+        MCroot.getStyleClass().add("app");
+        MCsidebar=new VBox(6);MCsidebar.getStyleClass().add("sidebar");MCsidebar.setPrefWidth(242);MCsidebar.setMinWidth(242);
+        ImageView MClogoImage=new ImageView(new Image(MCStudioWindow.class.getResourceAsStream("/img/icon-128.png")));MClogoImage.setFitWidth(34);MClogoImage.setFitHeight(34);MClogoImage.setPreserveRatio(true);MClogoImage.setSmooth(true);
+        StackPane MClogo=new StackPane(MClogoImage);MClogo.getStyleClass().add("marca-logo");
+        MCbrandTexts=new VBox(1,new Label("Gestion"),new Label("Panel administrativo"));
+        MCbrandTexts.getChildren().get(0).getStyleClass().add("marca-titulo");MCbrandTexts.getChildren().get(1).getStyleClass().add("marca-subtitulo");
+        HBox MCbrand=new HBox(12,MClogo,MCbrandTexts);MCbrand.getStyleClass().add("marca");MCsidebar.getChildren().add(MCbrand);
+        MCindicator=new Region();MCindicator.getStyleClass().add("nav-indicador");MCindicator.setPrefHeight(42);MCindicator.setMaxHeight(42);
+        VBox MCitems=new VBox(3);
+        MCaddSection(MCitems,"GENERAL");MCgenerateNavigation=MCaddNavigation(MCitems,"Generar documentos","fth-file-text",this::MCshowGenerator);
+        MCaddSection(MCitems,"DOCUMENTOS");MCaddNavigation(MCitems,"Variables","fth-tag",this::MCshowDefinitions);MCaddNavigation(MCitems,"Plantillas","fth-folder",this::MCshowLibrary);MCaddNavigation(MCitems,"Editor de plantillas","fth-edit-3",this::MCshowEditor);
+        MCaddSection(MCitems,"REGISTROS");MCaddNavigation(MCitems,"Clientes","fth-users",this::MCshowContacts);MCaddNavigation(MCitems,"Historial","fth-clock",this::MCshowHistory);
+        MCaddSection(MCitems,"SISTEMA");MCaddNavigation(MCitems,"Conexiones API","fth-link",this::MCshowApi);MCaddNavigation(MCitems,"Configuración y respaldos","fth-settings",this::MCshowSettings);
+        StackPane MCmenuPane=new StackPane(MCindicator,MCitems);MCmenuPane.setAlignment(Pos.TOP_LEFT);MCsidebar.getChildren().add(MCmenuPane);
+        Region MCspacer=new Region();VBox.setVgrow(MCspacer,Priority.ALWAYS);MCsidebar.getChildren().add(MCspacer);
+        Separator MCseparator=new Separator();MCseparator.getStyleClass().add("nav-separador");MCsidebar.getChildren().add(MCseparator);
+        MCthemeButton=MCsidebarAction("Modo oscuro","fth-moon",this::MCchangeTheme);
+        MCcollapseButton=MCsidebarAction("Contraer menú","fth-chevrons-left",this::MCcollapseMenu);
+        MCsidebar.getChildren().addAll(MCthemeButton,MCcollapseButton);
+        MCmenu.selectedToggleProperty().addListener((MCo,MCprevious,MCcurrent)->{
+            if(MCcurrent==null){MCmenu.selectToggle(MCprevious);return;}
+            Runnable MCaction=(Runnable)((ToggleButton)MCcurrent).getUserData();
+            MCaction.run();MCmoveIndicator(MCcurrent);
         });
-        mcWorkspace.getStyleClass().add("contenido");mcRoot.setLeft(mcSidebar);mcRoot.setCenter(mcWorkspace);
+        MCworkspace.getStyleClass().add("contenido");MCroot.setLeft(MCsidebar);MCroot.setCenter(MCworkspace);
     }
-    private void mcAddSection(VBox mcItems,String mcTitle){Label mcSection=new Label(mcTitle);mcSection.getStyleClass().add("nav-seccion");mcItems.getChildren().add(mcSection);mcMenuTexts.add(mcSection);}
-    private ToggleButton mcAddNavigation(VBox mcItems,String mcTitle,String mcIcon,Runnable mcAction){ToggleButton mcButton=new ToggleButton(mcTitle,new FontIcon(mcIcon));mcButton.setToggleGroup(mcMenu);mcButton.setMaxWidth(Double.MAX_VALUE);mcButton.getStyleClass().add("nav-item");mcButton.setUserData(mcAction);Tooltip mcTip=new Tooltip(mcTitle);mcTip.setShowDelay(Duration.millis(300));mcButton.setTooltip(mcTip);mcNavigation.add(mcButton);mcItems.getChildren().add(mcButton);return mcButton;}
-    private Button mcSidebarAction(String mcTitle,String mcIcon,Runnable mcAction){Button mcButton=new Button(mcTitle,new FontIcon(mcIcon));mcButton.getStyleClass().add("nav-item");mcButton.setMaxWidth(Double.MAX_VALUE);mcButton.setOnAction(mcE->mcSafe(mcAction));return mcButton;}
-    private void mcMoveIndicator(javafx.scene.control.Toggle mcToggle){if(mcToggle==null)return;Node mcButton=(Node)mcToggle;double mcY=mcButton.getBoundsInParent().getMinY();mcIndicator.setPrefHeight(mcButton.getBoundsInParent().getHeight());new Timeline(new KeyFrame(Duration.millis(280),new KeyValue(mcIndicator.translateYProperty(),mcY,Interpolator.SPLINE(0.4,0,0.2,1)))).play();}
-    private void mcChangeTheme(){mcDarkTheme=!mcDarkTheme;Application.setUserAgentStylesheet(mcDarkTheme?new PrimerDark().getUserAgentStylesheet():new PrimerLight().getUserAgentStylesheet());if(mcDarkTheme)mcRoot.getStyleClass().add("dark");else mcRoot.getStyleClass().remove("dark");((FontIcon)mcThemeButton.getGraphic()).setIconCode(mcDarkTheme?Feather.SUN:Feather.MOON);mcThemeButton.setText(mcDarkTheme?"Modo claro":"Modo oscuro");Animations.fadeIn(mcWorkspace,Duration.millis(300)).play();}
-    private void mcCollapseMenu(){mcCollapsed=!mcCollapsed;double mcWidth=mcCollapsed?76:242;Timeline mcTransition=new Timeline(new KeyFrame(Duration.millis(260),new KeyValue(mcSidebar.prefWidthProperty(),mcWidth,Interpolator.SPLINE(0.4,0,0.2,1)),new KeyValue(mcSidebar.minWidthProperty(),mcWidth,Interpolator.SPLINE(0.4,0,0.2,1))));List<Node> mcTexts=new ArrayList<>(mcMenuTexts);mcTexts.add(mcBrandTexts);List<ButtonBase> mcButtons=new ArrayList<>(mcNavigation);mcButtons.add(mcThemeButton);mcButtons.add(mcCollapseButton);if(mcCollapsed){mcTexts.forEach(mcN->{mcN.setVisible(false);mcN.setManaged(false);});mcButtons.forEach(mcB->mcB.setContentDisplay(ContentDisplay.GRAPHIC_ONLY));mcTransition.play();}else{mcTransition.setOnFinished(mcE->{mcTexts.forEach(mcN->{mcN.setVisible(true);mcN.setManaged(true);});mcButtons.forEach(mcB->mcB.setContentDisplay(ContentDisplay.LEFT));ParallelTransition mcFade=new ParallelTransition();mcTexts.forEach(mcN->mcFade.getChildren().add(Animations.fadeIn(mcN,Duration.millis(200))));mcFade.play();Platform.runLater(()->mcMoveIndicator(mcMenu.getSelectedToggle()));});mcTransition.play();}((FontIcon)mcCollapseButton.getGraphic()).setIconCode(mcCollapsed?Feather.CHEVRONS_RIGHT:Feather.CHEVRONS_LEFT);Platform.runLater(()->mcMoveIndicator(mcMenu.getSelectedToggle()));}
-    private void mcPage(String mcTitle,Node mcContent){
-        Label mcHeading=new Label(mcTitle);mcHeading.getStyleClass().add("pagina-titulo");
-        if(!mcStatus.getStyleClass().contains("pagina-subtitulo"))mcStatus.getStyleClass().add("pagina-subtitulo");
-        mcStatus.setText(switch(mcTitle){
+    private void MCaddSection(VBox MCitems,String MCtitle){Label MCsection=new Label(MCtitle);MCsection.getStyleClass().add("nav-seccion");MCitems.getChildren().add(MCsection);MCmenuTexts.add(MCsection);}
+    private ToggleButton MCaddNavigation(VBox MCitems,String MCtitle,String MCicon,Runnable MCaction){ToggleButton MCbutton=new ToggleButton(MCtitle,new FontIcon(MCicon));MCbutton.setToggleGroup(MCmenu);MCbutton.setMaxWidth(Double.MAX_VALUE);MCbutton.getStyleClass().add("nav-item");MCbutton.setUserData(MCaction);Tooltip MCtip=new Tooltip(MCtitle);MCtip.setShowDelay(Duration.millis(300));MCbutton.setTooltip(MCtip);MCnavigation.add(MCbutton);MCitems.getChildren().add(MCbutton);return MCbutton;}
+    private Button MCsidebarAction(String MCtitle,String MCicon,Runnable MCaction){Button MCbutton=new Button(MCtitle,new FontIcon(MCicon));MCbutton.getStyleClass().add("nav-item");MCbutton.setMaxWidth(Double.MAX_VALUE);MCbutton.setOnAction(MCe->MCsafe(MCaction));return MCbutton;}
+    private void MCmoveIndicator(javafx.scene.control.Toggle MCtoggle){if(MCtoggle==null)return;Node MCbutton=(Node)MCtoggle;double MCy=MCbutton.getBoundsInParent().getMinY();MCindicator.setPrefHeight(MCbutton.getBoundsInParent().getHeight());new Timeline(new KeyFrame(Duration.millis(280),new KeyValue(MCindicator.translateYProperty(),MCy,Interpolator.SPLINE(0.4,0,0.2,1)))).play();}
+    private void MCchangeTheme(){MCdarkTheme=!MCdarkTheme;Application.setUserAgentStylesheet(MCdarkTheme?new PrimerDark().getUserAgentStylesheet():new PrimerLight().getUserAgentStylesheet());if(MCdarkTheme)MCroot.getStyleClass().add("dark");else MCroot.getStyleClass().remove("dark");((FontIcon)MCthemeButton.getGraphic()).setIconCode(MCdarkTheme?Feather.SUN:Feather.MOON);MCthemeButton.setText(MCdarkTheme?"Modo claro":"Modo oscuro");Animations.fadeIn(MCworkspace,Duration.millis(300)).play();}
+    private void MCcollapseMenu(){MCcollapsed=!MCcollapsed;double MCwidth=MCcollapsed?76:242;Timeline MCtransition=new Timeline(new KeyFrame(Duration.millis(260),new KeyValue(MCsidebar.prefWidthProperty(),MCwidth,Interpolator.SPLINE(0.4,0,0.2,1)),new KeyValue(MCsidebar.minWidthProperty(),MCwidth,Interpolator.SPLINE(0.4,0,0.2,1))));List<Node> MCtexts=new ArrayList<>(MCmenuTexts);MCtexts.add(MCbrandTexts);List<ButtonBase> MCbuttons=new ArrayList<>(MCnavigation);MCbuttons.add(MCthemeButton);MCbuttons.add(MCcollapseButton);if(MCcollapsed){MCtexts.forEach(MCn->{MCn.setVisible(false);MCn.setManaged(false);});MCbuttons.forEach(MCb->MCb.setContentDisplay(ContentDisplay.GRAPHIC_ONLY));MCtransition.play();}else{MCtransition.setOnFinished(MCe->{MCtexts.forEach(MCn->{MCn.setVisible(true);MCn.setManaged(true);});MCbuttons.forEach(MCb->MCb.setContentDisplay(ContentDisplay.LEFT));ParallelTransition MCfade=new ParallelTransition();MCtexts.forEach(MCn->MCfade.getChildren().add(Animations.fadeIn(MCn,Duration.millis(200))));MCfade.play();Platform.runLater(()->MCmoveIndicator(MCmenu.getSelectedToggle()));});MCtransition.play();}((FontIcon)MCcollapseButton.getGraphic()).setIconCode(MCcollapsed?Feather.CHEVRONS_RIGHT:Feather.CHEVRONS_LEFT);Platform.runLater(()->MCmoveIndicator(MCmenu.getSelectedToggle()));}
+    private void MCpage(String MCtitle,Node MCcontent){
+        Label MCheading=new Label(MCtitle);MCheading.getStyleClass().add("pagina-titulo");
+        if(!MCstatus.getStyleClass().contains("pagina-subtitulo"))MCstatus.getStyleClass().add("pagina-subtitulo");
+        MCstatus.setText(switch(MCtitle){
             case "Generar documentos"->"Complete los datos y prepare su documento con una plantilla.";
             case "Variables"->"Defina campos reutilizables y vincule los datos que necesita.";
             case "Plantillas"->"Organice sus documentos en grupos y acceda al editor.";
@@ -346,908 +343,904 @@ public final class MCStudioWindow {
             case "Conexiones API"->"Administre credenciales y consulte DNI o RUC con guardado automático.";
             default->"Importe archivos y exporte sus plantillas o clientes.";
         });
-        mcStatus.setWrapText(true);VBox mcHeaderText=new VBox(4,mcHeading,mcStatus);HBox mcHeader=new HBox(mcHeaderText);mcHeader.getStyleClass().add("pagina-cabecera");
-        VBox mcPage="Editor de plantillas".equals(mcTitle)?new VBox(mcContent):new VBox(mcHeader,mcContent);mcPage.getStyleClass().add("pagina");VBox.setVgrow(mcContent,Priority.ALWAYS);mcWorkspace.getChildren().setAll(mcPage);Animations.fadeInUp(mcPage,Duration.millis(380)).play();
+        MCstatus.setWrapText(true);VBox MCheaderText=new VBox(4,MCheading,MCstatus);HBox MCheader=new HBox(MCheaderText);MCheader.getStyleClass().add("pagina-cabecera");
+        VBox MCpage="Editor de plantillas".equals(MCtitle)?new VBox(MCcontent):new VBox(MCheader,MCcontent);MCpage.getStyleClass().add("pagina");VBox.setVgrow(MCcontent,Priority.ALWAYS);MCworkspace.getChildren().setAll(MCpage);Animations.fadeInUp(MCpage,Duration.millis(380)).play();
     }
-    private Button mcButton(String mcLabel,Runnable mcAction){
-        Button mcB=new Button(mcLabel.startsWith("+ ")?mcLabel.substring(2):mcLabel);mcB.getStyleClass().add("secondary-btn");
-        if(mcLabel.startsWith("Guardar")||mcLabel.startsWith("Importar archivo"))mcB.getStyleClass().add("primary-btn");
-        else if(mcLabel.startsWith("Eliminar"))mcB.getStyleClass().add("danger-btn");
-        String mcIcon=null;
-        if(mcLabel.startsWith("Guardar"))mcIcon="fth-save";
-        else if(mcLabel.startsWith("Importar"))mcIcon="fth-upload";
-        else if(mcLabel.startsWith("Exportar")||mcLabel.startsWith("Descargar"))mcIcon="fth-download";
-        else if(mcLabel.startsWith("Eliminar"))mcIcon="fth-trash-2";
-        else if(mcLabel.startsWith("Duplicar"))mcIcon="fth-copy";
-        else if(mcLabel.startsWith("Consultar")||mcLabel.startsWith("Buscar"))mcIcon="fth-search";
-        else if(mcLabel.startsWith("Abrir"))mcIcon="fth-external-link";
-        else if(mcLabel.startsWith("Editar"))mcIcon="fth-edit-2";
-        else if(mcLabel.startsWith("Nueva")||mcLabel.startsWith("+ "))mcIcon="fth-plus";
-        if(mcIcon!=null)mcB.setGraphic(new FontIcon(mcIcon));
-        mcB.setOnAction(mcE->mcSafe(mcAction));return mcB;
+    private Button MCbutton(String MClabel,Runnable MCaction){
+        Button MCb=new Button(MClabel.startsWith("+ ")?MClabel.substring(2):MClabel);MCb.getStyleClass().add("secondary-btn");
+        if(MClabel.startsWith("Guardar")||MClabel.startsWith("Importar archivo"))MCb.getStyleClass().add("primary-btn");
+        else if(MClabel.startsWith("Eliminar"))MCb.getStyleClass().add("danger-btn");
+        String MCicon=null;
+        if(MClabel.startsWith("Guardar"))MCicon="fth-save";
+        else if(MClabel.startsWith("Importar"))MCicon="fth-upload";
+        else if(MClabel.startsWith("Exportar")||MClabel.startsWith("Descargar"))MCicon="fth-download";
+        else if(MClabel.startsWith("Eliminar"))MCicon="fth-trash-2";
+        else if(MClabel.startsWith("Duplicar"))MCicon="fth-copy";
+        else if(MClabel.startsWith("Consultar")||MClabel.startsWith("Buscar"))MCicon="fth-search";
+        else if(MClabel.startsWith("Abrir"))MCicon="fth-external-link";
+        else if(MClabel.startsWith("Editar"))MCicon="fth-edit-2";
+        else if(MClabel.startsWith("Nueva")||MClabel.startsWith("+ "))MCicon="fth-plus";
+        if(MCicon!=null)MCb.setGraphic(new FontIcon(MCicon));
+        MCb.setOnAction(MCe->MCsafe(MCaction));return MCb;
     }
-    /** @author MC */
-    @FunctionalInterface private interface MCCheckedAction {void mcRun()throws Exception;}
-    private void mcClientAction(MCCheckedAction mcAction){try{mcAction.mcRun();}catch(Exception mcE){mcError(mcE);}}
-    private void mcSafe(Runnable mcAction){try{mcAction.run();}catch(Exception mcE){mcError(mcE);}}
-    private void mcError(Exception mcE){mcStatus.setText("Error: "+mcE.getMessage());new Alert(Alert.AlertType.ERROR,"No se completó la operación:\n"+mcE.getMessage(),ButtonType.OK).showAndWait();}
-    private void mcSaved(String mcMessage){mcStatus.setText(mcMessage);mcUpdateEditorSaveStatus();}
-    private static VBox mcLabelled(String mcName,Node mcNode){Label mcL=new Label(mcName);mcL.getStyleClass().add("field-label");VBox mcBox=new VBox(5,mcL,mcNode);mcBox.setMinWidth(0);mcBox.setMaxWidth(Double.MAX_VALUE);mcL.setWrapText(true);if(mcNode instanceof Region mcR){mcR.setMinWidth(0);mcR.setMaxWidth(Double.MAX_VALUE);}return mcBox;}
+    @FunctionalInterface private interface MCCheckedAction {void MCrun()throws Exception;}
+    private void MCclientAction(MCCheckedAction MCaction){try{MCaction.MCrun();}catch(Exception MCe){MCerror(MCe);}}
+    private void MCsafe(Runnable MCaction){try{MCaction.run();}catch(Exception MCe){MCerror(MCe);}}
+    private void MCerror(Exception MCe){MCstatus.setText("Error: "+MCe.getMessage());new Alert(Alert.AlertType.ERROR,"No se completó la operación:\n"+MCe.getMessage(),ButtonType.OK).showAndWait();}
+    private void MCsaved(String MCmessage){MCstatus.setText(MCmessage);MCupdateEditorSaveStatus();}
+    private static VBox MClabelled(String MCname,Node MCnode){Label MCl=new Label(MCname);MCl.getStyleClass().add("field-label");VBox MCbox=new VBox(5,MCl,MCnode);MCbox.setMinWidth(0);MCbox.setMaxWidth(Double.MAX_VALUE);MCl.setWrapText(true);if(MCnode instanceof Region MCr){MCr.setMinWidth(0);MCr.setMaxWidth(Double.MAX_VALUE);}return MCbox;}
 
-    private static GridPane mcTwoColumns(){
-        GridPane mcGrid=new GridPane();mcGrid.setHgap(14);mcGrid.setVgap(14);mcGrid.setMinWidth(0);
-        for(int mcI=0;mcI<2;mcI++){ColumnConstraints mcCol=new ColumnConstraints();mcCol.setPercentWidth(50);mcCol.setFillWidth(true);mcGrid.getColumnConstraints().add(mcCol);}return mcGrid;
+    private static GridPane MCtwoColumns(){
+        GridPane MCgrid=new GridPane();MCgrid.setHgap(14);MCgrid.setVgap(14);MCgrid.setMinWidth(0);
+        for(int MCi=0;MCi<2;MCi++){ColumnConstraints MCcol=new ColumnConstraints();MCcol.setPercentWidth(50);MCcol.setFillWidth(true);MCgrid.getColumnConstraints().add(MCcol);}return MCgrid;
     }
-    private static ScrollPane mcScrolling(Node mcContent){ScrollPane mcScroll=new ScrollPane(mcContent);mcScroll.setFitToWidth(true);mcScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);mcScroll.setMinWidth(0);mcScroll.getStyleClass().add("content-scroll");return mcScroll;}
-    private static void mcUniformButtons(Pane mcPane){for(Node mcN:mcPane.getChildren())if(mcN instanceof Button mcB)mcB.setMaxWidth(Double.MAX_VALUE);}
-    private static void mcFixedWidth(Region mcNode,double mcWidth){mcNode.setMinWidth(mcWidth);mcNode.setPrefWidth(mcWidth);mcNode.setMaxWidth(mcWidth);}
-    private static Label mcDescription(String mcText){Label mcLabel=new Label(mcText);mcLabel.setWrapText(true);mcLabel.setMinWidth(0);mcLabel.getStyleClass().add("field-label");return mcLabel;}
-    private static <T> void mcTwoLineCells(ListView<T> mcList,java.util.function.Function<T,String> mcTitle,java.util.function.Function<T,String> mcDetail){
-        mcList.setCellFactory(mcView->new ListCell<>(){
-            private final Label mcPrimary=new Label(),mcSecondary=new Label();private final VBox mcBox=new VBox(4,mcPrimary,mcSecondary);
-            {mcPrimary.setWrapText(true);mcSecondary.setWrapText(true);mcSecondary.getStyleClass().add("field-label");mcBox.setMinWidth(0);mcBox.prefWidthProperty().bind(widthProperty().subtract(28));mcBox.setMaxWidth(Double.MAX_VALUE);}
-            @Override protected void updateItem(T mcValue,boolean mcEmpty){super.updateItem(mcValue,mcEmpty);setText(null);setGraphic(mcEmpty||mcValue==null?null:mcBox);if(!mcEmpty&&mcValue!=null){mcPrimary.setText(mcTitle.apply(mcValue));mcSecondary.setText(mcDetail.apply(mcValue));}}
+    private static ScrollPane MCscrolling(Node MCcontent){ScrollPane MCscroll=new ScrollPane(MCcontent);MCscroll.setFitToWidth(true);MCscroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);MCscroll.setMinWidth(0);MCscroll.getStyleClass().add("content-scroll");return MCscroll;}
+    private static void MCuniformButtons(Pane MCpane){for(Node MCn:MCpane.getChildren())if(MCn instanceof Button MCb)MCb.setMaxWidth(Double.MAX_VALUE);}
+    private static void MCfixedWidth(Region MCnode,double MCwidth){MCnode.setMinWidth(MCwidth);MCnode.setPrefWidth(MCwidth);MCnode.setMaxWidth(MCwidth);}
+    private static Label MCdescription(String MCtext){Label MClabel=new Label(MCtext);MClabel.setWrapText(true);MClabel.setMinWidth(0);MClabel.getStyleClass().add("field-label");return MClabel;}
+    private static <T> void MCtwoLineCells(ListView<T> MClist,java.util.function.Function<T,String> MCtitle,java.util.function.Function<T,String> MCdetail){
+        MClist.setCellFactory(MCview->new ListCell<>(){
+            private final Label MCprimary=new Label(),MCsecondary=new Label();private final VBox MCbox=new VBox(4,MCprimary,MCsecondary);
+            {MCprimary.setWrapText(true);MCsecondary.setWrapText(true);MCsecondary.getStyleClass().add("field-label");MCbox.setMinWidth(0);MCbox.prefWidthProperty().bind(widthProperty().subtract(28));MCbox.setMaxWidth(Double.MAX_VALUE);}
+            @Override protected void updateItem(T MCvalue,boolean MCempty){super.updateItem(MCvalue,MCempty);setText(null);setGraphic(MCempty||MCvalue==null?null:MCbox);if(!MCempty&&MCvalue!=null){MCprimary.setText(MCtitle.apply(MCvalue));MCsecondary.setText(MCdetail.apply(MCvalue));}}
         });
     }
 
-    private void mcBuildDefinitions(){
-        mcDefinitionsPage=new BorderPane();mcDefinitionsPage.getStyleClass().add("page");
-        mcDefinitionSearch.setPromptText("Buscar identificador, etiqueta o tipo");mcDefinitionSearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshDefinitions());
-        mcDefinitionList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->mcLoadDefinition(mcB));
-        mcTwoLineCells(mcDefinitionList,MCDefinition::mcLabel,mcD->mcD.mcKey()+" · "+mcD.mcType());
-        VBox mcLeft=new VBox(8,mcDefinitionSearch,mcDefinitionList,mcButton("+ Nueva variable",this::mcNewDefinition),mcButton("Duplicar variable",this::mcDuplicateDefinition),mcButton("Eliminar variable",this::mcDeleteDefinition));
-        mcLeft.getStyleClass().add("side-panel");mcFixedWidth(mcLeft,340);mcUniformButtons(mcLeft);VBox.setVgrow(mcDefinitionList,Priority.ALWAYS);mcDefinitionsPage.setLeft(mcLeft);BorderPane.setMargin(mcLeft,new Insets(0,14,0,0));
-        mcDefinitionType.getItems().setAll(mcTYPES);mcDefinitionApiService.getItems().setAll("DNI","RUC");mcDefinitionApiService.setValue("DNI");mcDefinitionApiService.setOnAction(mcE->mcRefreshDefinitionApiFields());
-        GridPane mcApiGrid=mcTwoColumns();mcApiGrid.add(mcLabelled("Servicio",mcDefinitionApiService),0,0);mcApiGrid.add(mcLabelled("Dato solicitado",mcDefinitionApiField),1,0);
-        mcDefinitionApiPath.setWrapText(true);mcDefinitionApiOptions=new VBox(12,mcApiGrid,mcDefinitionApiPath);
-        mcDefinitionApiEnabled.selectedProperty().addListener((mcO,mcA,mcB)->{mcDefinitionApiOptions.setVisible(mcB);mcDefinitionApiOptions.setManaged(mcB);});mcDefinitionApiOptions.setVisible(false);mcDefinitionApiOptions.setManaged(false);mcRefreshDefinitionApiFields();
-        GridPane mcFields=mcTwoColumns();mcFields.add(mcLabelled("Identificador estable",mcDefinitionKey),0,0);mcFields.add(mcLabelled("Etiqueta visible",mcDefinitionLabel),1,0);mcFields.add(mcLabelled("Tipo de entrada",mcDefinitionType),0,1);mcFields.add(mcLabelled("Valor predeterminado opcional",mcDefinitionDefault),1,1);
-        mcDefinitionChoice(mcComplementChoice);mcComplementBoth.setSelected(true);mcComplementBoth.setWrapText(true);mcComplementChoice.setPromptText("Variable complemento");mcComplementChoice.setMinWidth(0);mcComplementChoice.setMaxWidth(Double.MAX_VALUE);
-        VBox mcApiCard=new VBox(10,new Label("Conexión API"),mcDefinitionApiEnabled,mcDefinitionApiOptions),mcComplementCard=new VBox(10,new Label("Complemento de variable"),mcLabelled("Variable complemento",mcComplementChoice),mcComplementBoth,mcButton("Vincular complemento",this::mcLinkComplement),mcComplementLinks);
-        for(VBox mcCard:List.of(mcApiCard,mcComplementCard)){mcCard.getStyleClass().add("binding-card");mcCard.setMinWidth(0);mcCard.setPrefWidth(1);mcCard.setMaxWidth(Double.MAX_VALUE);HBox.setHgrow(mcCard,Priority.ALWAYS);}HBox mcConnections=new HBox(12,mcApiCard,mcComplementCard);
-        mcCurrentDateFormat.getItems().setAll(MCDocumentStore.mcDATE_FORMATS);mcCurrentDateFormat.setValue("dd/MM/yyyy");mcCurrentDateFormat.setMaxWidth(Double.MAX_VALUE);mcCurrentDateFormat.disableProperty().bind(mcAutoCurrentDate.selectedProperty().not());mcCurrentDateFormat.valueProperty().addListener((mcO,mcA,mcB)->mcUpdateAutomaticDatePreview());mcAutoCurrentDate.setWrapText(true);mcCurrentDatePreview.setWrapText(true);mcUpdateAutomaticDatePreview();
-        mcCurrentDateFormat.setCellFactory(mcList->new ListCell<>(){@Override protected void updateItem(String mcFormat,boolean mcEmpty){super.updateItem(mcFormat,mcEmpty);setText(mcEmpty||mcFormat==null?null:mcFormat+" — "+LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(mcFormat,Locale.forLanguageTag("es-PE"))));}});
-        VBox mcDateCard=new VBox(10,new Label("Fecha actual automática"),mcAutoCurrentDate,mcCurrentDateFormat,mcCurrentDatePreview);mcDateCard.getStyleClass().add("binding-card");
-        mcClientScope.setToggleGroup(mcVariableScope);mcGlobalScope.setToggleGroup(mcVariableScope);mcClientScope.setSelected(true);mcClientScope.setWrapText(true);mcGlobalScope.setWrapText(true);
-        VBox mcScopeCard=new VBox(10,new Label("Alcance de la variable"),mcClientScope,mcGlobalScope);mcScopeCard.getStyleClass().add("binding-card");
-        VBox mcForm=new VBox(16,new Label("DEFINICIÓN DE VARIABLE"),mcFields,mcConnections,mcDateCard,mcScopeCard,mcButton("Guardar variable",this::mcSaveDefinition));mcForm.getStyleClass().add("catalog-form");mcDefinitionsPage.setCenter(mcScrolling(mcForm));mcNewDefinition();
+    private void MCbuildDefinitions(){
+        MCdefinitionsPage=new BorderPane();MCdefinitionsPage.getStyleClass().add("page");
+        MCdefinitionSearch.setPromptText("Buscar identificador, etiqueta o tipo");MCdefinitionSearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshDefinitions());
+        MCdefinitionList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->MCloadDefinition(MCb));
+        MCtwoLineCells(MCdefinitionList,MCDefinition::MClabel,MCd->MCd.MCkey()+" · "+MCd.MCtype());
+        VBox MCleft=new VBox(8,MCdefinitionSearch,MCdefinitionList,MCbutton("+ Nueva variable",this::MCnewDefinition),MCbutton("Duplicar variable",this::MCduplicateDefinition),MCbutton("Eliminar variable",this::MCdeleteDefinition));
+        MCleft.getStyleClass().add("side-panel");MCfixedWidth(MCleft,340);MCuniformButtons(MCleft);VBox.setVgrow(MCdefinitionList,Priority.ALWAYS);MCdefinitionsPage.setLeft(MCleft);BorderPane.setMargin(MCleft,new Insets(0,14,0,0));
+        MCdefinitionType.getItems().setAll(MCTYPES);MCdefinitionApiService.getItems().setAll("DNI","RUC");MCdefinitionApiService.setValue("DNI");MCdefinitionApiService.setOnAction(MCe->MCrefreshDefinitionApiFields());
+        GridPane MCapiGrid=MCtwoColumns();MCapiGrid.add(MClabelled("Servicio",MCdefinitionApiService),0,0);MCapiGrid.add(MClabelled("Dato solicitado",MCdefinitionApiField),1,0);
+        MCdefinitionApiPath.setWrapText(true);MCdefinitionApiOptions=new VBox(12,MCapiGrid,MCdefinitionApiPath);
+        MCdefinitionApiEnabled.selectedProperty().addListener((MCo,MCa,MCb)->{MCdefinitionApiOptions.setVisible(MCb);MCdefinitionApiOptions.setManaged(MCb);});MCdefinitionApiOptions.setVisible(false);MCdefinitionApiOptions.setManaged(false);MCrefreshDefinitionApiFields();
+        GridPane MCfields=MCtwoColumns();MCfields.add(MClabelled("Identificador estable",MCdefinitionKey),0,0);MCfields.add(MClabelled("Etiqueta visible",MCdefinitionLabel),1,0);MCfields.add(MClabelled("Tipo de entrada",MCdefinitionType),0,1);MCfields.add(MClabelled("Valor predeterminado opcional",MCdefinitionDefault),1,1);
+        MCdefinitionChoice(MCcomplementChoice);MCcomplementBoth.setSelected(true);MCcomplementBoth.setWrapText(true);MCcomplementChoice.setPromptText("Variable complemento");MCcomplementChoice.setMinWidth(0);MCcomplementChoice.setMaxWidth(Double.MAX_VALUE);
+        VBox MCapiCard=new VBox(10,new Label("Conexión API"),MCdefinitionApiEnabled,MCdefinitionApiOptions),MCcomplementCard=new VBox(10,new Label("Complemento de variable"),MClabelled("Variable complemento",MCcomplementChoice),MCcomplementBoth,MCbutton("Vincular complemento",this::MClinkComplement),MCcomplementLinks);
+        for(VBox MCcard:List.of(MCapiCard,MCcomplementCard)){MCcard.getStyleClass().add("binding-card");MCcard.setMinWidth(0);MCcard.setPrefWidth(1);MCcard.setMaxWidth(Double.MAX_VALUE);HBox.setHgrow(MCcard,Priority.ALWAYS);}HBox MCconnections=new HBox(12,MCapiCard,MCcomplementCard);
+        MCcurrentDateFormat.getItems().setAll(MCDocumentStore.MCDATE_FORMATS);MCcurrentDateFormat.setValue("dd/MM/yyyy");MCcurrentDateFormat.setMaxWidth(Double.MAX_VALUE);MCcurrentDateFormat.disableProperty().bind(MCautoCurrentDate.selectedProperty().not());MCcurrentDateFormat.valueProperty().addListener((MCo,MCa,MCb)->MCupdateAutomaticDatePreview());MCautoCurrentDate.setWrapText(true);MCcurrentDatePreview.setWrapText(true);MCupdateAutomaticDatePreview();
+        MCcurrentDateFormat.setCellFactory(MClist->new ListCell<>(){@Override protected void updateItem(String MCformat,boolean MCempty){super.updateItem(MCformat,MCempty);setText(MCempty||MCformat==null?null:MCformat+" — "+LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(MCformat,Locale.forLanguageTag("es-PE"))));}});
+        VBox MCdateCard=new VBox(10,new Label("Fecha actual automática"),MCautoCurrentDate,MCcurrentDateFormat,MCcurrentDatePreview);MCdateCard.getStyleClass().add("binding-card");
+        MCclientScope.setToggleGroup(MCvariableScope);MCglobalScope.setToggleGroup(MCvariableScope);MCclientScope.setSelected(true);MCclientScope.setWrapText(true);MCglobalScope.setWrapText(true);
+        VBox MCscopeCard=new VBox(10,new Label("Alcance de la variable"),MCclientScope,MCglobalScope);MCscopeCard.getStyleClass().add("binding-card");
+        VBox MCform=new VBox(16,new Label("DEFINICIÓN DE VARIABLE"),MCfields,MCconnections,MCdateCard,MCscopeCard,MCbutton("Guardar variable",this::MCsaveDefinition));MCform.getStyleClass().add("catalog-form");MCdefinitionsPage.setCenter(MCscrolling(MCform));MCnewDefinition();
     }
-    private void mcShowDefinitions(){mcRefreshDefinitions();mcPage("Variables",mcDefinitionsPage);}
-    private void mcRefreshDefinitions(){try{long mcSelected=mcSelectedDefinition==null?0:mcSelectedDefinition.mcId();String mcQ=mcDefinitionSearch.getText().trim().toLowerCase();mcDefinitionList.getItems().setAll(mcStore.mcDefinitions().stream().filter(mcD->(mcD.mcKey()+" "+mcD.mcLabel()+" "+mcD.mcType()).toLowerCase().contains(mcQ)).toList());if(mcSelected!=0)mcDefinitionList.getSelectionModel().select(mcDefinitionList.getItems().stream().filter(mcD->mcD.mcId()==mcSelected).findFirst().orElse(null));}catch(Exception mcE){mcError(mcE);}}
-    private void mcLoadDefinition(MCDefinition mcD){if(mcD==null)return;mcSelectedDefinition=mcD;mcDefinitionKey.setText(mcD.mcKey());mcDefinitionKey.setDisable(true);mcDefinitionLabel.setText(mcD.mcLabel());mcDefinitionType.setValue(MCVariableInput.mcVisualType(mcD.mcType()));mcDefinitionDefault.setText(mcD.mcDefaultValue()==null?"":mcD.mcDefaultValue());mcClientScope.setSelected(mcD.mcBindToClient());mcGlobalScope.setSelected(!mcD.mcBindToClient());mcAutoCurrentDate.setSelected(mcD.mcAutoCurrentDate());mcCurrentDateFormat.setValue(mcD.mcDateFormat());mcUpdateAutomaticDatePreview();mcRefreshComplements();try{MCApiBinding mcBinding=mcData.mcApiBinding(mcD.mcId());mcDefinitionApiEnabled.setSelected(mcBinding!=null);mcDefinitionApiService.setValue(mcBinding==null?"DNI":mcBinding.mcService());mcRefreshDefinitionApiFields();if(mcBinding!=null){String mcKey=MCApiFieldCatalog.mcCanonical(mcBinding.mcService(),mcBinding.mcPath());mcDefinitionApiField.setValue(mcKey.startsWith("legacy:")?"Campo anterior sin equivalencia":MCApiFieldCatalog.mcLabel(mcBinding.mcService(),mcKey));}}catch(Exception mcE){mcError(mcE);}}
-    private void mcNewDefinition(){mcSelectedDefinition=null;mcDefinitionList.getSelectionModel().clearSelection();mcDefinitionKey.setDisable(false);mcDefinitionKey.clear();mcDefinitionLabel.clear();mcDefinitionType.setValue(mcTYPES.get(0));mcDefinitionDefault.clear();mcDefinitionApiEnabled.setSelected(false);mcDefinitionApiService.setValue("DNI");mcDefinitionApiField.setValue(null);mcComplementBoth.setSelected(true);mcClientScope.setSelected(true);mcAutoCurrentDate.setSelected(false);mcCurrentDateFormat.setValue("dd/MM/yyyy");mcUpdateAutomaticDatePreview();mcRefreshComplements();}
-    private void mcRefreshDefinitionApiFields(){String mcCurrent=mcDefinitionApiField.getValue();mcDefinitionApiField.getItems().setAll(MCApiFieldCatalog.mcFields(mcDefinitionApiService.getValue()).stream().map(MCApiFieldCatalog.MCField::mcLabel).toList());if(mcCurrent!=null&&mcDefinitionApiField.getItems().contains(mcCurrent))mcDefinitionApiField.setValue(mcCurrent);else mcDefinitionApiField.getSelectionModel().selectFirst();}
-    private void mcSaveDefinition(){String mcKey=mcDefinitionKey.getText().trim(),mcLabel=mcDefinitionLabel.getText().trim();if(!mcKey.matches("[a-zA-Z][a-zA-Z0-9_]*"))throw new IllegalArgumentException("El identificador debe empezar con letra y contener letras, números o guion bajo.");if(mcLabel.isBlank())throw new IllegalArgumentException("Escriba una etiqueta.");try{String mcType=mcDefinitionType.getValue();if(!mcDefinitionDefault.getText().isBlank()&&!"Fecha".equals(mcType))MCVariableInput.mcValidate(mcType,mcDefinitionDefault.getText(),Locale.getDefault());String mcStored=null;if(mcDefinitionApiEnabled.isSelected()){String mcRequested=mcDefinitionApiField.getValue();MCApiFieldCatalog.MCField mcField=MCApiFieldCatalog.mcFields(mcDefinitionApiService.getValue()).stream().filter(mcF->mcF.mcLabel().equals(mcRequested)).findFirst().orElse(null);if(mcField!=null)mcStored="field:"+mcField.mcKey();else if(mcSelectedDefinition!=null&&"Campo anterior sin equivalencia".equals(mcRequested)){MCApiBinding mcPrior=mcData.mcApiBinding(mcSelectedDefinition.mcId());if(mcPrior!=null)mcStored=mcPrior.mcPath();}if(mcStored==null)throw new IllegalArgumentException("Seleccione un dato solicitado.");}MCDefinition mcSaved=mcStore.mcSaveDefinition(new MCDefinition(mcSelectedDefinition==null?0:mcSelectedDefinition.mcId(),mcKey,mcLabel,mcType,mcDefinitionDefault.getText(),mcAutoCurrentDate.isSelected(),mcCurrentDateFormat.getValue(),!mcGlobalScope.isSelected()));if(mcDefinitionApiEnabled.isSelected())mcData.mcSaveApiBinding(new MCApiBinding(mcSaved.mcId(),mcDefinitionApiService.getValue(),mcStored));else mcData.mcDeleteApiBinding(mcSaved.mcId());mcSelectedDefinition=mcSaved;mcRefreshDefinitions();mcRefreshVariables();mcRefreshComplements();mcSaved("Variable guardada en el catálogo");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDuplicateDefinition(){MCDefinition mcSelected=mcDefinitionList.getSelectionModel().getSelectedItem();if(mcSelected==null)return;try{Set<String> mcKeys=new HashSet<>();for(MCDefinition mcD:mcStore.mcDefinitions())mcKeys.add(mcD.mcKey());String mcBase=mcSelected.mcKey()+"_copia",mcKey=mcBase;int mcSuffix=2;while(mcKeys.contains(mcKey))mcKey=mcBase+mcSuffix++;MCDefinition mcCopy=mcStore.mcSaveDefinition(new MCDefinition(0,mcKey,mcSelected.mcLabel()+" (copia)",MCVariableInput.mcVisualType(mcSelected.mcType()),"",mcSelected.mcAutoCurrentDate(),mcSelected.mcDateFormat(),mcSelected.mcBindToClient()));mcSelectedDefinition=mcCopy;mcRefreshDefinitions();mcDefinitionList.getSelectionModel().select(mcCopy);mcSaved("Variable duplicada sin datos ni asociaciones");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteDefinition(){
-        MCDefinition mcSelected=mcDefinitionList.getSelectionModel().getSelectedItem();if(mcSelected==null)return;
+    private void MCshowDefinitions(){MCrefreshDefinitions();MCpage("Variables",MCdefinitionsPage);}
+    private void MCrefreshDefinitions(){try{long MCselected=MCselectedDefinition==null?0:MCselectedDefinition.MCid();String MCq=MCdefinitionSearch.getText().trim().toLowerCase();MCdefinitionList.getItems().setAll(MCstore.MCdefinitions().stream().filter(MCd->(MCd.MCkey()+" "+MCd.MClabel()+" "+MCd.MCtype()).toLowerCase().contains(MCq)).toList());if(MCselected!=0)MCdefinitionList.getSelectionModel().select(MCdefinitionList.getItems().stream().filter(MCd->MCd.MCid()==MCselected).findFirst().orElse(null));}catch(Exception MCe){MCerror(MCe);}}
+    private void MCloadDefinition(MCDefinition MCd){if(MCd==null)return;MCselectedDefinition=MCd;MCdefinitionKey.setText(MCd.MCkey());MCdefinitionKey.setDisable(true);MCdefinitionLabel.setText(MCd.MClabel());MCdefinitionType.setValue(MCVariableInput.MCvisualType(MCd.MCtype()));MCdefinitionDefault.setText(MCd.MCdefaultValue()==null?"":MCd.MCdefaultValue());MCclientScope.setSelected(MCd.MCbindToClient());MCglobalScope.setSelected(!MCd.MCbindToClient());MCautoCurrentDate.setSelected(MCd.MCautoCurrentDate());MCcurrentDateFormat.setValue(MCd.MCdateFormat());MCupdateAutomaticDatePreview();MCrefreshComplements();try{MCApiBinding MCbinding=MCdata.MCapiBinding(MCd.MCid());MCdefinitionApiEnabled.setSelected(MCbinding!=null);MCdefinitionApiService.setValue(MCbinding==null?"DNI":MCbinding.MCservice());MCrefreshDefinitionApiFields();if(MCbinding!=null){String MCkey=MCApiFieldCatalog.MCcanonical(MCbinding.MCservice(),MCbinding.MCpath());MCdefinitionApiField.setValue(MCkey.startsWith("legacy:")?"Campo anterior sin equivalencia":MCApiFieldCatalog.MClabel(MCbinding.MCservice(),MCkey));}}catch(Exception MCe){MCerror(MCe);}}
+    private void MCnewDefinition(){MCselectedDefinition=null;MCdefinitionList.getSelectionModel().clearSelection();MCdefinitionKey.setDisable(false);MCdefinitionKey.clear();MCdefinitionLabel.clear();MCdefinitionType.setValue(MCTYPES.get(0));MCdefinitionDefault.clear();MCdefinitionApiEnabled.setSelected(false);MCdefinitionApiService.setValue("DNI");MCdefinitionApiField.setValue(null);MCcomplementBoth.setSelected(true);MCclientScope.setSelected(true);MCautoCurrentDate.setSelected(false);MCcurrentDateFormat.setValue("dd/MM/yyyy");MCupdateAutomaticDatePreview();MCrefreshComplements();}
+    private void MCrefreshDefinitionApiFields(){String MCcurrent=MCdefinitionApiField.getValue();MCdefinitionApiField.getItems().setAll(MCApiFieldCatalog.MCfields(MCdefinitionApiService.getValue()).stream().map(MCApiFieldCatalog.MCField::MClabel).toList());if(MCcurrent!=null&&MCdefinitionApiField.getItems().contains(MCcurrent))MCdefinitionApiField.setValue(MCcurrent);else MCdefinitionApiField.getSelectionModel().selectFirst();}
+    private void MCsaveDefinition(){String MCkey=MCdefinitionKey.getText().trim(),MClabel=MCdefinitionLabel.getText().trim();if(!MCkey.matches("[a-zA-Z][a-zA-Z0-9_]*"))throw new IllegalArgumentException("El identificador debe empezar con letra y contener letras, números o guion bajo.");if(MClabel.isBlank())throw new IllegalArgumentException("Escriba una etiqueta.");try{String MCtype=MCdefinitionType.getValue();if(!MCdefinitionDefault.getText().isBlank()&&!"Fecha".equals(MCtype))MCVariableInput.MCvalidate(MCtype,MCdefinitionDefault.getText(),Locale.getDefault());String MCstored=null;if(MCdefinitionApiEnabled.isSelected()){String MCrequested=MCdefinitionApiField.getValue();MCApiFieldCatalog.MCField MCfield=MCApiFieldCatalog.MCfields(MCdefinitionApiService.getValue()).stream().filter(MCf->MCf.MClabel().equals(MCrequested)).findFirst().orElse(null);if(MCfield!=null)MCstored="field:"+MCfield.MCkey();else if(MCselectedDefinition!=null&&"Campo anterior sin equivalencia".equals(MCrequested)){MCApiBinding MCprior=MCdata.MCapiBinding(MCselectedDefinition.MCid());if(MCprior!=null)MCstored=MCprior.MCpath();}if(MCstored==null)throw new IllegalArgumentException("Seleccione un dato solicitado.");}MCDefinition MCsaved=MCstore.MCsaveDefinition(new MCDefinition(MCselectedDefinition==null?0:MCselectedDefinition.MCid(),MCkey,MClabel,MCtype,MCdefinitionDefault.getText(),MCautoCurrentDate.isSelected(),MCcurrentDateFormat.getValue(),!MCglobalScope.isSelected()));if(MCdefinitionApiEnabled.isSelected())MCdata.MCsaveApiBinding(new MCApiBinding(MCsaved.MCid(),MCdefinitionApiService.getValue(),MCstored));else MCdata.MCdeleteApiBinding(MCsaved.MCid());MCselectedDefinition=MCsaved;MCrefreshDefinitions();MCrefreshVariables();MCrefreshComplements();MCsaved("Variable guardada en el catálogo");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCduplicateDefinition(){MCDefinition MCselected=MCdefinitionList.getSelectionModel().getSelectedItem();if(MCselected==null)return;try{Set<String> MCkeys=new HashSet<>();for(MCDefinition MCd:MCstore.MCdefinitions())MCkeys.add(MCd.MCkey());String MCbase=MCselected.MCkey()+"_copia",MCkey=MCbase;int MCsuffix=2;while(MCkeys.contains(MCkey))MCkey=MCbase+MCsuffix++;MCDefinition MCcopy=MCstore.MCsaveDefinition(new MCDefinition(0,MCkey,MCselected.MClabel()+" (copia)",MCVariableInput.MCvisualType(MCselected.MCtype()),"",MCselected.MCautoCurrentDate(),MCselected.MCdateFormat(),MCselected.MCbindToClient()));MCselectedDefinition=MCcopy;MCrefreshDefinitions();MCdefinitionList.getSelectionModel().select(MCcopy);MCsaved("Variable duplicada sin datos ni asociaciones");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteDefinition(){
+        MCDefinition MCselected=MCdefinitionList.getSelectionModel().getSelectedItem();if(MCselected==null)return;
         try{
-            List<MCTemplate> mcAffected=mcStore.mcDefinitionTemplates(mcSelected.mcId());
-            if(!mcAffected.isEmpty()){
-                ButtonType mcOpen=new ButtonType("Abrir editor");Alert mcWarning=new Alert(Alert.AlertType.WARNING,"La variable se utiliza en estas plantillas:\n"+String.join("\n",mcAffected.stream().map(MCTemplate::mcName).toList())+"\n\nQuite o reemplace cada aparición y desvincule la variable antes de eliminarla.",mcOpen,ButtonType.CANCEL);
-                if(mcWarning.showAndWait().orElse(ButtonType.CANCEL)==mcOpen)mcOpenAffectedTemplate(mcAffected.get(0));return;
+            List<MCTemplate> MCaffected=MCstore.MCdefinitionTemplates(MCselected.MCid());
+            if(!MCaffected.isEmpty()){
+                ButtonType MCopen=new ButtonType("Abrir editor");Alert MCwarning=new Alert(Alert.AlertType.WARNING,"La variable se utiliza en estas plantillas:\n"+String.join("\n",MCaffected.stream().map(MCTemplate::MCname).toList())+"\n\nQuite o reemplace cada aparición y desvincule la variable antes de eliminarla.",MCopen,ButtonType.CANCEL);
+                if(MCwarning.showAndWait().orElse(ButtonType.CANCEL)==MCopen)MCopenAffectedTemplate(MCaffected.get(0));return;
             }
-            Alert mcConfirm=new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la variable "+mcSelected.mcKey()+"?",ButtonType.YES,ButtonType.CANCEL);if(mcConfirm.showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;
-            mcData.mcDeleteApiBinding(mcSelected.mcId());mcStore.mcDeleteDefinition(mcSelected.mcId());mcNewDefinition();mcRefreshDefinitions();mcRefreshVariables();mcSaved("Variable eliminada");
-        }catch(Exception mcE){mcError(mcE);}
+            Alert MCconfirm=new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la variable "+MCselected.MCkey()+"?",ButtonType.YES,ButtonType.CANCEL);if(MCconfirm.showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;
+            MCdata.MCdeleteApiBinding(MCselected.MCid());MCstore.MCdeleteDefinition(MCselected.MCid());MCnewDefinition();MCrefreshDefinitions();MCrefreshVariables();MCsaved("Variable eliminada");
+        }catch(Exception MCe){MCerror(MCe);}
     }
-    private void mcOpenAffectedTemplate(MCTemplate mcTemplate){
-        ToggleButton mcEditor=mcNavigation.stream().filter(mcButton->"Editor de plantillas".equals(mcButton.getText())).findFirst().orElseThrow();
-        if(mcMenu.getSelectedToggle()==mcEditor)mcShowEditor();else mcMenu.selectToggle(mcEditor);
-        mcOpenTemplate(mcTemplate);
+    private void MCopenAffectedTemplate(MCTemplate MCtemplate){
+        ToggleButton MCeditor=MCnavigation.stream().filter(MCbutton->"Editor de plantillas".equals(MCbutton.getText())).findFirst().orElseThrow();
+        if(MCmenu.getSelectedToggle()==MCeditor)MCshowEditor();else MCmenu.selectToggle(MCeditor);
+        MCopenTemplate(MCtemplate);
     }
-    private void mcEditDefinitionFromEditor(){MCDefinition mcD=mcVariableList.getSelectionModel().getSelectedItem();mcMenu.getToggles().stream().filter(mcT->mcT instanceof ToggleButton mcB&&"Variables".equals(mcB.getText())).findFirst().ifPresent(mcMenu::selectToggle);if(mcD!=null){mcSelectedDefinition=mcD;mcDefinitionList.getSelectionModel().select(mcDefinitionList.getItems().stream().filter(mcX->mcX.mcId()==mcD.mcId()).findFirst().orElse(null));}}
+    private void MCeditDefinitionFromEditor(){MCDefinition MCd=MCvariableList.getSelectionModel().getSelectedItem();MCmenu.getToggles().stream().filter(MCt->MCt instanceof ToggleButton MCb&&"Variables".equals(MCb.getText())).findFirst().ifPresent(MCmenu::selectToggle);if(MCd!=null){MCselectedDefinition=MCd;MCdefinitionList.getSelectionModel().select(MCdefinitionList.getItems().stream().filter(MCx->MCx.MCid()==MCd.MCid()).findFirst().orElse(null));}}
 
-    private BorderPane mcEditorPage;
-    private void mcBuildEditor(){
-        mcEditorPage=new BorderPane();mcEditorPage.getStyleClass().add("page");
-        BorderPane mcDocumentPage=new BorderPane();mcDocumentPage.getStyleClass().add("page");
-        FlowPane mcToolbar=new FlowPane(6,4);mcToolbar.setAlignment(Pos.CENTER_LEFT);
-        mcTemplateChoice.setPrefWidth(190);mcRibbonControl(mcTemplateChoice,"Plantilla — Selecciona la plantilla que desea editar");mcRibbonChoice(mcTemplateChoice,Feather.FILE_TEXT);mcTemplateChoice.setPromptText("Seleccione plantilla");
-        mcTemplateChoice.setOnAction(mcE->{if(!mcUpdatingTemplates)mcSafe(()->mcOpenTemplate(mcTemplateChoice.getValue()));});
-        mcTemplateName.setPromptText("Nombre de la plantilla");mcTemplateName.setPrefWidth(150);mcRibbonControl(mcTemplateName,"Nombre de plantilla — Cambia el nombre de la plantilla actual");mcTemplateName.textProperty().addListener((mcO,mcA,mcB)->{if(mcCurrentTemplate!=null&&!Objects.equals(mcB,mcCurrentTemplate.mcName())){mcDirty=true;mcUpdateEditorSaveStatus();}});
-        Button mcSave=mcRibbonButton("Guardar plantilla",Feather.SAVE,"Guardar plantilla — Conserva los cambios del documento actual",this::mcRequestSaveTemplate);mcSave.getStyleClass().add("primary-btn");mcEditorSaveStatus.getStyleClass().add("editor-save-status");
-        mcToolbar.getChildren().addAll(mcRibbonButton("",Feather.FOLDER,"Abrir Plantillas — Abre la biblioteca de plantillas",this::mcShowLibrary),mcTemplateChoice,mcTemplateName,mcEditorSaveStatus,mcSave,mcRibbonButton("Nueva",Feather.FILE_PLUS,"Nueva plantilla — Crea una plantilla en blanco",this::mcNewTemplate),mcRibbonButton("Importar",Feather.UPLOAD,"Importar Word — Abre un documento Word como plantilla",this::mcImportDocx));
-        mcToolbar.getStyleClass().add("toolbar");
-        mcToolbar.getStyleClass().add("editor-toolbar");VBox mcTop=new VBox(4,mcToolbar,mcBuildEditorTools());mcDocumentPage.setTop(mcTop);
-        mcPaletteSearch.setPromptText("Buscar variable");mcPaletteSearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshVariables());
-        Label mcPaletteTitle=new Label("Variables");Region mcPaletteSpacer=new Region();HBox.setHgrow(mcPaletteSpacer,Priority.ALWAYS);
-        mcEditorPersona.setPromptText("General (sin persona)");mcEditorPersona.setMaxWidth(Double.MAX_VALUE);mcEditorPersona.setMinWidth(0);VBox mcPeople=new VBox(5,new Label("Personas en este documento"),mcEditorPersona,mcButton("+ Agregar persona",this::mcAddEditorPersona),new HBox(4,mcButton("Renombrar",this::mcRenameEditorPersona),mcButton("Quitar",this::mcRemoveEditorPersona)));mcPeople.getChildren().get(0).setStyle("-fx-font-size: 11px;");
-        VBox mcPaletteBody=new VBox(7,mcPeople,mcPaletteSearch,mcVariableList,mcButton("Insertar en cursor",this::mcInsertSelected),mcButton("Abrir Variables",this::mcEditDefinitionFromEditor));VBox.setVgrow(mcVariableList,Priority.ALWAYS);
-        mcPaletteToggle=mcButton("",()->{
-            boolean mcVisible=!mcPaletteBody.isManaged();mcVariablesView.setSelected(mcVisible);mcPaletteBody.setVisible(mcVisible);mcPaletteBody.setManaged(mcVisible);mcPaletteTitle.setVisible(mcVisible);mcPaletteTitle.setManaged(mcVisible);mcPaletteSpacer.setVisible(mcVisible);mcPaletteSpacer.setManaged(mcVisible);
-            mcPalettePanel.setPrefWidth(mcVisible?250:68);mcPalettePanel.setMinWidth(mcVisible?250:68);
-            mcPaletteToggle.setGraphic(new FontIcon(mcVisible?"fth-chevron-left":"fth-chevron-right"));String mcAction=mcVisible?"Contraer variables":"Expandir variables";mcPaletteToggle.setAccessibleText(mcAction);mcPaletteToggle.setTooltip(new Tooltip(mcAction));Platform.runLater(this::mcUpdateZoom);
+    private BorderPane MCeditorPage;
+    private void MCbuildEditor(){
+        MCeditorPage=new BorderPane();MCeditorPage.getStyleClass().add("page");
+        BorderPane MCdocumentPage=new BorderPane();MCdocumentPage.getStyleClass().add("page");
+        FlowPane MCtoolbar=new FlowPane(6,4);MCtoolbar.setAlignment(Pos.CENTER_LEFT);
+        MCtemplateChoice.setPrefWidth(190);MCribbonControl(MCtemplateChoice,"Plantilla — Selecciona la plantilla que desea editar");MCribbonChoice(MCtemplateChoice,Feather.FILE_TEXT);MCtemplateChoice.setPromptText("Seleccione plantilla");
+        MCtemplateChoice.setOnAction(MCe->{if(!MCupdatingTemplates)MCsafe(()->MCopenTemplate(MCtemplateChoice.getValue()));});
+        MCtemplateName.setPromptText("Nombre de la plantilla");MCtemplateName.setPrefWidth(150);MCribbonControl(MCtemplateName,"Nombre de plantilla — Cambia el nombre de la plantilla actual");MCtemplateName.textProperty().addListener((MCo,MCa,MCb)->{if(MCcurrentTemplate!=null&&!Objects.equals(MCb,MCcurrentTemplate.MCname())){MCdirty=true;MCupdateEditorSaveStatus();}});
+        Button MCsave=MCribbonButton("Guardar plantilla",Feather.SAVE,"Guardar plantilla — Conserva los cambios del documento actual",this::MCrequestSaveTemplate);MCsave.getStyleClass().add("primary-btn");MCeditorSaveStatus.getStyleClass().add("editor-save-status");
+        MCtoolbar.getChildren().addAll(MCribbonButton("",Feather.FOLDER,"Abrir Plantillas — Abre la biblioteca de plantillas",this::MCshowLibrary),MCtemplateChoice,MCtemplateName,MCeditorSaveStatus,MCsave,MCribbonButton("Nueva",Feather.FILE_PLUS,"Nueva plantilla — Crea una plantilla en blanco",this::MCnewTemplate),MCribbonButton("Importar",Feather.UPLOAD,"Importar Word — Abre un documento Word como plantilla",this::MCimportDocx));
+        MCtoolbar.getStyleClass().add("toolbar");
+        MCtoolbar.getStyleClass().add("editor-toolbar");VBox MCtop=new VBox(4,MCtoolbar,MCbuildEditorTools());MCdocumentPage.setTop(MCtop);
+        MCpaletteSearch.setPromptText("Buscar variable");MCpaletteSearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshVariables());
+        Label MCpaletteTitle=new Label("Variables");Region MCpaletteSpacer=new Region();HBox.setHgrow(MCpaletteSpacer,Priority.ALWAYS);
+        MCeditorPersona.setPromptText("General (sin persona)");MCeditorPersona.setMaxWidth(Double.MAX_VALUE);MCeditorPersona.setMinWidth(0);VBox MCpeople=new VBox(5,new Label("Personas en este documento"),MCeditorPersona,MCbutton("+ Agregar persona",this::MCaddEditorPersona),new HBox(4,MCbutton("Renombrar",this::MCrenameEditorPersona),MCbutton("Quitar",this::MCremoveEditorPersona)));MCpeople.getChildren().get(0).setStyle("-fx-font-size: 11px;");
+        VBox MCpaletteBody=new VBox(7,MCpeople,MCpaletteSearch,MCvariableList,MCbutton("Insertar en cursor",this::MCinsertSelected),MCbutton("Abrir Variables",this::MCeditDefinitionFromEditor));VBox.setVgrow(MCvariableList,Priority.ALWAYS);
+        MCpaletteToggle=MCbutton("",()->{
+            boolean MCvisible=!MCpaletteBody.isManaged();MCvariablesView.setSelected(MCvisible);MCpaletteBody.setVisible(MCvisible);MCpaletteBody.setManaged(MCvisible);MCpaletteTitle.setVisible(MCvisible);MCpaletteTitle.setManaged(MCvisible);MCpaletteSpacer.setVisible(MCvisible);MCpaletteSpacer.setManaged(MCvisible);
+            MCpalettePanel.setPrefWidth(MCvisible?250:68);MCpalettePanel.setMinWidth(MCvisible?250:68);
+            MCpaletteToggle.setGraphic(new FontIcon(MCvisible?"fth-chevron-left":"fth-chevron-right"));String MCaction=MCvisible?"Contraer variables":"Expandir variables";MCpaletteToggle.setAccessibleText(MCaction);MCpaletteToggle.setTooltip(new Tooltip(MCaction));Platform.runLater(this::MCupdateZoom);
         });
-        mcPaletteToggle.setGraphic(new FontIcon("fth-chevron-left"));mcPaletteToggle.setAccessibleText("Contraer variables");mcPaletteToggle.setTooltip(new Tooltip("Contraer variables"));mcPaletteToggle.setStyle("-fx-padding: 8;");mcPaletteToggle.setMinSize(36,36);mcPaletteToggle.setPrefSize(36,36);mcPaletteToggle.setMaxSize(36,36);
-        HBox mcPaletteHeader=new HBox(4,mcPaletteTitle,mcPaletteSpacer,mcPaletteToggle);mcPaletteHeader.setAlignment(Pos.CENTER_LEFT);
-        mcPalettePanel=new VBox(7,mcPaletteHeader,mcPaletteBody);VBox.setVgrow(mcPaletteBody,Priority.ALWAYS);
-        mcPalettePanel.getStyleClass().add("side-panel");mcPalettePanel.setPrefWidth(250);mcPalettePanel.setMinWidth(250);VBox.setVgrow(mcVariableList,Priority.ALWAYS);
-        mcVariableList.setCellFactory(mcList->new ListCell<>(){
-            @Override protected void updateItem(MCDefinition mcV,boolean mcEmpty){super.updateItem(mcV,mcEmpty);setText(mcEmpty||mcV==null?null:mcV.mcLabel());setTooltip(mcEmpty||mcV==null?null:new Tooltip(mcV.mcLabel()+"\n"+mcV.mcKey()+" · "+mcV.mcType()+(mcV.mcDefaultValue()==null||mcV.mcDefaultValue().isBlank()?"":"\nPredeterminado: "+mcV.mcDefaultValue())));}
+        MCpaletteToggle.setGraphic(new FontIcon("fth-chevron-left"));MCpaletteToggle.setAccessibleText("Contraer variables");MCpaletteToggle.setTooltip(new Tooltip("Contraer variables"));MCpaletteToggle.setStyle("-fx-padding: 8;");MCpaletteToggle.setMinSize(36,36);MCpaletteToggle.setPrefSize(36,36);MCpaletteToggle.setMaxSize(36,36);
+        HBox MCpaletteHeader=new HBox(4,MCpaletteTitle,MCpaletteSpacer,MCpaletteToggle);MCpaletteHeader.setAlignment(Pos.CENTER_LEFT);
+        MCpalettePanel=new VBox(7,MCpaletteHeader,MCpaletteBody);VBox.setVgrow(MCpaletteBody,Priority.ALWAYS);
+        MCpalettePanel.getStyleClass().add("side-panel");MCpalettePanel.setPrefWidth(250);MCpalettePanel.setMinWidth(250);VBox.setVgrow(MCvariableList,Priority.ALWAYS);
+        MCvariableList.setCellFactory(MClist->new ListCell<>(){
+            @Override protected void updateItem(MCDefinition MCv,boolean MCempty){super.updateItem(MCv,MCempty);setText(MCempty||MCv==null?null:MCv.MClabel());setTooltip(MCempty||MCv==null?null:new Tooltip(MCv.MClabel()+"\n"+MCv.MCkey()+" · "+MCv.MCtype()+(MCv.MCdefaultValue()==null||MCv.MCdefaultValue().isBlank()?"":"\nPredeterminado: "+MCv.MCdefaultValue())));}
         });
-        mcVariableList.setOnDragDetected(mcE->{MCDefinition mcV=mcVariableList.getSelectionModel().getSelectedItem();if(mcV!=null){Dragboard mcDb=mcVariableList.startDragAndDrop(TransferMode.COPY);ClipboardContent mcCc=new ClipboardContent();mcCc.putString("definition:"+mcV.mcId()+":"+mcEditorTokenKey(mcV));mcDb.setContent(mcCc);mcE.consume();}});
-        mcDocumentPage.setLeft(mcPalettePanel);
-        mcRichEditor.setContextMenuEnabled(true);
-        mcRichEditor.getEngine().getLoadWorker().stateProperty().addListener((mcO,mcA,mcB)->{if(mcB==Worker.State.SUCCEEDED){if(mcDocument==null||mcRichModel==null||!Boolean.TRUE.equals(mcRichEditor.getEngine().executeScript("typeof window.mcStudio !== 'undefined'"))){mcEditorReady=false;return;}mcEditorReady=true;((JSObject)mcRichEditor.getEngine().executeScript("window")).setMember("mcJavaBridge",mcEditorBridge);mcRichEditor.getEngine().executeScript("window.mcStudio.mcPaper("+mcPageWidth+","+mcPageHeight+","+mcEditorLeft+","+mcEditorTop+","+mcEditorRight+","+mcEditorBottom+")");mcEditorScript("mcPersonas("+mcJsonString(mcEditorPersonaNames)+")");mcEditorScript("mcNotifySelectionFormat()");mcUpdateEditorView();mcUpdateZoom();}});
-        mcRichEditor.getEngine().locationProperty().addListener((mcO,mcA,mcB)->{if(mcB!=null&&(mcB.startsWith("http:")||mcB.startsWith("https:")))mcRichEditor.getEngine().loadContent("");});
-        mcRichEditor.widthProperty().addListener((mcO,mcA,mcB)->mcUpdateZoom());mcRichEditor.heightProperty().addListener((mcO,mcA,mcB)->mcUpdateZoom());
-        mcDocumentPage.setCenter(mcRichEditor);
-        mcEditorTabs=new TabPane(new Tab("Documento",mcDocumentPage));mcEditorTabs.getTabs().get(0).setClosable(false);mcEditorPage.setCenter(mcEditorTabs);
+        MCvariableList.setOnDragDetected(MCe->{MCDefinition MCv=MCvariableList.getSelectionModel().getSelectedItem();if(MCv!=null){Dragboard MCdb=MCvariableList.startDragAndDrop(TransferMode.COPY);ClipboardContent MCcc=new ClipboardContent();MCcc.putString("definition:"+MCv.MCid()+":"+MCeditorTokenKey(MCv));MCdb.setContent(MCcc);MCe.consume();}});
+        MCdocumentPage.setLeft(MCpalettePanel);
+        MCrichEditor.setContextMenuEnabled(true);
+        MCrichEditor.getEngine().getLoadWorker().stateProperty().addListener((MCo,MCa,MCb)->{if(MCb==Worker.State.SUCCEEDED){if(MCdocument==null||MCrichModel==null||!Boolean.TRUE.equals(MCrichEditor.getEngine().executeScript("typeof window.MCstudio !== 'undefined'"))){MCeditorReady=false;return;}MCeditorReady=true;((JSObject)MCrichEditor.getEngine().executeScript("window")).setMember("MCjavaBridge",MCeditorBridge);MCrichEditor.getEngine().executeScript("window.MCstudio.MCpaper("+MCpageWidth+","+MCpageHeight+","+MCeditorLeft+","+MCeditorTop+","+MCeditorRight+","+MCeditorBottom+")");MCeditorScript("MCpersonas("+MCjsonString(MCeditorPersonaNames)+")");MCeditorScript("MCnotifySelectionFormat()");MCupdateEditorView();MCupdateZoom();}});
+        MCrichEditor.getEngine().locationProperty().addListener((MCo,MCa,MCb)->{if(MCb!=null&&(MCb.startsWith("http:")||MCb.startsWith("https:")))MCrichEditor.getEngine().loadContent("");});
+        MCrichEditor.widthProperty().addListener((MCo,MCa,MCb)->MCupdateZoom());MCrichEditor.heightProperty().addListener((MCo,MCa,MCb)->MCupdateZoom());
+        MCdocumentPage.setCenter(MCrichEditor);
+        MCeditorTabs=new TabPane(new Tab("Documento",MCdocumentPage));MCeditorTabs.getTabs().get(0).setClosable(false);MCeditorPage.setCenter(MCeditorTabs);
     }
-    private void mcAttachGenerationConfiguration(){Tab mcConfig=new Tab("Configurar generación",mcCatalogPage);mcConfig.setClosable(false);mcEditorTabs.getTabs().add(mcConfig);mcEditorTabs.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->{if(mcB==mcConfig){if(mcDirty)mcSafe(this::mcSaveTemplate);mcRefreshTemplates();mcRefreshKinds();if(mcCurrentTemplate!=null&&mcKindTemplate.getValue()==null){mcKindTemplate.setValue(mcCurrentTemplate);}}});}
-    private void mcShowEditor(){mcRefreshTemplates();mcRefreshVariables();mcEditorTabs.getSelectionModel().select(0);mcPage("Editor de plantillas",mcEditorPage);if(mcDocument==null)mcRichEditor.getEngine().loadContent("<html><body style='font:14px Arial;padding:30px'>Importe un DOCX o cree una plantilla nueva.</body></html>");}
-    private void mcRefreshTemplates(){try{mcUpdatingTemplates=true;MCTemplate mcSelected=mcCurrentTemplate;mcTemplateChoice.getItems().setAll(mcStore.mcTemplates());mcKindTemplate.getItems().setAll(mcTemplateChoice.getItems());if(mcSelected!=null)mcTemplateChoice.getSelectionModel().select(mcTemplateChoice.getItems().stream().filter(mcT->mcT.mcId()==mcSelected.mcId()).findFirst().orElse(null));}catch(Exception mcE){mcError(mcE);}finally{mcUpdatingTemplates=false;}}
-    private void mcNewTemplate(){TextInputDialog mcName=new TextInputDialog();mcName.setTitle("Nueva plantilla");mcName.setHeaderText("Nombre de la plantilla");String mcSelected=mcName.showAndWait().orElse(null);if(mcSelected==null)return;if(mcSelected.isBlank())throw new IllegalArgumentException("Escriba un nombre.");if(!mcConfirmPendingSwitch())return;try{XWPFDocument mcD=new XWPFDocument();mcD.createParagraph().createRun().setText("Escriba aquí el contenido del documento.");byte[] mcContent=MCDocumentEngine.mcBytes(mcD);mcD.close();MCTemplate mcT=mcStore.mcSaveTemplate(new MCTemplate(0,mcSelected.trim(),mcContent,mcContent));mcData.mcRecordRevision(mcT.mcId(),mcContent);MCTemplateGroup mcSelectedGroup=mcGroupList.getSelectionModel().getSelectedItem();if(mcSelectedGroup!=null)mcStore.mcSetTemplateGroups(mcT.mcId(),List.of(mcSelectedGroup.mcId()));mcRefreshTemplates();mcRefreshLibrary();mcRefreshKinds();mcOpenTemplate(mcT);mcSaved("Plantilla creada");}catch(Exception mcE){mcError(mcE);}}
-    private void mcImportDocx(){FileChooser mcFc=new FileChooser();mcFc.setTitle("Importar documento Word");mcFc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documentos de Word (*.doc, *.docx, *.docm, *.dot, *.dotx, *.dotm)","*.doc","*.DOC","*.docx","*.DOCX","*.docm","*.DOCM","*.dot","*.DOT","*.dotx","*.DOTX","*.dotm","*.DOTM"));File mcFile=mcFc.showOpenDialog(mcStage);if(mcFile==null||!mcConfirmPendingSwitch())return;try{byte[] mcContent=MCWordDocumentImporter.mcImportToDocx(mcFile.toPath());MCTemplate mcT=mcStore.mcSaveTemplate(new MCTemplate(0,mcFile.getName().replaceFirst("(?i)\\.(docx?|docm|dotx?|dotm)$",""),mcContent,mcContent));mcData.mcRecordRevision(mcT.mcId(),mcContent);MCTemplateGroup mcSelectedGroup=mcGroupList.getSelectionModel().getSelectedItem();if(mcSelectedGroup!=null)mcStore.mcSetTemplateGroups(mcT.mcId(),List.of(mcSelectedGroup.mcId()));mcRefreshTemplates();mcRefreshLibrary();mcRefreshKinds();mcOpenTemplate(mcT);mcSaved("Documento Word importado y guardado localmente");}catch(Exception mcE){mcError(mcE);}}
-    private boolean mcConfirmPendingSwitch(){if(mcDocument==null||!mcDirty)return true;Alert mcChoice=new Alert(Alert.AlertType.CONFIRMATION,"Hay cambios pendientes. ¿Guardar antes de abrir otra plantilla?",ButtonType.YES,ButtonType.NO,ButtonType.CANCEL);ButtonType mcResult=mcChoice.showAndWait().orElse(ButtonType.CANCEL);if(mcResult==ButtonType.CANCEL)return false;if(mcResult==ButtonType.YES)mcSaveTemplate();else mcDirty=false;return true;}
-    private void mcOpenTemplate(MCTemplate mcT){if(mcT==null)return;try{if(mcCurrentTemplate!=null&&mcCurrentTemplate.mcId()!=mcT.mcId()&&!mcConfirmPendingSwitch())return;if(mcDocument!=null)mcDocument.close();mcCurrentTemplate=mcT;mcDocument=MCDocumentEngine.mcOpen(mcT.mcEdited());mcSelectedRun=null;mcSelectedParagraph=null;mcSelectedText=null;mcTemplateName.setText(mcT.mcName());mcDirty=false;mcUpdateEditorSaveStatus();mcRefreshVariables();mcRefreshEditorPersonas();mcRenderDocument();mcUpdatingTemplates=true;mcTemplateChoice.getSelectionModel().select(mcTemplateChoice.getItems().stream().filter(mcX->mcX.mcId()==mcT.mcId()).findFirst().orElse(mcT));mcUpdatingTemplates=false;}catch(Exception mcE){mcUpdatingTemplates=false;mcError(mcE);}}
-    private void mcRequestSaveTemplate(){if(mcDocument==null)return;if(!mcDirty&&Objects.equals(mcTemplateName.getText().trim(),mcCurrentTemplate.mcName())){mcSaved("La plantilla ya está guardada");return;}if(new Alert(Alert.AlertType.CONFIRMATION,"¿Guardar los cambios de esta plantilla?",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)==ButtonType.YES)mcSaveTemplate();}
-    private void mcSaveTemplate(){if(mcDocument==null)return;if(mcTemplateName.getText().isBlank())throw new IllegalArgumentException("Escriba un nombre de plantilla.");try{mcSyncEditor();byte[] mcContent=MCDocumentEngine.mcBytes(mcDocument);boolean mcContentChanged=!Arrays.equals(mcContent,mcCurrentTemplate.mcEdited());boolean mcNameChanged=!mcTemplateName.getText().trim().equals(mcCurrentTemplate.mcName());if(!mcContentChanged&&!mcNameChanged){mcDirty=false;mcSaved("La plantilla ya está guardada");return;}mcCurrentTemplate=mcStore.mcSaveTemplate(new MCTemplate(mcCurrentTemplate.mcId(),mcTemplateName.getText().trim(),mcCurrentTemplate.mcOriginal(),mcContent));if(mcContentChanged)mcData.mcRecordRevision(mcCurrentTemplate.mcId(),mcContent);mcDirty=false;mcRefreshTemplates();mcRefreshLibrary();mcRefreshKinds();mcSaved("Plantilla guardada");mcRenderDocument();}catch(Exception mcE){throw new RuntimeException("No se pudo guardar la plantilla",mcE);}}
-    private void mcRefreshVariables(){try{long mcSelected=mcVariableList.getSelectionModel().getSelectedItem()==null?0:mcVariableList.getSelectionModel().getSelectedItem().mcId();String mcQ=mcPaletteSearch.getText().trim().toLowerCase();mcVariableList.getItems().setAll(mcStore.mcDefinitions().stream().filter(mcD->(mcD.mcLabel()+" "+mcD.mcKey()).toLowerCase().contains(mcQ)).toList());if(mcSelected!=0)mcVariableList.getSelectionModel().select(mcVariableList.getItems().stream().filter(mcD->mcD.mcId()==mcSelected).findFirst().orElse(null));}catch(Exception mcE){mcError(mcE);}}
-    private void mcBuildLibrary(){
-        mcLibraryPage=new BorderPane();mcLibraryPage.getStyleClass().add("page");mcLibrarySearch.setPromptText("Buscar plantilla");mcLibrarySearch.getStyleClass().add("buscador");mcLibrarySearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshLibrary());
-        mcGroupList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->{if(!mcRefreshingLibrary)mcRefreshLibrary();});
-        VBox mcGroups=new VBox(8,new Label("GRUPOS"),mcGroupList,mcButton("+ Nuevo grupo",this::mcCreateGroup),mcButton("Renombrar grupo",this::mcRenameGroup),mcButton("Eliminar grupo",this::mcRemoveGroup));mcGroups.getStyleClass().add("side-panel");mcFixedWidth(mcGroups,240);mcUniformButtons(mcGroups);BorderPane.setMargin(mcGroups,new Insets(0,12,0,0));VBox.setVgrow(mcGroupList,Priority.ALWAYS);mcLibraryPage.setLeft(mcGroups);
-        mcLibrarySort.getItems().setAll("Nombre A-Z","Nombre Z-A","Más recientes","Más antiguas");mcLibrarySort.setValue("Nombre A-Z");mcLibrarySort.setOnAction(mcE->mcRefreshLibrary());
-        HBox mcSearchRow=new HBox(8,mcLibrarySearch,mcLibrarySort);HBox.setHgrow(mcLibrarySearch,Priority.ALWAYS);mcLibrarySearch.setMaxWidth(Double.MAX_VALUE);mcLibrarySort.setPrefWidth(135);
-        mcGroupList.setPlaceholder(mcDescription("Cree su primer grupo para organizar las plantillas."));
-        VBox mcTemplates=new VBox(9,mcSearchRow,mcLibraryList);mcTemplates.setMinWidth(0);mcTemplates.getStyleClass().add("catalog-form");mcTemplates.setMaxWidth(Double.MAX_VALUE);VBox.setVgrow(mcLibraryList,Priority.ALWAYS);mcLibraryPage.setCenter(mcTemplates);
-        mcLibraryList.setCellFactory(mcView->new ListCell<>(){
-            private final Label mcTitle=new Label(),mcDetail=new Label();private final VBox mcLines=new VBox(4,mcTitle,mcDetail);
-            {mcTitle.setWrapText(true);mcDetail.setWrapText(true);mcDetail.getStyleClass().add("field-label");mcLines.setMinWidth(0);mcLines.prefWidthProperty().bind(widthProperty().subtract(28));}
-            @Override protected void updateItem(MCTemplate mcTemplate,boolean mcEmpty){
-                super.updateItem(mcTemplate,mcEmpty);getStyleClass().remove("library-associated");setText(null);setGraphic(null);
-                if(mcEmpty||mcTemplate==null)return;
-                List<Long> mcMemberships=mcLibraryMemberships.getOrDefault(mcTemplate.mcId(),List.of());MCTemplateGroup mcGroup=mcGroupList.getSelectionModel().getSelectedItem();
-                if(mcGroup!=null&&mcLibraryHighlighted(mcMemberships,mcGroup.mcId()))getStyleClass().add("library-associated");
-                mcTitle.setText(mcTemplate.mcName());String mcNames=mcMemberships.stream().map(mcLibraryGroupNames::get).filter(Objects::nonNull).collect(java.util.stream.Collectors.joining(", "));
-                String mcDate=mcLibraryModifiedDates.get(mcTemplate.mcId());mcDetail.setText(mcNames+(mcDate==null?"":" · "+mcDate));setGraphic(mcLines);
+    private void MCattachGenerationConfiguration(){Tab MCconfig=new Tab("Configurar generación",MCcatalogPage);MCconfig.setClosable(false);MCeditorTabs.getTabs().add(MCconfig);MCeditorTabs.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->{if(MCb==MCconfig){if(MCdirty)MCsafe(this::MCsaveTemplate);MCrefreshTemplates();MCrefreshKinds();if(MCcurrentTemplate!=null&&MCkindTemplate.getValue()==null){MCkindTemplate.setValue(MCcurrentTemplate);}}});}
+    private void MCshowEditor(){MCrefreshTemplates();MCrefreshVariables();MCeditorTabs.getSelectionModel().select(0);MCpage("Editor de plantillas",MCeditorPage);if(MCdocument==null)MCrichEditor.getEngine().loadContent("<html><body style='font:14px Arial;padding:30px'>Importe un DOCX o cree una plantilla nueva.</body></html>");}
+    private void MCrefreshTemplates(){try{MCupdatingTemplates=true;MCTemplate MCselected=MCcurrentTemplate;MCtemplateChoice.getItems().setAll(MCstore.MCtemplates());MCkindTemplate.getItems().setAll(MCtemplateChoice.getItems());if(MCselected!=null)MCtemplateChoice.getSelectionModel().select(MCtemplateChoice.getItems().stream().filter(MCt->MCt.MCid()==MCselected.MCid()).findFirst().orElse(null));}catch(Exception MCe){MCerror(MCe);}finally{MCupdatingTemplates=false;}}
+    private void MCnewTemplate(){TextInputDialog MCname=new TextInputDialog();MCname.setTitle("Nueva plantilla");MCname.setHeaderText("Nombre de la plantilla");String MCselected=MCname.showAndWait().orElse(null);if(MCselected==null)return;if(MCselected.isBlank())throw new IllegalArgumentException("Escriba un nombre.");if(!MCconfirmPendingSwitch())return;try{XWPFDocument MCd=new XWPFDocument();MCd.createParagraph().createRun().setText("Escriba aquí el contenido del documento.");byte[] MCcontent=MCDocumentEngine.MCbytes(MCd);MCd.close();MCTemplate MCt=MCstore.MCsaveTemplate(new MCTemplate(0,MCselected.trim(),MCcontent,MCcontent));MCdata.MCrecordRevision(MCt.MCid(),MCcontent);MCTemplateGroup MCselectedGroup=MCgroupList.getSelectionModel().getSelectedItem();if(MCselectedGroup!=null)MCstore.MCsetTemplateGroups(MCt.MCid(),List.of(MCselectedGroup.MCid()));MCrefreshTemplates();MCrefreshLibrary();MCrefreshKinds();MCopenTemplate(MCt);MCsaved("Plantilla creada");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCimportDocx(){FileChooser MCfc=new FileChooser();MCfc.setTitle("Importar documento Word");MCfc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documentos de Word (*.doc, *.docx, *.docm, *.dot, *.dotx, *.dotm)","*.doc","*.DOC","*.docx","*.DOCX","*.docm","*.DOCM","*.dot","*.DOT","*.dotx","*.DOTX","*.dotm","*.DOTM"));File MCfile=MCfc.showOpenDialog(MCstage);if(MCfile==null||!MCconfirmPendingSwitch())return;try{byte[] MCcontent=MCWordDocumentImporter.MCimportToDocx(MCfile.toPath());MCTemplate MCt=MCstore.MCsaveTemplate(new MCTemplate(0,MCfile.getName().replaceFirst("(?i)\\.(docx?|docm|dotx?|dotm)$",""),MCcontent,MCcontent));MCdata.MCrecordRevision(MCt.MCid(),MCcontent);MCTemplateGroup MCselectedGroup=MCgroupList.getSelectionModel().getSelectedItem();if(MCselectedGroup!=null)MCstore.MCsetTemplateGroups(MCt.MCid(),List.of(MCselectedGroup.MCid()));MCrefreshTemplates();MCrefreshLibrary();MCrefreshKinds();MCopenTemplate(MCt);MCsaved("Documento Word importado y guardado localmente");}catch(Exception MCe){MCerror(MCe);}}
+    private boolean MCconfirmPendingSwitch(){if(MCdocument==null||!MCdirty)return true;Alert MCchoice=new Alert(Alert.AlertType.CONFIRMATION,"Hay cambios pendientes. ¿Guardar antes de abrir otra plantilla?",ButtonType.YES,ButtonType.NO,ButtonType.CANCEL);ButtonType MCresult=MCchoice.showAndWait().orElse(ButtonType.CANCEL);if(MCresult==ButtonType.CANCEL)return false;if(MCresult==ButtonType.YES)MCsaveTemplate();else MCdirty=false;return true;}
+    private void MCopenTemplate(MCTemplate MCt){if(MCt==null)return;try{if(MCcurrentTemplate!=null&&MCcurrentTemplate.MCid()!=MCt.MCid()&&!MCconfirmPendingSwitch())return;if(MCdocument!=null)MCdocument.close();MCcurrentTemplate=MCt;MCdocument=MCDocumentEngine.MCopen(MCt.MCedited());MCselectedRun=null;MCselectedParagraph=null;MCselectedText=null;MCtemplateName.setText(MCt.MCname());MCdirty=false;MCupdateEditorSaveStatus();MCrefreshVariables();MCrefreshEditorPersonas();MCrenderDocument();MCupdatingTemplates=true;MCtemplateChoice.getSelectionModel().select(MCtemplateChoice.getItems().stream().filter(MCx->MCx.MCid()==MCt.MCid()).findFirst().orElse(MCt));MCupdatingTemplates=false;}catch(Exception MCe){MCupdatingTemplates=false;MCerror(MCe);}}
+    private void MCrequestSaveTemplate(){if(MCdocument==null)return;if(!MCdirty&&Objects.equals(MCtemplateName.getText().trim(),MCcurrentTemplate.MCname())){MCsaved("La plantilla ya está guardada");return;}if(new Alert(Alert.AlertType.CONFIRMATION,"¿Guardar los cambios de esta plantilla?",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)==ButtonType.YES)MCsaveTemplate();}
+    private void MCsaveTemplate(){if(MCdocument==null)return;if(MCtemplateName.getText().isBlank())throw new IllegalArgumentException("Escriba un nombre de plantilla.");try{MCsyncEditor();byte[] MCcontent=MCDocumentEngine.MCbytes(MCdocument);boolean MCcontentChanged=!Arrays.equals(MCcontent,MCcurrentTemplate.MCedited());boolean MCnameChanged=!MCtemplateName.getText().trim().equals(MCcurrentTemplate.MCname());if(!MCcontentChanged&&!MCnameChanged){MCdirty=false;MCsaved("La plantilla ya está guardada");return;}MCcurrentTemplate=MCstore.MCsaveTemplate(new MCTemplate(MCcurrentTemplate.MCid(),MCtemplateName.getText().trim(),MCcurrentTemplate.MCoriginal(),MCcontent));if(MCcontentChanged)MCdata.MCrecordRevision(MCcurrentTemplate.MCid(),MCcontent);MCdirty=false;MCrefreshTemplates();MCrefreshLibrary();MCrefreshKinds();MCsaved("Plantilla guardada");MCrenderDocument();}catch(Exception MCe){throw new RuntimeException("No se pudo guardar la plantilla",MCe);}}
+    private void MCrefreshVariables(){try{long MCselected=MCvariableList.getSelectionModel().getSelectedItem()==null?0:MCvariableList.getSelectionModel().getSelectedItem().MCid();String MCq=MCpaletteSearch.getText().trim().toLowerCase();MCvariableList.getItems().setAll(MCstore.MCdefinitions().stream().filter(MCd->(MCd.MClabel()+" "+MCd.MCkey()).toLowerCase().contains(MCq)).toList());if(MCselected!=0)MCvariableList.getSelectionModel().select(MCvariableList.getItems().stream().filter(MCd->MCd.MCid()==MCselected).findFirst().orElse(null));}catch(Exception MCe){MCerror(MCe);}}
+    private void MCbuildLibrary(){
+        MClibraryPage=new BorderPane();MClibraryPage.getStyleClass().add("page");MClibrarySearch.setPromptText("Buscar plantilla");MClibrarySearch.getStyleClass().add("buscador");MClibrarySearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshLibrary());
+        MCgroupList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->{if(!MCrefreshingLibrary)MCrefreshLibrary();});
+        VBox MCgroups=new VBox(8,new Label("GRUPOS"),MCgroupList,MCbutton("+ Nuevo grupo",this::MCcreateGroup),MCbutton("Renombrar grupo",this::MCrenameGroup),MCbutton("Eliminar grupo",this::MCremoveGroup));MCgroups.getStyleClass().add("side-panel");MCfixedWidth(MCgroups,240);MCuniformButtons(MCgroups);BorderPane.setMargin(MCgroups,new Insets(0,12,0,0));VBox.setVgrow(MCgroupList,Priority.ALWAYS);MClibraryPage.setLeft(MCgroups);
+        MClibrarySort.getItems().setAll("Nombre A-Z","Nombre Z-A","Más recientes","Más antiguas");MClibrarySort.setValue("Nombre A-Z");MClibrarySort.setOnAction(MCe->MCrefreshLibrary());
+        HBox MCsearchRow=new HBox(8,MClibrarySearch,MClibrarySort);HBox.setHgrow(MClibrarySearch,Priority.ALWAYS);MClibrarySearch.setMaxWidth(Double.MAX_VALUE);MClibrarySort.setPrefWidth(135);
+        MCgroupList.setPlaceholder(MCdescription("Cree su primer grupo para organizar las plantillas."));
+        VBox MCtemplates=new VBox(9,MCsearchRow,MClibraryList);MCtemplates.setMinWidth(0);MCtemplates.getStyleClass().add("catalog-form");MCtemplates.setMaxWidth(Double.MAX_VALUE);VBox.setVgrow(MClibraryList,Priority.ALWAYS);MClibraryPage.setCenter(MCtemplates);
+        MClibraryList.setCellFactory(MCview->new ListCell<>(){
+            private final Label MCtitle=new Label(),MCdetail=new Label();private final VBox MClines=new VBox(4,MCtitle,MCdetail);
+            {MCtitle.setWrapText(true);MCdetail.setWrapText(true);MCdetail.getStyleClass().add("field-label");MClines.setMinWidth(0);MClines.prefWidthProperty().bind(widthProperty().subtract(28));}
+            @Override protected void updateItem(MCTemplate MCtemplate,boolean MCempty){
+                super.updateItem(MCtemplate,MCempty);getStyleClass().remove("library-associated");setText(null);setGraphic(null);
+                if(MCempty||MCtemplate==null)return;
+                List<Long> MCmemberships=MClibraryMemberships.getOrDefault(MCtemplate.MCid(),List.of());MCTemplateGroup MCgroup=MCgroupList.getSelectionModel().getSelectedItem();
+                if(MCgroup!=null&&MClibraryHighlighted(MCmemberships,MCgroup.MCid()))getStyleClass().add("library-associated");
+                MCtitle.setText(MCtemplate.MCname());String MCnames=MCmemberships.stream().map(MClibraryGroupNames::get).filter(Objects::nonNull).collect(java.util.stream.Collectors.joining(", "));
+                String MCdate=MClibraryModifiedDates.get(MCtemplate.MCid());MCdetail.setText(MCnames+(MCdate==null?"":" · "+MCdate));setGraphic(MClines);
             }
         });
-        mcLibraryGroups.setWrapText(true);mcAddToGroup=mcButton("Añadir plantilla al grupo",this::mcAddLibraryGroup);mcRemoveFromGroup=mcButton("Quitar del grupo",this::mcRemoveLibraryGroup);
-        VBox mcActions=new VBox(9,new Label("PLANTILLA SELECCIONADA"),mcButton("Abrir en editor",this::mcOpenLibraryTemplate),mcButton("Renombrar plantilla",this::mcRenameLibraryTemplate),mcButton("Duplicar plantilla",this::mcDuplicateLibraryTemplate),mcButton("Eliminar plantilla",this::mcRemoveLibraryTemplate),new Separator(),new Label("GRUPOS ASIGNADOS"),mcLibraryGroups,mcAddToGroup,mcRemoveFromGroup);mcActions.getStyleClass().add("side-panel");mcFixedWidth(mcActions,270);mcUniformButtons(mcActions);mcLibraryPage.setRight(mcScrolling(mcActions));BorderPane.setMargin(mcLibraryPage.getRight(),new Insets(0,0,0,12));
-        mcLibraryList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->mcUpdateLibraryActions());mcUpdateLibraryActions();
+        MClibraryGroups.setWrapText(true);MCaddToGroup=MCbutton("Añadir plantilla al grupo",this::MCaddLibraryGroup);MCremoveFromGroup=MCbutton("Quitar del grupo",this::MCremoveLibraryGroup);
+        VBox MCactions=new VBox(9,new Label("PLANTILLA SELECCIONADA"),MCbutton("Abrir en editor",this::MCopenLibraryTemplate),MCbutton("Renombrar plantilla",this::MCrenameLibraryTemplate),MCbutton("Duplicar plantilla",this::MCduplicateLibraryTemplate),MCbutton("Eliminar plantilla",this::MCremoveLibraryTemplate),new Separator(),new Label("GRUPOS ASIGNADOS"),MClibraryGroups,MCaddToGroup,MCremoveFromGroup);MCactions.getStyleClass().add("side-panel");MCfixedWidth(MCactions,270);MCuniformButtons(MCactions);MClibraryPage.setRight(MCscrolling(MCactions));BorderPane.setMargin(MClibraryPage.getRight(),new Insets(0,0,0,12));
+        MClibraryList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->MCupdateLibraryActions());MCupdateLibraryActions();
     }
-    private void mcShowLibrary(){mcRefreshLibrary();mcPage("Plantillas",mcLibraryPage);}
-    private void mcRefreshLibrary(){if(mcRefreshingLibrary)return;mcRefreshingLibrary=true;try{
-        MCTemplate mcSelected=mcLibraryList.getSelectionModel().getSelectedItem();MCTemplateGroup mcSelectedGroup=mcGroupList.getSelectionModel().getSelectedItem();String mcQ=mcLibrarySearch.getText().trim().toLowerCase();List<MCTemplate> mcAll=mcStore.mcTemplates();List<MCTemplateGroup> mcGroups=mcStore.mcGroups();Map<Long,String> mcDates=mcData.mcRevisionDates();Map<Long,List<Long>> mcMemberships=new HashMap<>();for(MCTemplate mcT:mcAll)mcMemberships.put(mcT.mcId(),mcStore.mcGroupIds(mcT.mcId()));mcLibraryMemberships=mcMemberships;mcLibraryModifiedDates=mcDates;Map<Long,String> mcNames=new HashMap<>();for(MCTemplateGroup mcG:mcGroups)mcNames.put(mcG.mcId(),mcG.mcName());mcLibraryGroupNames=mcNames;
-        mcGroupList.getItems().setAll(mcGroups);
-        MCTemplateGroup mcActive=mcGroups.stream().filter(mcG->mcSelectedGroup!=null&&mcG.mcId()==mcSelectedGroup.mcId()).findFirst().orElse(mcGroups.isEmpty()?null:mcGroups.get(0));
-        mcGroupList.getSelectionModel().select(mcActive);
-        mcLibraryList.setPlaceholder(mcDescription(mcAll.isEmpty()?"Todavía no hay plantillas guardadas. Créelas o impórtelas desde el Editor de plantillas.":"No hay plantillas que coincidan con la búsqueda."));
-        List<MCTemplate> mcFound=new ArrayList<>();for(MCTemplate mcT:mcAll)if(mcLibraryMatches(mcT.mcName(),mcQ))mcFound.add(mcT);
-        Comparator<MCTemplate> mcName=Comparator.comparing(MCTemplate::mcName,String.CASE_INSENSITIVE_ORDER).thenComparingLong(MCTemplate::mcId);String mcSort=mcLibrarySort.getValue();Comparator<MCTemplate> mcOrder=switch(mcSort==null?"Nombre A-Z":mcSort){case "Nombre Z-A"->mcName.reversed();case "Más recientes"->Comparator.comparing((MCTemplate mcT)->mcDates.get(mcT.mcId()),Comparator.nullsFirst(String::compareTo)).reversed().thenComparing(mcName);case "Más antiguas"->Comparator.comparing((MCTemplate mcT)->mcDates.get(mcT.mcId()),Comparator.nullsLast(String::compareTo)).thenComparing(mcName);default->mcName;};mcFound.sort(mcOrder);
-        mcLibraryList.getItems().setAll(mcFound);if(mcSelected!=null)mcLibraryList.getSelectionModel().select(mcFound.stream().filter(mcT->mcT.mcId()==mcSelected.mcId()).findFirst().orElse(null));mcLibraryList.refresh();mcUpdateLibraryActions();
-    }catch(Exception mcEx){mcError(mcEx);}finally{mcRefreshingLibrary=false;}}
-    static boolean mcLibraryMatches(String mcName,String mcSearch){return mcName.toLowerCase(Locale.ROOT).contains(mcSearch.toLowerCase(Locale.ROOT));}
-    static boolean mcLibraryHighlighted(List<Long> mcMemberships,long mcSelectedGroup){return mcSelectedGroup>0&&mcMemberships.contains(mcSelectedGroup);}
-    private void mcUpdateLibraryActions(){try{MCTemplate mcT=mcLibraryList.getSelectionModel().getSelectedItem();MCTemplateGroup mcGroup=mcGroupList.getSelectionModel().getSelectedItem();List<Long> mcIds=mcT==null?List.of():mcStore.mcGroupIds(mcT.mcId());String mcNames=mcStore.mcGroups().stream().filter(mcG->mcIds.contains(mcG.mcId())).map(MCTemplateGroup::mcName).collect(java.util.stream.Collectors.joining(", "));mcLibraryGroups.setText(mcT==null?"Seleccione una plantilla":mcNames.isBlank()?"Sin grupo":mcNames);boolean mcReady=mcT!=null&&mcGroup!=null&&mcGroup.mcId()>0;boolean mcMember=mcReady&&mcIds.contains(mcGroup.mcId());if(mcAddToGroup!=null)mcAddToGroup.setDisable(mcGroup==null);if(mcRemoveFromGroup!=null)mcRemoveFromGroup.setDisable(!mcReady||!mcMember);}catch(Exception mcEx){mcError(mcEx);}}
-    private void mcAddLibraryGroup(){try{
-        MCTemplateGroup mcGroup=mcSelectedGroup();List<MCTemplate> mcAvailable=mcStore.mcTemplates().stream().filter(mcT->!mcLibraryMemberships.getOrDefault(mcT.mcId(),List.of()).contains(mcGroup.mcId())).toList();
-        if(mcAvailable.isEmpty()){mcSaved("Todas las plantillas guardadas ya pertenecen a este grupo. Cree o importe otra plantilla.");return;}
-        ChoiceDialog<MCTemplate> mcChoice=new ChoiceDialog<>(mcAvailable.get(0),mcAvailable);mcChoice.setTitle("Añadir plantilla al grupo");mcChoice.setHeaderText("Seleccione una plantilla para "+mcGroup.mcName());
-        mcChoice.showAndWait().ifPresent(mcT->{try{Set<Long> mcIds=new LinkedHashSet<>(mcStore.mcGroupIds(mcT.mcId()));mcIds.add(mcGroup.mcId());mcStore.mcSetTemplateGroups(mcT.mcId(),mcIds);mcRefreshLibrary();mcLibraryList.getSelectionModel().select(mcT);mcSaved("Plantilla añadida al grupo");}catch(Exception mcEx){mcError(mcEx);}});
-    }catch(Exception mcEx){mcError(mcEx);}}
-    private void mcRemoveLibraryGroup(){mcChangeLibraryGroup(false);}
-    private void mcChangeLibraryGroup(boolean mcAdd){try{MCTemplate mcT=mcSelectedLibraryTemplate();MCTemplateGroup mcG=mcSelectedGroup();Set<Long> mcIds=new LinkedHashSet<>(mcStore.mcGroupIds(mcT.mcId()));if(mcAdd)mcIds.add(mcG.mcId());else mcIds.remove(mcG.mcId());mcStore.mcSetTemplateGroups(mcT.mcId(),mcIds);mcRefreshLibrary();mcSaved(mcAdd?"Plantilla añadida al grupo":"Plantilla quitada del grupo");}catch(Exception mcEx){mcError(mcEx);}}
-    private MCTemplate mcSelectedLibraryTemplate(){MCTemplate mcT=mcLibraryList.getSelectionModel().getSelectedItem();if(mcT==null)throw new IllegalArgumentException("Seleccione una plantilla.");return mcT;}
-    private MCTemplateGroup mcSelectedGroup(){MCTemplateGroup mcG=mcGroupList.getSelectionModel().getSelectedItem();if(mcG==null||mcG.mcId()<=0)throw new IllegalArgumentException("Seleccione un grupo de Mis grupos.");return mcG;}
-    private void mcCreateGroup(){TextInputDialog mcInput=new TextInputDialog();mcInput.setTitle("Nuevo grupo");mcInput.setHeaderText("Nombre del grupo de plantillas");mcInput.showAndWait().ifPresent(mcName->{try{MCTemplateGroup mcG=mcStore.mcSaveGroup(0,mcName);mcRefreshLibrary();mcGroupList.getSelectionModel().select(mcG);mcSaved("Grupo creado");}catch(Exception mcEx){mcError(mcEx);}});}
-    private void mcRenameGroup(){MCTemplateGroup mcG=mcSelectedGroup();TextInputDialog mcInput=new TextInputDialog(mcG.mcName());mcInput.setTitle("Renombrar grupo");mcInput.setHeaderText("Nombre del grupo");mcInput.showAndWait().ifPresent(mcName->{try{mcStore.mcSaveGroup(mcG.mcId(),mcName);mcRefreshLibrary();mcSaved("Grupo renombrado");}catch(Exception mcEx){mcError(mcEx);}});}
-    private void mcRemoveGroup(){try{MCTemplateGroup mcG=mcSelectedGroup();if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar el grupo '"+mcG.mcName()+"'? Sus "+mcG.mcCount()+" plantillas permanecerán guardadas.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;mcStore.mcDeleteGroup(mcG.mcId(),null);mcGroupList.getSelectionModel().clearSelection();mcRefreshLibrary();mcSaved("Grupo eliminado; las plantillas permanecen guardadas");}catch(Exception mcEx){mcError(mcEx);}}
-    private void mcOpenLibraryTemplate(){MCTemplate mcT=mcSelectedLibraryTemplate();mcShowEditor();mcOpenTemplate(mcT);}
-    private void mcRenameLibraryTemplate(){MCTemplate mcT=mcSelectedLibraryTemplate();TextInputDialog mcInput=new TextInputDialog(mcT.mcName());mcInput.setTitle("Renombrar plantilla");mcInput.setHeaderText("Nombre de la plantilla");mcInput.showAndWait().ifPresent(mcName->{try{if(mcName.isBlank())throw new IllegalArgumentException("Escriba un nombre.");mcStore.mcSaveTemplate(new MCTemplate(mcT.mcId(),mcName.trim(),mcT.mcOriginal(),mcT.mcEdited()));if(mcCurrentTemplate!=null&&mcCurrentTemplate.mcId()==mcT.mcId()){mcCurrentTemplate=new MCTemplate(mcT.mcId(),mcName.trim(),mcT.mcOriginal(),mcT.mcEdited());mcTemplateName.setText(mcName.trim());}mcRefreshLibrary();mcRefreshTemplates();mcSaved("Plantilla renombrada");}catch(Exception mcEx){mcError(mcEx);}});}
-    private void mcDuplicateLibraryTemplate(){MCTemplate mcT=mcSelectedLibraryTemplate();try{MCTemplate mcCopy=mcStore.mcSaveTemplate(new MCTemplate(0,mcT.mcName()+" (copia)",mcT.mcOriginal(),mcT.mcEdited()));for(var mcPerson:mcStore.mcPersonas(mcT.mcId()))mcStore.mcAddPersona(mcCopy.mcId(),mcPerson.mcPersonaKey(),mcPerson.mcDisplayName(),mcPerson.mcSortOrder());for(MCVariable mcV:mcStore.mcVariables(mcT.mcId())){MCVariable mcCreated=mcStore.mcSaveVariable(new MCVariable(0,mcCopy.mcId(),mcV.mcKey(),mcV.mcLabel(),mcV.mcType(),mcV.mcDefaultValue(),mcV.mcRequired(),mcV.mcPosition()));long mcDef=mcStore.mcDefinitionId(mcV.mcId());if(mcDef>0)mcStore.mcLinkDefinition(mcCreated.mcId(),mcDef);}for(MCApiContext mcC:mcData.mcApiContexts(mcT.mcId()))mcData.mcSaveApiContext(new MCApiContext(mcCopy.mcId(),mcC.mcVariableKey(),mcC.mcGroupKey(),mcC.mcService(),mcC.mcSource()));for(MCContactBinding mcB:mcData.mcContactBindings(mcT.mcId()))mcData.mcSaveContactBinding(new MCContactBinding(0,mcCopy.mcId(),mcB.mcGroupKey(),mcB.mcKind(),mcB.mcField(),mcB.mcVariableKey()));mcData.mcRecordRevision(mcCopy.mcId(),mcCopy.mcEdited());mcRefreshLibrary();mcRefreshTemplates();mcLibraryList.getSelectionModel().select(mcCopy);mcSaved("Plantilla duplicada sin grupos");}catch(Exception mcEx){mcError(mcEx);}}
-    private void mcRemoveLibraryTemplate(){MCTemplate mcT=mcSelectedLibraryTemplate();try{List<String> mcLegacy=mcStore.mcTemplateDependencies(mcT.mcId());String mcDetail=mcLegacy.isEmpty()?"":" También se quitarán "+mcLegacy.size()+" configuraciones antiguas vinculadas a esta plantilla.";if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la plantilla '"+mcT.mcName()+"'? Los documentos ya generados se conservarán en Historial."+mcDetail,ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;mcStore.mcDeleteTemplateWithLegacyKinds(mcT.mcId());mcData.mcClearMappings(mcT.mcId());mcData.mcClearContactBindings(mcT.mcId());mcData.mcClearApiContexts(mcT.mcId());if(mcCurrentTemplate!=null&&mcCurrentTemplate.mcId()==mcT.mcId()){if(mcDocument!=null)mcDocument.close();mcDocument=null;mcCurrentTemplate=null;mcRichModel=null;mcEditorReady=false;}mcRefreshLibrary();mcRefreshTemplates();mcRefreshKinds();mcRefreshHistory();mcSaved("Plantilla eliminada; documentos conservados en Historial");}catch(Exception mcEx){mcError(mcEx);}}
-    private void mcInsertSelected(){MCDefinition mcD=mcVariableList.getSelectionModel().getSelectedItem();if(mcD==null||mcDocument==null||!mcEditorReady){mcSaved("Seleccione una variable y coloque el cursor en el documento");return;}if(mcBindVariable(mcD))mcRichEditor.getEngine().executeScript("window.mcStudio.mcInsertToken("+mcJsonString(mcEditorTokenKey(mcD))+")");}
-    private boolean mcBindVariable(MCDefinition mcD){return mcBindVariable(mcD,mcEditorTokenKey(mcD));}
-    private boolean mcBindVariable(MCDefinition mcD,String mcKey){try{if(mcCurrentTemplate==null)return false;MCVariable mcBound=mcStore.mcVariables(mcCurrentTemplate.mcId()).stream().filter(mcV->mcV.mcKey().equals(mcKey)).findFirst().orElse(null);if(mcBound==null)mcStore.mcBindDefinition(mcCurrentTemplate.mcId(),mcD.mcId(),mcKey,false,mcStore.mcVariables(mcCurrentTemplate.mcId()).size()+1);else if(mcStore.mcDefinitionId(mcBound.mcId())!=mcD.mcId())throw new IllegalArgumentException("Esta plantilla ya utiliza '"+mcD.mcKey()+"' con otra definición.");return true;}catch(Exception mcEx){mcError(mcEx);return false;}}
-    private String mcJsonString(Object mcValue){try{return mcJson.writeValueAsString(mcValue);}catch(Exception mcEx){throw new RuntimeException(mcEx);}}
-    private void mcEditorCommand(String mcName){mcEditorCommand(mcName,null);}
-    private void mcEditorCommand(String mcName,String mcValue){if(mcEditorReady&&!mcUpdatingToolbarFromSelection)mcRichEditor.getEngine().executeScript("window.mcStudio.mcCommand("+mcJsonString(mcName)+","+(mcValue==null?"null":mcJsonString(mcValue))+")");}
-    private void mcSyncEditor() throws Exception {if(mcEditorReady&&mcRichModel!=null&&mcDocument!=null){String mcXml=String.valueOf(mcRichEditor.getEngine().executeScript("window.mcStudio.mcHtml()"));mcRichModel.mcApply(mcXml);XWPFDocument mcNormalized=MCDocumentEngine.mcOpen(MCDocumentEngine.mcBytes(mcDocument));mcDocument.close();mcDocument=mcNormalized;mcRichModel=new MCContinuousDocxEditor(mcDocument,mcEditorPersonaNames);mcRichEditor.getEngine().executeScript("window.mcStudio.mcAccept("+mcJsonString("<div>"+mcRichModel.mcHtml()+"</div>")+")");}}
-    private void mcUpdateToolbarFromSelection(String mcJsonState){
-        if(!mcEditorReady)return;
+    private void MCshowLibrary(){MCrefreshLibrary();MCpage("Plantillas",MClibraryPage);}
+    private void MCrefreshLibrary(){if(MCrefreshingLibrary)return;MCrefreshingLibrary=true;try{
+        MCTemplate MCselected=MClibraryList.getSelectionModel().getSelectedItem();MCTemplateGroup MCselectedGroup=MCgroupList.getSelectionModel().getSelectedItem();String MCq=MClibrarySearch.getText().trim().toLowerCase();List<MCTemplate> MCall=MCstore.MCtemplates();List<MCTemplateGroup> MCgroups=MCstore.MCgroups();Map<Long,String> MCdates=MCdata.MCrevisionDates();Map<Long,List<Long>> MCmemberships=new HashMap<>();for(MCTemplate MCt:MCall)MCmemberships.put(MCt.MCid(),MCstore.MCgroupIds(MCt.MCid()));MClibraryMemberships=MCmemberships;MClibraryModifiedDates=MCdates;Map<Long,String> MCnames=new HashMap<>();for(MCTemplateGroup MCg:MCgroups)MCnames.put(MCg.MCid(),MCg.MCname());MClibraryGroupNames=MCnames;
+        MCgroupList.getItems().setAll(MCgroups);
+        MCTemplateGroup MCactive=MCgroups.stream().filter(MCg->MCselectedGroup!=null&&MCg.MCid()==MCselectedGroup.MCid()).findFirst().orElse(MCgroups.isEmpty()?null:MCgroups.get(0));
+        MCgroupList.getSelectionModel().select(MCactive);
+        MClibraryList.setPlaceholder(MCdescription(MCall.isEmpty()?"Todavía no hay plantillas guardadas. Créelas o impórtelas desde el Editor de plantillas.":"No hay plantillas que coincidan con la búsqueda."));
+        List<MCTemplate> MCfound=new ArrayList<>();for(MCTemplate MCt:MCall)if(MClibraryMatches(MCt.MCname(),MCq))MCfound.add(MCt);
+        Comparator<MCTemplate> MCname=Comparator.comparing(MCTemplate::MCname,String.CASE_INSENSITIVE_ORDER).thenComparingLong(MCTemplate::MCid);String MCsort=MClibrarySort.getValue();Comparator<MCTemplate> MCorder=switch(MCsort==null?"Nombre A-Z":MCsort){case "Nombre Z-A"->MCname.reversed();case "Más recientes"->Comparator.comparing((MCTemplate MCt)->MCdates.get(MCt.MCid()),Comparator.nullsFirst(String::compareTo)).reversed().thenComparing(MCname);case "Más antiguas"->Comparator.comparing((MCTemplate MCt)->MCdates.get(MCt.MCid()),Comparator.nullsLast(String::compareTo)).thenComparing(MCname);default->MCname;};MCfound.sort(MCorder);
+        MClibraryList.getItems().setAll(MCfound);if(MCselected!=null)MClibraryList.getSelectionModel().select(MCfound.stream().filter(MCt->MCt.MCid()==MCselected.MCid()).findFirst().orElse(null));MClibraryList.refresh();MCupdateLibraryActions();
+    }catch(Exception MCex){MCerror(MCex);}finally{MCrefreshingLibrary=false;}}
+    static boolean MClibraryMatches(String MCname,String MCsearch){return MCname.toLowerCase(Locale.ROOT).contains(MCsearch.toLowerCase(Locale.ROOT));}
+    static boolean MClibraryHighlighted(List<Long> MCmemberships,long MCselectedGroup){return MCselectedGroup>0&&MCmemberships.contains(MCselectedGroup);}
+    private void MCupdateLibraryActions(){try{MCTemplate MCt=MClibraryList.getSelectionModel().getSelectedItem();MCTemplateGroup MCgroup=MCgroupList.getSelectionModel().getSelectedItem();List<Long> MCids=MCt==null?List.of():MCstore.MCgroupIds(MCt.MCid());String MCnames=MCstore.MCgroups().stream().filter(MCg->MCids.contains(MCg.MCid())).map(MCTemplateGroup::MCname).collect(java.util.stream.Collectors.joining(", "));MClibraryGroups.setText(MCt==null?"Seleccione una plantilla":MCnames.isBlank()?"Sin grupo":MCnames);boolean MCready=MCt!=null&&MCgroup!=null&&MCgroup.MCid()>0;boolean MCmember=MCready&&MCids.contains(MCgroup.MCid());if(MCaddToGroup!=null)MCaddToGroup.setDisable(MCgroup==null);if(MCremoveFromGroup!=null)MCremoveFromGroup.setDisable(!MCready||!MCmember);}catch(Exception MCex){MCerror(MCex);}}
+    private void MCaddLibraryGroup(){try{
+        MCTemplateGroup MCgroup=MCselectedGroup();List<MCTemplate> MCavailable=MCstore.MCtemplates().stream().filter(MCt->!MClibraryMemberships.getOrDefault(MCt.MCid(),List.of()).contains(MCgroup.MCid())).toList();
+        if(MCavailable.isEmpty()){MCsaved("Todas las plantillas guardadas ya pertenecen a este grupo. Cree o importe otra plantilla.");return;}
+        ChoiceDialog<MCTemplate> MCchoice=new ChoiceDialog<>(MCavailable.get(0),MCavailable);MCchoice.setTitle("Añadir plantilla al grupo");MCchoice.setHeaderText("Seleccione una plantilla para "+MCgroup.MCname());
+        MCchoice.showAndWait().ifPresent(MCt->{try{Set<Long> MCids=new LinkedHashSet<>(MCstore.MCgroupIds(MCt.MCid()));MCids.add(MCgroup.MCid());MCstore.MCsetTemplateGroups(MCt.MCid(),MCids);MCrefreshLibrary();MClibraryList.getSelectionModel().select(MCt);MCsaved("Plantilla añadida al grupo");}catch(Exception MCex){MCerror(MCex);}});
+    }catch(Exception MCex){MCerror(MCex);}}
+    private void MCremoveLibraryGroup(){MCchangeLibraryGroup(false);}
+    private void MCchangeLibraryGroup(boolean MCadd){try{MCTemplate MCt=MCselectedLibraryTemplate();MCTemplateGroup MCg=MCselectedGroup();Set<Long> MCids=new LinkedHashSet<>(MCstore.MCgroupIds(MCt.MCid()));if(MCadd)MCids.add(MCg.MCid());else MCids.remove(MCg.MCid());MCstore.MCsetTemplateGroups(MCt.MCid(),MCids);MCrefreshLibrary();MCsaved(MCadd?"Plantilla añadida al grupo":"Plantilla quitada del grupo");}catch(Exception MCex){MCerror(MCex);}}
+    private MCTemplate MCselectedLibraryTemplate(){MCTemplate MCt=MClibraryList.getSelectionModel().getSelectedItem();if(MCt==null)throw new IllegalArgumentException("Seleccione una plantilla.");return MCt;}
+    private MCTemplateGroup MCselectedGroup(){MCTemplateGroup MCg=MCgroupList.getSelectionModel().getSelectedItem();if(MCg==null||MCg.MCid()<=0)throw new IllegalArgumentException("Seleccione un grupo de Mis grupos.");return MCg;}
+    private void MCcreateGroup(){TextInputDialog MCinput=new TextInputDialog();MCinput.setTitle("Nuevo grupo");MCinput.setHeaderText("Nombre del grupo de plantillas");MCinput.showAndWait().ifPresent(MCname->{try{MCTemplateGroup MCg=MCstore.MCsaveGroup(0,MCname);MCrefreshLibrary();MCgroupList.getSelectionModel().select(MCg);MCsaved("Grupo creado");}catch(Exception MCex){MCerror(MCex);}});}
+    private void MCrenameGroup(){MCTemplateGroup MCg=MCselectedGroup();TextInputDialog MCinput=new TextInputDialog(MCg.MCname());MCinput.setTitle("Renombrar grupo");MCinput.setHeaderText("Nombre del grupo");MCinput.showAndWait().ifPresent(MCname->{try{MCstore.MCsaveGroup(MCg.MCid(),MCname);MCrefreshLibrary();MCsaved("Grupo renombrado");}catch(Exception MCex){MCerror(MCex);}});}
+    private void MCremoveGroup(){try{MCTemplateGroup MCg=MCselectedGroup();if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar el grupo '"+MCg.MCname()+"'? Sus "+MCg.MCcount()+" plantillas permanecerán guardadas.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;MCstore.MCdeleteGroup(MCg.MCid(),null);MCgroupList.getSelectionModel().clearSelection();MCrefreshLibrary();MCsaved("Grupo eliminado; las plantillas permanecen guardadas");}catch(Exception MCex){MCerror(MCex);}}
+    private void MCopenLibraryTemplate(){MCTemplate MCt=MCselectedLibraryTemplate();MCshowEditor();MCopenTemplate(MCt);}
+    private void MCrenameLibraryTemplate(){MCTemplate MCt=MCselectedLibraryTemplate();TextInputDialog MCinput=new TextInputDialog(MCt.MCname());MCinput.setTitle("Renombrar plantilla");MCinput.setHeaderText("Nombre de la plantilla");MCinput.showAndWait().ifPresent(MCname->{try{if(MCname.isBlank())throw new IllegalArgumentException("Escriba un nombre.");MCstore.MCsaveTemplate(new MCTemplate(MCt.MCid(),MCname.trim(),MCt.MCoriginal(),MCt.MCedited()));if(MCcurrentTemplate!=null&&MCcurrentTemplate.MCid()==MCt.MCid()){MCcurrentTemplate=new MCTemplate(MCt.MCid(),MCname.trim(),MCt.MCoriginal(),MCt.MCedited());MCtemplateName.setText(MCname.trim());}MCrefreshLibrary();MCrefreshTemplates();MCsaved("Plantilla renombrada");}catch(Exception MCex){MCerror(MCex);}});}
+    private void MCduplicateLibraryTemplate(){MCTemplate MCt=MCselectedLibraryTemplate();try{MCTemplate MCcopy=MCstore.MCsaveTemplate(new MCTemplate(0,MCt.MCname()+" (copia)",MCt.MCoriginal(),MCt.MCedited()));for(var MCperson:MCstore.MCpersonas(MCt.MCid()))MCstore.MCaddPersona(MCcopy.MCid(),MCperson.MCpersonaKey(),MCperson.MCdisplayName(),MCperson.MCsortOrder());for(MCVariable MCv:MCstore.MCvariables(MCt.MCid())){MCVariable MCcreated=MCstore.MCsaveVariable(new MCVariable(0,MCcopy.MCid(),MCv.MCkey(),MCv.MClabel(),MCv.MCtype(),MCv.MCdefaultValue(),MCv.MCrequired(),MCv.MCposition()));long MCdef=MCstore.MCdefinitionId(MCv.MCid());if(MCdef>0)MCstore.MClinkDefinition(MCcreated.MCid(),MCdef);}for(MCApiContext MCc:MCdata.MCapiContexts(MCt.MCid()))MCdata.MCsaveApiContext(new MCApiContext(MCcopy.MCid(),MCc.MCvariableKey(),MCc.MCgroupKey(),MCc.MCservice(),MCc.MCsource()));for(MCContactBinding MCb:MCdata.MCcontactBindings(MCt.MCid()))MCdata.MCsaveContactBinding(new MCContactBinding(0,MCcopy.MCid(),MCb.MCgroupKey(),MCb.MCkind(),MCb.MCfield(),MCb.MCvariableKey()));MCdata.MCrecordRevision(MCcopy.MCid(),MCcopy.MCedited());MCrefreshLibrary();MCrefreshTemplates();MClibraryList.getSelectionModel().select(MCcopy);MCsaved("Plantilla duplicada sin grupos");}catch(Exception MCex){MCerror(MCex);}}
+    private void MCremoveLibraryTemplate(){MCTemplate MCt=MCselectedLibraryTemplate();try{List<String> MClegacy=MCstore.MCtemplateDependencies(MCt.MCid());String MCdetail=MClegacy.isEmpty()?"":" También se quitarán "+MClegacy.size()+" configuraciones antiguas vinculadas a esta plantilla.";if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la plantilla '"+MCt.MCname()+"'? Los documentos ya generados se conservarán en Historial."+MCdetail,ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;MCstore.MCdeleteTemplateWithLegacyKinds(MCt.MCid());MCdata.MCclearMappings(MCt.MCid());MCdata.MCclearContactBindings(MCt.MCid());MCdata.MCclearApiContexts(MCt.MCid());if(MCcurrentTemplate!=null&&MCcurrentTemplate.MCid()==MCt.MCid()){if(MCdocument!=null)MCdocument.close();MCdocument=null;MCcurrentTemplate=null;MCrichModel=null;MCeditorReady=false;}MCrefreshLibrary();MCrefreshTemplates();MCrefreshKinds();MCrefreshHistory();MCsaved("Plantilla eliminada; documentos conservados en Historial");}catch(Exception MCex){MCerror(MCex);}}
+    private void MCinsertSelected(){MCDefinition MCd=MCvariableList.getSelectionModel().getSelectedItem();if(MCd==null||MCdocument==null||!MCeditorReady){MCsaved("Seleccione una variable y coloque el cursor en el documento");return;}if(MCbindVariable(MCd))MCrichEditor.getEngine().executeScript("window.MCstudio.MCinsertToken("+MCjsonString(MCeditorTokenKey(MCd))+")");}
+    private boolean MCbindVariable(MCDefinition MCd){return MCbindVariable(MCd,MCeditorTokenKey(MCd));}
+    private boolean MCbindVariable(MCDefinition MCd,String MCkey){try{if(MCcurrentTemplate==null)return false;MCVariable MCbound=MCstore.MCvariables(MCcurrentTemplate.MCid()).stream().filter(MCv->MCv.MCkey().equals(MCkey)).findFirst().orElse(null);if(MCbound==null)MCstore.MCbindDefinition(MCcurrentTemplate.MCid(),MCd.MCid(),MCkey,false,MCstore.MCvariables(MCcurrentTemplate.MCid()).size()+1);else if(MCstore.MCdefinitionId(MCbound.MCid())!=MCd.MCid())throw new IllegalArgumentException("Esta plantilla ya utiliza '"+MCd.MCkey()+"' con otra definición.");return true;}catch(Exception MCex){MCerror(MCex);return false;}}
+    private String MCjsonString(Object MCvalue){try{return MCjson.writeValueAsString(MCvalue);}catch(Exception MCex){throw new RuntimeException(MCex);}}
+    private void MCeditorCommand(String MCname){MCeditorCommand(MCname,null);}
+    private void MCeditorCommand(String MCname,String MCvalue){if(MCeditorReady&&!MCupdatingToolbarFromSelection)MCrichEditor.getEngine().executeScript("window.MCstudio.MCcommand("+MCjsonString(MCname)+","+(MCvalue==null?"null":MCjsonString(MCvalue))+")");}
+    private void MCsyncEditor() throws Exception {if(MCeditorReady&&MCrichModel!=null&&MCdocument!=null){String MCxml=String.valueOf(MCrichEditor.getEngine().executeScript("window.MCstudio.MChtml()"));MCrichModel.MCapply(MCxml);XWPFDocument MCnormalized=MCDocumentEngine.MCopen(MCDocumentEngine.MCbytes(MCdocument));MCdocument.close();MCdocument=MCnormalized;MCrichModel=new MCContinuousDocxEditor(MCdocument,MCeditorPersonaNames);MCrichEditor.getEngine().executeScript("window.MCstudio.MCaccept("+MCjsonString("<div>"+MCrichModel.MChtml()+"</div>")+")");}}
+    private void MCupdateToolbarFromSelection(String MCjsonState){
+        if(!MCeditorReady)return;
         try{
-            var mcState=mcJson.readTree(mcJsonState);if(mcState==null||!mcState.isObject())return;
-            mcUpdatingToolbarFromSelection=true;
-            String mcFont=mcState.path("fontFamily").asText("Arial");
-            if(!mcFontChoice.getItems().contains(mcFont))mcFontChoice.getItems().add(mcFont);
-            mcFontChoice.setValue(mcFont);mcFontSizeChoice.setValue(mcState.path("fontSizePt").asInt(12));
-            String mcAlignment=mcState.path("alignment").asText("left");
-            mcSelectionFormatButtons.forEach((mcKey,mcButton)->{
-                boolean mcActive=Set.of("left","center","right","justify").contains(mcKey)?mcKey.equals(mcAlignment):mcState.path(mcKey).asBoolean(false);
-                if(mcActive){if(!mcButton.getStyleClass().contains("ribbon-btn-active"))mcButton.getStyleClass().add("ribbon-btn-active");}
-                else mcButton.getStyleClass().remove("ribbon-btn-active");
+            var MCstate=MCjson.readTree(MCjsonState);if(MCstate==null||!MCstate.isObject())return;
+            MCupdatingToolbarFromSelection=true;
+            String MCfont=MCstate.path("fontFamily").asText("Arial");
+            if(!MCfontChoice.getItems().contains(MCfont))MCfontChoice.getItems().add(MCfont);
+            MCfontChoice.setValue(MCfont);MCfontSizeChoice.setValue(MCstate.path("fontSizePt").asInt(12));
+            String MCalignment=MCstate.path("alignment").asText("left");
+            MCselectionFormatButtons.forEach((MCkey,MCbutton)->{
+                boolean MCactive=Set.of("left","center","right","justify").contains(MCkey)?MCkey.equals(MCalignment):MCstate.path(MCkey).asBoolean(false);
+                if(MCactive){if(!MCbutton.getStyleClass().contains("ribbon-btn-active"))MCbutton.getStyleClass().add("ribbon-btn-active");}
+                else MCbutton.getStyleClass().remove("ribbon-btn-active");
             });
-            mcEditorTextColor.setValue(Color.web(mcState.path("textColor").asText("#000000")));
-            mcEditorHighlightColor.setValue(Color.web(mcState.path("highlightColor").asText("#ffffff")));
-        }catch(IOException|IllegalArgumentException mcIgnored){}
-        finally{mcUpdatingToolbarFromSelection=false;}
+            MCeditorTextColor.setValue(Color.web(MCstate.path("textColor").asText("#000000")));
+            MCeditorHighlightColor.setValue(Color.web(MCstate.path("highlightColor").asText("#ffffff")));
+        }catch(IOException|IllegalArgumentException MCignored){}
+        finally{MCupdatingToolbarFromSelection=false;}
     }
-    /** @author MC */
     public final class MCEditorBridge {
-        public void mcSaveCurrentTemplate(){Platform.runLater(()->mcSafe(MCStudioWindow.this::mcSaveTemplate));}
-        public void mcOnSelectionFormatChanged(String mcJsonState){Platform.runLater(()->mcUpdateToolbarFromSelection(mcJsonState));}
-        public boolean mcBindDroppedDefinition(String mcId,String mcKey){
-            try{MCDefinition mcDefinition=mcStore.mcDefinitions().stream().filter(mcD->Long.toString(mcD.mcId()).equals(mcId)&&mcD.mcKey().equals(MCDocumentEngine.mcBaseKey(mcKey))).findFirst().orElse(null);return mcDefinition!=null&&(mcDefinition.mcBindToClient()||MCDocumentEngine.mcPersonaKey(mcKey).isEmpty())&&MCDocumentEngine.mcValidKey(mcKey)&&(MCDocumentEngine.mcPersonaKey(mcKey).isEmpty()||mcEditorPersonaNames.containsKey(MCDocumentEngine.mcPersonaKey(mcKey)))&&mcEditorReady&&mcBindVariable(mcDefinition,mcKey);}catch(Exception mcE){mcError(mcE);return false;}
+        public void MCsaveCurrentTemplate(){Platform.runLater(()->MCsafe(MCStudioWindow.this::MCsaveTemplate));}
+        public void MConSelectionFormatChanged(String MCjsonState){Platform.runLater(()->MCupdateToolbarFromSelection(MCjsonState));}
+        public boolean MCbindDroppedDefinition(String MCid,String MCkey){
+            try{MCDefinition MCdefinition=MCstore.MCdefinitions().stream().filter(MCd->Long.toString(MCd.MCid()).equals(MCid)&&MCd.MCkey().equals(MCDocumentEngine.MCbaseKey(MCkey))).findFirst().orElse(null);return MCdefinition!=null&&(MCdefinition.MCbindToClient()||MCDocumentEngine.MCpersonaKey(MCkey).isEmpty())&&MCDocumentEngine.MCvalidKey(MCkey)&&(MCDocumentEngine.MCpersonaKey(MCkey).isEmpty()||MCeditorPersonaNames.containsKey(MCDocumentEngine.MCpersonaKey(MCkey)))&&MCeditorReady&&MCbindVariable(MCdefinition,MCkey);}catch(Exception MCe){MCerror(MCe);return false;}
         }
-public void mcMarkDirty(){Platform.runLater(()->{mcDirty=true;mcUpdateEditorSaveStatus();mcStatus.setText("Cambios sin guardar");});}public void mcPageMoved(){Platform.runLater(MCStudioWindow.this::mcUpdatePageIndicator);}public void mcTableSelected(boolean mcSelected){Platform.runLater(()->{if(mcTableTools!=null){mcTableTools.setVisible(mcSelected);mcTableTools.setManaged(mcSelected);}});}public void mcImageSelected(boolean mcSelected){Platform.runLater(()->{if(mcImageTools!=null){mcImageTools.setVisible(mcSelected);mcImageTools.setManaged(mcSelected);}});}}
-    private void mcTableAction(String mcAction){mcTableAction(mcAction,null);}
-    private void mcTableAction(String mcAction,String mcValue){if(mcEditorReady)mcRichEditor.getEngine().executeScript("window.mcStudio.mcTableAction("+mcJsonString(mcAction)+","+(mcValue==null?"null":mcJsonString(mcValue))+")");}
-    private void mcImageAction(String mcAction){if(mcEditorReady)mcRichEditor.getEngine().executeScript("window.mcStudio.mcImageAction("+mcJsonString(mcAction)+")");}
-    private <T extends Control> T mcRibbonControl(T mcControl,String mcDescription){
-        mcControl.setTooltip(new Tooltip(mcDescription));mcControl.setAccessibleText(mcDescription.split(" — ")[0]);mcControl.getStyleClass().add("ribbon-btn");mcControl.setFocusTraversable(false);return mcControl;
+public void MCmarkDirty(){Platform.runLater(()->{MCdirty=true;MCupdateEditorSaveStatus();MCstatus.setText("Cambios sin guardar");});}public void MCpageMoved(){Platform.runLater(MCStudioWindow.this::MCupdatePageIndicator);}public void MCtableSelected(boolean MCselected){Platform.runLater(()->{if(MCtableTools!=null){MCtableTools.setVisible(MCselected);MCtableTools.setManaged(MCselected);}});}public void MCimageSelected(boolean MCselected){Platform.runLater(()->{if(MCimageTools!=null){MCimageTools.setVisible(MCselected);MCimageTools.setManaged(MCselected);}});}}
+    private void MCtableAction(String MCaction){MCtableAction(MCaction,null);}
+    private void MCtableAction(String MCaction,String MCvalue){if(MCeditorReady)MCrichEditor.getEngine().executeScript("window.MCstudio.MCtableAction("+MCjsonString(MCaction)+","+(MCvalue==null?"null":MCjsonString(MCvalue))+")");}
+    private void MCimageAction(String MCaction){if(MCeditorReady)MCrichEditor.getEngine().executeScript("window.MCstudio.MCimageAction("+MCjsonString(MCaction)+")");}
+    private <T extends Control> T MCribbonControl(T MCcontrol,String MCdescription){
+        MCcontrol.setTooltip(new Tooltip(MCdescription));MCcontrol.setAccessibleText(MCdescription.split(" — ")[0]);MCcontrol.getStyleClass().add("ribbon-btn");MCcontrol.setFocusTraversable(false);return MCcontrol;
     }
-    private <T> void mcRibbonChoice(ComboBox<T> mcChoice,Feather mcIcon){
-        mcChoice.setButtonCell(new ListCell<>(){@Override protected void updateItem(T mcValue,boolean mcEmpty){super.updateItem(mcValue,mcEmpty);setText(mcValue==null?mcChoice.getPromptText():mcValue.toString());setGraphic(new FontIcon(mcIcon));}});
+    private <T> void MCribbonChoice(ComboBox<T> MCchoice,Feather MCicon){
+        MCchoice.setButtonCell(new ListCell<>(){@Override protected void updateItem(T MCvalue,boolean MCempty){super.updateItem(MCvalue,MCempty);setText(MCvalue==null?MCchoice.getPromptText():MCvalue.toString());setGraphic(new FontIcon(MCicon));}});
     }
-    private Button mcRibbonButton(String mcText,Feather mcIcon,String mcDescription,Runnable mcAction){
-        Button mcControl=mcRibbonControl(new Button(mcText,new FontIcon(mcIcon)),mcDescription);mcControl.setOnAction(mcE->mcSafe(mcAction));return mcControl;
+    private Button MCribbonButton(String MCtext,Feather MCicon,String MCdescription,Runnable MCaction){
+        Button MCcontrol=MCribbonControl(new Button(MCtext,new FontIcon(MCicon)),MCdescription);MCcontrol.setOnAction(MCe->MCsafe(MCaction));return MCcontrol;
     }
-    private Button mcSelectionFormatButton(String mcState,Feather mcIcon,String mcDescription,Runnable mcAction){
-        Button mcButton=mcRibbonButton("",mcIcon,mcDescription,()->{if(!mcUpdatingToolbarFromSelection)mcAction.run();});
-        mcSelectionFormatButtons.put(mcState,mcButton);return mcButton;
+    private Button MCselectionFormatButton(String MCstate,Feather MCicon,String MCdescription,Runnable MCaction){
+        Button MCbutton=MCribbonButton("",MCicon,MCdescription,()->{if(!MCupdatingToolbarFromSelection)MCaction.run();});
+        MCselectionFormatButtons.put(MCstate,MCbutton);return MCbutton;
     }
-    private ToggleButton mcRibbonToggle(String mcText,Feather mcIcon,String mcDescription,boolean mcSelected,Runnable mcAction){
-        ToggleButton mcControl=mcRibbonControl(new ToggleButton(mcText,new FontIcon(mcIcon)),mcDescription);mcControl.setSelected(mcSelected);mcControl.setOnAction(mcE->mcSafe(mcAction));return mcControl;
+    private ToggleButton MCribbonToggle(String MCtext,Feather MCicon,String MCdescription,boolean MCselected,Runnable MCaction){
+        ToggleButton MCcontrol=MCribbonControl(new ToggleButton(MCtext,new FontIcon(MCicon)),MCdescription);MCcontrol.setSelected(MCselected);MCcontrol.setOnAction(MCe->MCsafe(MCaction));return MCcontrol;
     }
-    private MenuButton mcRibbonMenu(String mcText,Feather mcIcon,String mcDescription){return mcRibbonControl(new MenuButton(mcText,new FontIcon(mcIcon)),mcDescription);}
-    private MenuItem mcRibbonItem(String mcText,Feather mcIcon,String mcDescription,Runnable mcAction){
-        Label mcLabel=new Label(mcText,new FontIcon(mcIcon));mcLabel.setMaxWidth(Double.MAX_VALUE);Tooltip mcTooltip=new Tooltip(mcDescription);Tooltip.install(mcLabel,mcTooltip);
-        CustomMenuItem mcItem=new CustomMenuItem(mcLabel);mcItem.setText(mcText);mcItem.getProperties().put("ribbon-tooltip",mcTooltip);mcItem.setOnAction(mcE->mcSafe(mcAction));return mcItem;
+    private MenuButton MCribbonMenu(String MCtext,Feather MCicon,String MCdescription){return MCribbonControl(new MenuButton(MCtext,new FontIcon(MCicon)),MCdescription);}
+    private MenuItem MCribbonItem(String MCtext,Feather MCicon,String MCdescription,Runnable MCaction){
+        Label MClabel=new Label(MCtext,new FontIcon(MCicon));MClabel.setMaxWidth(Double.MAX_VALUE);Tooltip MCtooltip=new Tooltip(MCdescription);Tooltip.install(MClabel,MCtooltip);
+        CustomMenuItem MCitem=new CustomMenuItem(MClabel);MCitem.setText(MCtext);MCitem.getProperties().put("ribbon-tooltip",MCtooltip);MCitem.setOnAction(MCe->MCsafe(MCaction));return MCitem;
     }
-    private VBox mcRibbonGroup(String mcTitle,Node... mcControls){
-        HBox mcRow=new HBox(3,mcControls);mcRow.setAlignment(Pos.CENTER_LEFT);Label mcCaption=new Label(mcTitle);mcCaption.getStyleClass().add("ribbon-caption");
-        VBox mcGroup=new VBox(3,mcRow,mcCaption);mcGroup.setAlignment(Pos.CENTER);mcGroup.getStyleClass().add("ribbon-group");return mcGroup;
+    private VBox MCribbonGroup(String MCtitle,Node... MCcontrols){
+        HBox MCrow=new HBox(3,MCcontrols);MCrow.setAlignment(Pos.CENTER_LEFT);Label MCcaption=new Label(MCtitle);MCcaption.getStyleClass().add("ribbon-caption");
+        VBox MCgroup=new VBox(3,MCrow,MCcaption);MCgroup.setAlignment(Pos.CENTER);MCgroup.getStyleClass().add("ribbon-group");return MCgroup;
     }
-    private HBox mcRibbonRow(Node... mcGroups){
-        HBox mcRow=new HBox(3);mcRow.setAlignment(Pos.CENTER_LEFT);for(Node mcGroup:mcGroups){if(!mcRow.getChildren().isEmpty()){Separator mcSeparator=new Separator(Orientation.VERTICAL);mcSeparator.getStyleClass().add("ribbon-sep");mcRow.getChildren().add(mcSeparator);}mcRow.getChildren().add(mcGroup);}return mcRow;
+    private HBox MCribbonRow(Node... MCgroups){
+        HBox MCrow=new HBox(3);MCrow.setAlignment(Pos.CENTER_LEFT);for(Node MCgroup:MCgroups){if(!MCrow.getChildren().isEmpty()){Separator MCseparator=new Separator(Orientation.VERTICAL);MCseparator.getStyleClass().add("ribbon-sep");MCrow.getChildren().add(MCseparator);}MCrow.getChildren().add(MCgroup);}return MCrow;
     }
-    private MenuButton mcTableGrid(){
-        MenuButton mcPicker=mcRibbonMenu("Tabla",Feather.GRID,"Insertar tabla — Agrega una tabla editable de filas y columnas en la posición del cursor");
-        GridPane mcGrid=new GridPane();mcGrid.setHgap(2);mcGrid.setVgap(2);Label mcDimensions=new Label("Seleccione filas y columnas");VBox mcContent=new VBox(5,mcDimensions,mcGrid);
-        for(int mcRow=1;mcRow<=8;mcRow++)for(int mcCol=1;mcCol<=8;mcCol++){
-            final int mcRows=mcRow,mcCols=mcCol;Button mcSquare=mcRibbonControl(new Button(),"Insertar tabla — "+mcCols+" columnas × "+mcRows+" filas");mcSquare.getStyleClass().add("ribbon-grid-cell");mcSquare.setMinSize(21,21);mcSquare.setPrefSize(21,21);mcSquare.setMaxSize(21,21);
-            mcSquare.setOnMouseEntered(mcE->{mcDimensions.setText(mcCols+" columnas × "+mcRows+" filas");for(Node mcN:mcGrid.getChildren()){int mcC=GridPane.getColumnIndex(mcN)==null?0:GridPane.getColumnIndex(mcN),mcR=GridPane.getRowIndex(mcN)==null?0:GridPane.getRowIndex(mcN);if(mcC<mcCols&&mcR<mcRows){if(!mcN.getStyleClass().contains("accent"))mcN.getStyleClass().add("accent");}else mcN.getStyleClass().remove("accent");}});
-            mcSquare.setOnAction(mcE->{mcPicker.hide();if(mcEditorReady)mcRichEditor.getEngine().executeScript("window.mcStudio.mcInsertTable("+mcCols+","+mcRows+")");});mcGrid.add(mcSquare,mcCol-1,mcRow-1);
+    private MenuButton MCtableGrid(){
+        MenuButton MCpicker=MCribbonMenu("Tabla",Feather.GRID,"Insertar tabla — Agrega una tabla editable de filas y columnas en la posición del cursor");
+        GridPane MCgrid=new GridPane();MCgrid.setHgap(2);MCgrid.setVgap(2);Label MCdimensions=new Label("Seleccione filas y columnas");VBox MCcontent=new VBox(5,MCdimensions,MCgrid);
+        for(int MCrow=1;MCrow<=8;MCrow++)for(int MCcol=1;MCcol<=8;MCcol++){
+            final int MCrows=MCrow,MCcols=MCcol;Button MCsquare=MCribbonControl(new Button(),"Insertar tabla — "+MCcols+" columnas × "+MCrows+" filas");MCsquare.getStyleClass().add("ribbon-grid-cell");MCsquare.setMinSize(21,21);MCsquare.setPrefSize(21,21);MCsquare.setMaxSize(21,21);
+            MCsquare.setOnMouseEntered(MCe->{MCdimensions.setText(MCcols+" columnas × "+MCrows+" filas");for(Node MCn:MCgrid.getChildren()){int MCc=GridPane.getColumnIndex(MCn)==null?0:GridPane.getColumnIndex(MCn),MCr=GridPane.getRowIndex(MCn)==null?0:GridPane.getRowIndex(MCn);if(MCc<MCcols&&MCr<MCrows){if(!MCn.getStyleClass().contains("accent"))MCn.getStyleClass().add("accent");}else MCn.getStyleClass().remove("accent");}});
+            MCsquare.setOnAction(MCe->{MCpicker.hide();if(MCeditorReady)MCrichEditor.getEngine().executeScript("window.MCstudio.MCinsertTable("+MCcols+","+MCrows+")");});MCgrid.add(MCsquare,MCcol-1,MCrow-1);
         }
-        mcPicker.getItems().add(new CustomMenuItem(mcContent,false));return mcPicker;
+        MCpicker.getItems().add(new CustomMenuItem(MCcontent,false));return MCpicker;
     }
-    private Node mcBuildEditorTools(){
-        mcFontChoice.setEditable(false);mcFontChoice.setPrefWidth(130);mcFontChoice.getItems().setAll(Font.getFamilies().stream().filter(mcF->!mcF.toLowerCase().contains("symbol")).toList());mcFontChoice.setPromptText("Fuente");mcFontChoice.setValue("Arial");mcRibbonControl(mcFontChoice,"Fuente — Cambia la tipografía del texto seleccionado");mcRibbonChoice(mcFontChoice,Feather.TYPE);mcFontChoice.setOnAction(mcE->{if(!mcUpdatingToolbarFromSelection&&mcFontChoice.getValue()!=null)mcEditorCommand("fontName",mcFontChoice.getValue());});
-        ComboBox<Integer> mcFontSize=mcRibbonControl(mcFontSizeChoice,"Tamaño de fuente — Cambia el tamaño del texto seleccionado en puntos");mcFontSize.getItems().setAll(8,9,10,11,12,14,16,18,20,24,28,36,48,72);mcRibbonChoice(mcFontSize,Feather.TYPE);mcFontSize.setValue(12);mcFontSize.setPrefWidth(80);mcFontSize.setOnAction(mcE->{if(!mcUpdatingToolbarFromSelection&&mcEditorReady&&mcFontSize.getValue()!=null)mcRichEditor.getEngine().executeScript("window.mcStudio.mcFontSize("+mcFontSize.getValue()+")");});
-        ColorPicker mcColor=mcRibbonControl(mcEditorTextColor,"Color de texto — Aplica un color al texto seleccionado");mcColor.setPrefWidth(36);mcColor.setOnAction(mcE->mcEditorCommand("foreColor","#"+mcColor.getValue().toString().substring(2,8)));
-        ColorPicker mcHighlight=mcRibbonControl(mcEditorHighlightColor,"Resaltado — Destaca el texto seleccionado con un color de fondo");mcHighlight.setPrefWidth(36);mcHighlight.setOnAction(mcE->mcEditorCommand("hiliteColor","#"+mcHighlight.getValue().toString().substring(2,8)));
-        HBox mcTextColor=new HBox(2,new Label("",new FontIcon(Feather.TYPE)),mcColor),mcTextHighlight=new HBox(2,new Label("",new FontIcon(Feather.EDIT_3)),mcHighlight);mcTextColor.setAlignment(Pos.CENTER_LEFT);mcTextHighlight.setAlignment(Pos.CENTER_LEFT);
-        HBox mcHome=mcRibbonRow(
-            mcRibbonGroup("Historial",mcRibbonButton("",Feather.ROTATE_CCW,"Deshacer — Revierte la última edición del documento",()->mcEditorCommand("undo")),mcRibbonButton("",Feather.ROTATE_CW,"Rehacer — Recupera la última edición deshecha",()->mcEditorCommand("redo"))),
-            mcRibbonGroup("Fuente",mcFontChoice,mcFontSize,mcSelectionFormatButton("bold",Feather.BOLD,"Negrita — Resalta el texto seleccionado con trazo grueso",()->mcEditorCommand("bold")),mcSelectionFormatButton("italic",Feather.ITALIC,"Cursiva — Inclina el texto seleccionado",()->mcEditorCommand("italic")),mcSelectionFormatButton("underline",Feather.UNDERLINE,"Subrayado — Traza una línea bajo el texto seleccionado",()->mcEditorCommand("underline")),mcTextColor,mcTextHighlight),
-            mcRibbonGroup("Párrafo",mcSelectionFormatButton("left",Feather.ALIGN_LEFT,"Alinear izquierda — Alinea el párrafo al margen izquierdo",()->mcEditorCommand("justifyLeft")),mcSelectionFormatButton("center",Feather.ALIGN_CENTER,"Centrar — Centra el párrafo entre los márgenes",()->mcEditorCommand("justifyCenter")),mcSelectionFormatButton("right",Feather.ALIGN_RIGHT,"Alinear derecha — Alinea el párrafo al margen derecho",()->mcEditorCommand("justifyRight")),mcSelectionFormatButton("justify",Feather.ALIGN_JUSTIFY,"Justificar — Distribuye el párrafo entre ambos márgenes",()->mcEditorCommand("justifyFull")),mcSelectionFormatButton("bulletList",Feather.LIST,"Viñetas — Activa o quita las viñetas de los párrafos seleccionados",()->mcEditorScript("mcList('bullet')")),mcSelectionFormatButton("numberedList",Feather.HASH,"Numeración — Activa o quita la numeración de los párrafos seleccionados",()->mcEditorScript("mcList('decimal')"))));
-        MenuButton mcImage=mcRibbonMenu("Imagen",Feather.IMAGE,"Insertar imagen — Agrega una imagen en la posición del cursor");mcImage.getItems().add(mcRibbonItem("Desde este dispositivo...",Feather.UPLOAD,"Desde este dispositivo — Selecciona una imagen PNG o JPG del equipo",()->mcInsertImage(false)));
-        MenuButton mcHeader=mcRibbonMenu("Encabezado",Feather.ARROW_UP_CIRCLE,"Encabezado — Agrega texto o una imagen al encabezado del documento");mcHeader.getItems().addAll(mcRibbonItem("Agregar encabezado",Feather.TYPE,"Agregar encabezado — Inserta texto en la parte superior del documento",()->mcAddHeaderFooter(true)),mcRibbonItem("Imagen en encabezado",Feather.IMAGE,"Imagen en encabezado — Agrega una imagen a la cabecera del documento",()->mcInsertImage(true)));
-        MenuButton mcFooter=mcRibbonMenu("Pie de página",Feather.ARROW_DOWN_CIRCLE,"Pie de página — Agrega texto, imágenes o numeración al pie del documento");mcFooter.getItems().addAll(mcRibbonItem("Agregar pie",Feather.TYPE,"Agregar pie — Inserta texto al pie del documento",()->mcAddHeaderFooter(false)),mcRibbonItem("Imagen en pie",Feather.IMAGE,"Imagen en pie — Agrega una imagen al pie del documento",this::mcInsertImageInFooter),mcRibbonItem("Número de página",Feather.HASH,"Número de página — Inserta el campo de numeración de páginas en el pie",this::mcInsertPageNumber));
-        HBox mcInsert=mcRibbonRow(mcRibbonGroup("Elementos",mcTableGrid(),mcImage,mcRibbonButton("Salto",Feather.FILE_PLUS,"Salto de página — Comienza una página nueva en el documento",this::mcInsertPageBreak),mcRibbonButton("Línea",Feather.MINUS,"Línea separadora — Inserta una línea horizontal en la posición del cursor",()->mcEditorScript("mcInsertRule()")),mcRibbonButton("Variable",Feather.CODE,"Insertar variable — Inserta la variable seleccionada en la posición del cursor",this::mcInsertSelected)),mcRibbonGroup("Documento",mcHeader,mcFooter));
-        mcPaperChoice.getItems().setAll("A4","Carta");mcPaperChoice.setValue("A4");mcPaperChoice.setPrefWidth(85);mcRibbonChoice(mcPaperChoice,Feather.FILE);mcRibbonControl(mcPaperChoice,"Papel — Selecciona el tamaño A4 o Carta del documento");mcPaperChoice.setOnAction(mcE->{if(!mcReadingPageSize)mcSetPaperSize();});
-        mcZoomChoice.getItems().setAll("Ancho","Página","75%","100%","125%","150%","200%");mcZoomChoice.setValue("Ancho");mcZoomChoice.setPrefWidth(110);mcRibbonChoice(mcZoomChoice,Feather.ZOOM_IN);mcRibbonControl(mcZoomChoice,"Zoom — Ajusta el documento al ancho, a la página o a un porcentaje");mcZoomChoice.setOnAction(mcE->{mcZoomMode=mcZoomChoice.getValue();mcUpdateZoom();});
-        mcGuidesView=mcRibbonToggle("Márgenes",Feather.LAYOUT,"Guías de página — Muestra u oculta los límites de los márgenes",false,()->mcUpdateEditorView());
-        mcRulersView=mcRibbonToggle("Regla",Feather.EYE,"Regla — Muestra u oculta las reglas del documento",true,()->mcUpdateEditorView());
-        mcVariablesView=mcRibbonToggle("Variables",Feather.SLIDERS,"Panel de Variables — Muestra u oculta el panel lateral de variables",true,()->mcPaletteToggle.fire());
-        HBox mcView=mcRibbonRow(mcRibbonGroup("Zoom",mcRibbonButton("",Feather.ZOOM_OUT,"Alejar — Reduce el zoom del documento",()->mcAdjustEditorZoom(-.1)),mcZoomPercent,mcRibbonButton("",Feather.ZOOM_IN,"Acercar — Aumenta el zoom del documento",()->mcAdjustEditorZoom(.1)),mcRibbonButton("100%",Feather.MAXIMIZE_2,"Restablecer zoom — Muestra el documento al 100%",()->mcSetEditorZoom(1)),mcZoomChoice),mcRibbonGroup("Visualización",mcGuidesView,mcRulersView,mcVariablesView),mcRibbonGroup("Papel",mcPaperChoice,mcPageIndicator));
-        TabPane mcTools=new TabPane();mcTools.getStyleClass().add("editor-ribbon");Map<String,Node> mcSections=new LinkedHashMap<>();mcSections.put("Inicio",mcHome);mcSections.put("Insertar",mcInsert);mcSections.put("Vista",mcView);
-        for(var mcEntry:mcSections.entrySet()){ScrollPane mcStrip=new ScrollPane(mcEntry.getValue());mcStrip.setFitToHeight(true);mcStrip.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);mcStrip.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);mcStrip.getStyleClass().add("ribbon-strip");Tab mcTab=new Tab(mcEntry.getKey(),mcStrip);mcTab.getStyleClass().add("ribbon-tab");mcTab.setTooltip(new Tooltip(mcEntry.getKey()+" — Herramientas de "+mcEntry.getKey().toLowerCase()));mcTab.setClosable(false);mcTools.getTabs().add(mcTab);}
-        mcTools.setMinHeight(94);mcTools.setPrefHeight(94);mcTools.setMaxHeight(94);
-        mcTableTools=new HBox(4);mcTableTools.getStyleClass().add("ribbon-context");mcTableTools.setVisible(false);mcTableTools.setManaged(false);
-        MenuButton mcBorders=mcRibbonMenu("Bordes",Feather.GRID,"Bordes — Selecciona los bordes visibles de la tabla");for(String[] mcB:new String[][]{{"Todos los bordes","all"},{"Sin bordes","none"},{"Bordes exteriores","outer"},{"Bordes interiores","inner"}})mcBorders.getItems().add(mcRibbonItem(mcB[0],Feather.GRID,mcB[0]+" — Aplica esta disposición de bordes a la tabla",()->mcTableAction("borders",mcB[1])));
-        MenuButton mcBorderStyle=mcRibbonMenu("Estilo",Feather.EDIT_3,"Estilo de bordes — Selecciona líneas sencillas, dobles o discontinuas");for(String[] mcStyle:new String[][]{{"Sencillo","solid"},{"Doble","double"},{"Discontinuo","dashed"}})mcBorderStyle.getItems().add(mcRibbonItem(mcStyle[0],Feather.MINUS,mcStyle[0]+" — Cambia el trazo de los bordes de la tabla",()->mcTableAction("borderStyle",mcStyle[1])));
-        ComboBox<String> mcThickness=mcRibbonControl(new ComboBox<>(),"Grosor de bordes — Cambia el grosor de las líneas de la tabla");mcThickness.getItems().setAll("1","2","3");mcThickness.setValue("1");mcThickness.setPrefWidth(65);mcThickness.setOnAction(mcE->mcTableAction("borderWidth",mcThickness.getValue()));
-        ColorPicker mcBorderColor=mcRibbonControl(new ColorPicker(Color.GRAY),"Color de bordes — Cambia el color de las líneas de la tabla");mcBorderColor.setPrefWidth(36);mcBorderColor.setOnAction(mcE->mcTableAction("borderColor","#"+mcBorderColor.getValue().toString().substring(2,8)));
-        MenuButton mcRemove=mcRibbonMenu("Eliminar",Feather.TRASH_2,"Eliminar de tabla — Quita la fila, columna o tabla seleccionada");for(String[] mcA:new String[][]{{"Eliminar fila","deleteRow"},{"Eliminar columna","deleteColumn"},{"Eliminar tabla completa","deleteTable"}})mcRemove.getItems().add(mcRibbonItem(mcA[0],Feather.TRASH_2,mcA[0]+" — Elimina este elemento de la tabla",()->mcTableAction(mcA[1])));
-        mcTableTools.getChildren().addAll(new Label("TABLA"),mcBorders,mcBorderStyle,mcThickness,mcBorderColor,mcRemove);
-        mcImageTools=new HBox(4,new Label("IMAGEN"),mcRibbonButton("Reducir",Feather.MINUS,"Reducir imagen — Disminuye el tamaño de la imagen seleccionada",()->mcImageAction("smaller")),mcRibbonButton("Ampliar",Feather.PLUS,"Ampliar imagen — Aumenta el tamaño de la imagen seleccionada",()->mcImageAction("larger")),mcRibbonButton("",Feather.ALIGN_LEFT,"Imagen a la izquierda — Alinea la imagen al margen izquierdo",()->mcImageAction("left")),mcRibbonButton("",Feather.ALIGN_CENTER,"Centrar imagen — Centra la imagen entre los márgenes",()->mcImageAction("center")),mcRibbonButton("",Feather.ALIGN_RIGHT,"Imagen a la derecha — Alinea la imagen al margen derecho",()->mcImageAction("right")),mcRibbonButton("Eliminar",Feather.TRASH_2,"Eliminar imagen — Quita la imagen seleccionada del documento",()->mcImageAction("delete")));mcImageTools.getStyleClass().add("ribbon-context");mcImageTools.setVisible(false);mcImageTools.setManaged(false);
-        return new VBox(2,mcTools,mcTableTools,mcImageTools);
+    private Node MCbuildEditorTools(){
+        MCfontChoice.setEditable(false);MCfontChoice.setPrefWidth(130);MCfontChoice.getItems().setAll(Font.getFamilies().stream().filter(MCf->!MCf.toLowerCase().contains("symbol")).toList());MCfontChoice.setPromptText("Fuente");MCfontChoice.setValue("Arial");MCribbonControl(MCfontChoice,"Fuente — Cambia la tipografía del texto seleccionado");MCribbonChoice(MCfontChoice,Feather.TYPE);MCfontChoice.setOnAction(MCe->{if(!MCupdatingToolbarFromSelection&&MCfontChoice.getValue()!=null)MCeditorCommand("fontName",MCfontChoice.getValue());});
+        ComboBox<Integer> MCfontSize=MCribbonControl(MCfontSizeChoice,"Tamaño de fuente — Cambia el tamaño del texto seleccionado en puntos");MCfontSize.getItems().setAll(8,9,10,11,12,14,16,18,20,24,28,36,48,72);MCribbonChoice(MCfontSize,Feather.TYPE);MCfontSize.setValue(12);MCfontSize.setPrefWidth(80);MCfontSize.setOnAction(MCe->{if(!MCupdatingToolbarFromSelection&&MCeditorReady&&MCfontSize.getValue()!=null)MCrichEditor.getEngine().executeScript("window.MCstudio.MCfontSize("+MCfontSize.getValue()+")");});
+        ColorPicker MCcolor=MCribbonControl(MCeditorTextColor,"Color de texto — Aplica un color al texto seleccionado");MCcolor.setPrefWidth(36);MCcolor.setOnAction(MCe->MCeditorCommand("foreColor","#"+MCcolor.getValue().toString().substring(2,8)));
+        ColorPicker MChighlight=MCribbonControl(MCeditorHighlightColor,"Resaltado — Destaca el texto seleccionado con un color de fondo");MChighlight.setPrefWidth(36);MChighlight.setOnAction(MCe->MCeditorCommand("hiliteColor","#"+MChighlight.getValue().toString().substring(2,8)));
+        HBox MCtextColor=new HBox(2,new Label("",new FontIcon(Feather.TYPE)),MCcolor),MCtextHighlight=new HBox(2,new Label("",new FontIcon(Feather.EDIT_3)),MChighlight);MCtextColor.setAlignment(Pos.CENTER_LEFT);MCtextHighlight.setAlignment(Pos.CENTER_LEFT);
+        HBox MChome=MCribbonRow(
+            MCribbonGroup("Historial",MCribbonButton("",Feather.ROTATE_CCW,"Deshacer — Revierte la última edición del documento",()->MCeditorCommand("undo")),MCribbonButton("",Feather.ROTATE_CW,"Rehacer — Recupera la última edición deshecha",()->MCeditorCommand("redo"))),
+            MCribbonGroup("Fuente",MCfontChoice,MCfontSize,MCselectionFormatButton("bold",Feather.BOLD,"Negrita — Resalta el texto seleccionado con trazo grueso",()->MCeditorCommand("bold")),MCselectionFormatButton("italic",Feather.ITALIC,"Cursiva — Inclina el texto seleccionado",()->MCeditorCommand("italic")),MCselectionFormatButton("underline",Feather.UNDERLINE,"Subrayado — Traza una línea bajo el texto seleccionado",()->MCeditorCommand("underline")),MCtextColor,MCtextHighlight),
+            MCribbonGroup("Párrafo",MCselectionFormatButton("left",Feather.ALIGN_LEFT,"Alinear izquierda — Alinea el párrafo al margen izquierdo",()->MCeditorCommand("justifyLeft")),MCselectionFormatButton("center",Feather.ALIGN_CENTER,"Centrar — Centra el párrafo entre los márgenes",()->MCeditorCommand("justifyCenter")),MCselectionFormatButton("right",Feather.ALIGN_RIGHT,"Alinear derecha — Alinea el párrafo al margen derecho",()->MCeditorCommand("justifyRight")),MCselectionFormatButton("justify",Feather.ALIGN_JUSTIFY,"Justificar — Distribuye el párrafo entre ambos márgenes",()->MCeditorCommand("justifyFull")),MCselectionFormatButton("bulletList",Feather.LIST,"Viñetas — Activa o quita las viñetas de los párrafos seleccionados",()->MCeditorScript("MClist('bullet')")),MCselectionFormatButton("numberedList",Feather.HASH,"Numeración — Activa o quita la numeración de los párrafos seleccionados",()->MCeditorScript("MClist('decimal')"))));
+        MenuButton MCimage=MCribbonMenu("Imagen",Feather.IMAGE,"Insertar imagen — Agrega una imagen en la posición del cursor");MCimage.getItems().add(MCribbonItem("Desde este dispositivo...",Feather.UPLOAD,"Desde este dispositivo — Selecciona una imagen PNG o JPG del equipo",()->MCinsertImage(false)));
+        MenuButton MCheader=MCribbonMenu("Encabezado",Feather.ARROW_UP_CIRCLE,"Encabezado — Agrega texto o una imagen al encabezado del documento");MCheader.getItems().addAll(MCribbonItem("Agregar encabezado",Feather.TYPE,"Agregar encabezado — Inserta texto en la parte superior del documento",()->MCaddHeaderFooter(true)),MCribbonItem("Imagen en encabezado",Feather.IMAGE,"Imagen en encabezado — Agrega una imagen a la cabecera del documento",()->MCinsertImage(true)));
+        MenuButton MCfooter=MCribbonMenu("Pie de página",Feather.ARROW_DOWN_CIRCLE,"Pie de página — Agrega texto, imágenes o numeración al pie del documento");MCfooter.getItems().addAll(MCribbonItem("Agregar pie",Feather.TYPE,"Agregar pie — Inserta texto al pie del documento",()->MCaddHeaderFooter(false)),MCribbonItem("Imagen en pie",Feather.IMAGE,"Imagen en pie — Agrega una imagen al pie del documento",this::MCinsertImageInFooter),MCribbonItem("Número de página",Feather.HASH,"Número de página — Inserta el campo de numeración de páginas en el pie",this::MCinsertPageNumber));
+        HBox MCinsert=MCribbonRow(MCribbonGroup("Elementos",MCtableGrid(),MCimage,MCribbonButton("Salto",Feather.FILE_PLUS,"Salto de página — Comienza una página nueva en el documento",this::MCinsertPageBreak),MCribbonButton("Línea",Feather.MINUS,"Línea separadora — Inserta una línea horizontal en la posición del cursor",()->MCeditorScript("MCinsertRule()")),MCribbonButton("Variable",Feather.CODE,"Insertar variable — Inserta la variable seleccionada en la posición del cursor",this::MCinsertSelected)),MCribbonGroup("Documento",MCheader,MCfooter));
+        MCpaperChoice.getItems().setAll("A4","Carta");MCpaperChoice.setValue("A4");MCpaperChoice.setPrefWidth(85);MCribbonChoice(MCpaperChoice,Feather.FILE);MCribbonControl(MCpaperChoice,"Papel — Selecciona el tamaño A4 o Carta del documento");MCpaperChoice.setOnAction(MCe->{if(!MCreadingPageSize)MCsetPaperSize();});
+        MCzoomChoice.getItems().setAll("Ancho","Página","75%","100%","125%","150%","200%");MCzoomChoice.setValue("Ancho");MCzoomChoice.setPrefWidth(110);MCribbonChoice(MCzoomChoice,Feather.ZOOM_IN);MCribbonControl(MCzoomChoice,"Zoom — Ajusta el documento al ancho, a la página o a un porcentaje");MCzoomChoice.setOnAction(MCe->{MCzoomMode=MCzoomChoice.getValue();MCupdateZoom();});
+        MCguidesView=MCribbonToggle("Márgenes",Feather.LAYOUT,"Guías de página — Muestra u oculta los límites de los márgenes",false,()->MCupdateEditorView());
+        MCrulersView=MCribbonToggle("Regla",Feather.EYE,"Regla — Muestra u oculta las reglas del documento",true,()->MCupdateEditorView());
+        MCvariablesView=MCribbonToggle("Variables",Feather.SLIDERS,"Panel de Variables — Muestra u oculta el panel lateral de variables",true,()->MCpaletteToggle.fire());
+        HBox MCview=MCribbonRow(MCribbonGroup("Zoom",MCribbonButton("",Feather.ZOOM_OUT,"Alejar — Reduce el zoom del documento",()->MCadjustEditorZoom(-.1)),MCzoomPercent,MCribbonButton("",Feather.ZOOM_IN,"Acercar — Aumenta el zoom del documento",()->MCadjustEditorZoom(.1)),MCribbonButton("100%",Feather.MAXIMIZE_2,"Restablecer zoom — Muestra el documento al 100%",()->MCsetEditorZoom(1)),MCzoomChoice),MCribbonGroup("Visualización",MCguidesView,MCrulersView,MCvariablesView),MCribbonGroup("Papel",MCpaperChoice,MCpageIndicator));
+        TabPane MCtools=new TabPane();MCtools.getStyleClass().add("editor-ribbon");Map<String,Node> MCsections=new LinkedHashMap<>();MCsections.put("Inicio",MChome);MCsections.put("Insertar",MCinsert);MCsections.put("Vista",MCview);
+        for(var MCentry:MCsections.entrySet()){ScrollPane MCstrip=new ScrollPane(MCentry.getValue());MCstrip.setFitToHeight(true);MCstrip.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);MCstrip.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);MCstrip.getStyleClass().add("ribbon-strip");Tab MCtab=new Tab(MCentry.getKey(),MCstrip);MCtab.getStyleClass().add("ribbon-tab");MCtab.setTooltip(new Tooltip(MCentry.getKey()+" — Herramientas de "+MCentry.getKey().toLowerCase()));MCtab.setClosable(false);MCtools.getTabs().add(MCtab);}
+        MCtools.setMinHeight(94);MCtools.setPrefHeight(94);MCtools.setMaxHeight(94);
+        MCtableTools=new HBox(4);MCtableTools.getStyleClass().add("ribbon-context");MCtableTools.setVisible(false);MCtableTools.setManaged(false);
+        MenuButton MCborders=MCribbonMenu("Bordes",Feather.GRID,"Bordes — Selecciona los bordes visibles de la tabla");for(String[] MCb:new String[][]{{"Todos los bordes","all"},{"Sin bordes","none"},{"Bordes exteriores","outer"},{"Bordes interiores","inner"}})MCborders.getItems().add(MCribbonItem(MCb[0],Feather.GRID,MCb[0]+" — Aplica esta disposición de bordes a la tabla",()->MCtableAction("borders",MCb[1])));
+        MenuButton MCborderStyle=MCribbonMenu("Estilo",Feather.EDIT_3,"Estilo de bordes — Selecciona líneas sencillas, dobles o discontinuas");for(String[] MCstyle:new String[][]{{"Sencillo","solid"},{"Doble","double"},{"Discontinuo","dashed"}})MCborderStyle.getItems().add(MCribbonItem(MCstyle[0],Feather.MINUS,MCstyle[0]+" — Cambia el trazo de los bordes de la tabla",()->MCtableAction("borderStyle",MCstyle[1])));
+        ComboBox<String> MCthickness=MCribbonControl(new ComboBox<>(),"Grosor de bordes — Cambia el grosor de las líneas de la tabla");MCthickness.getItems().setAll("1","2","3");MCthickness.setValue("1");MCthickness.setPrefWidth(65);MCthickness.setOnAction(MCe->MCtableAction("borderWidth",MCthickness.getValue()));
+        ColorPicker MCborderColor=MCribbonControl(new ColorPicker(Color.GRAY),"Color de bordes — Cambia el color de las líneas de la tabla");MCborderColor.setPrefWidth(36);MCborderColor.setOnAction(MCe->MCtableAction("borderColor","#"+MCborderColor.getValue().toString().substring(2,8)));
+        MenuButton MCremove=MCribbonMenu("Eliminar",Feather.TRASH_2,"Eliminar de tabla — Quita la fila, columna o tabla seleccionada");for(String[] MCa:new String[][]{{"Eliminar fila","deleteRow"},{"Eliminar columna","deleteColumn"},{"Eliminar tabla completa","deleteTable"}})MCremove.getItems().add(MCribbonItem(MCa[0],Feather.TRASH_2,MCa[0]+" — Elimina este elemento de la tabla",()->MCtableAction(MCa[1])));
+        MCtableTools.getChildren().addAll(new Label("TABLA"),MCborders,MCborderStyle,MCthickness,MCborderColor,MCremove);
+        MCimageTools=new HBox(4,new Label("IMAGEN"),MCribbonButton("Reducir",Feather.MINUS,"Reducir imagen — Disminuye el tamaño de la imagen seleccionada",()->MCimageAction("smaller")),MCribbonButton("Ampliar",Feather.PLUS,"Ampliar imagen — Aumenta el tamaño de la imagen seleccionada",()->MCimageAction("larger")),MCribbonButton("",Feather.ALIGN_LEFT,"Imagen a la izquierda — Alinea la imagen al margen izquierdo",()->MCimageAction("left")),MCribbonButton("",Feather.ALIGN_CENTER,"Centrar imagen — Centra la imagen entre los márgenes",()->MCimageAction("center")),MCribbonButton("",Feather.ALIGN_RIGHT,"Imagen a la derecha — Alinea la imagen al margen derecho",()->MCimageAction("right")),MCribbonButton("Eliminar",Feather.TRASH_2,"Eliminar imagen — Quita la imagen seleccionada del documento",()->MCimageAction("delete")));MCimageTools.getStyleClass().add("ribbon-context");MCimageTools.setVisible(false);MCimageTools.setManaged(false);
+        return new VBox(2,MCtools,MCtableTools,MCimageTools);
     }
-    private void mcEditorScript(String mcCommand){if(mcEditorReady)mcRichEditor.getEngine().executeScript("window.mcStudio."+mcCommand);}
-    private void mcUpdateEditorView(){if(mcEditorReady){mcEditorScript("mcView('guides',"+mcGuidesView.isSelected()+")");mcEditorScript("mcView('rulers',"+mcRulersView.isSelected()+")");}}
-    private void mcAdjustEditorZoom(double mcChange){mcSetEditorZoom(mcEditorZoom+mcChange);}
-    private void mcSetEditorZoom(double mcScale){mcZoomChoice.setValue(Math.round(Math.max(.25,Math.min(3,mcScale))*100)+"%");}
-    private void mcUpdateEditorSaveStatus(){mcEditorSaveStatus.setText(mcCurrentTemplate==null?"Sin plantilla":mcDirty?"Cambios sin guardar":"Guardado");}
-    private void mcSetLineSpacing(double mcSpacing){if(mcSelectedParagraph==null)return;mcSelectedParagraph.setSpacingBetween(mcSpacing);mcChanged();}
-    private void mcAdjustParagraphSpacing(boolean mcBefore,int mcChange){if(mcSelectedParagraph==null)return;if(mcBefore)mcSelectedParagraph.setSpacingBefore(Math.max(0,mcSelectedParagraph.getSpacingBefore()+mcChange));else mcSelectedParagraph.setSpacingAfter(Math.max(0,mcSelectedParagraph.getSpacingAfter()+mcChange));mcChanged();}
-    private void mcAdjustIndent(int mcChange){if(mcSelectedParagraph==null)return;mcSelectedParagraph.setIndentationLeft(Math.max(0,mcSelectedParagraph.getIndentationLeft()+mcChange));mcChanged();}
-    private void mcSetHeading(String mcStyle){if(mcSelectedParagraph==null)return;mcSelectedParagraph.setStyle(mcStyle);mcChanged();}
-    private void mcClearFormat(){if(mcSelectedRun==null)return;mcSelectedRun.setBold(false);mcSelectedRun.setItalic(false);mcSelectedRun.setUnderline(UnderlinePatterns.NONE);mcSelectedRun.setStrikeThrough(false);mcSelectedRun.setColor("000000");mcSelectedRun.setTextHighlightColor("none");if(mcSelectedRun.getCTR().isSetRPr()){var mcProps=mcSelectedRun.getCTR().getRPr();while(mcProps.sizeOfShdArray()>0)mcProps.removeShd(0);}mcChanged();}
-    private void mcAdjustTable(boolean mcRow,boolean mcAdd){if(mcSelectedParagraph==null||!(mcSelectedParagraph.getBody() instanceof XWPFTableCell mcCell))return;XWPFTable mcTable=mcCell.getTableRow().getTable();if(mcRow){if(mcAdd)mcTable.createRow();else if(mcTable.getNumberOfRows()>1)mcTable.removeRow(mcTable.getRows().indexOf(mcCell.getTableRow()));}else{int mcColumn=mcCell.getTableRow().getTableCells().indexOf(mcCell);for(XWPFTableRow mcR:mcTable.getRows()){if(mcAdd)mcR.addNewTableCell();else if(mcR.getTableCells().size()>1)mcR.removeCell(Math.min(mcColumn,mcR.getTableCells().size()-1));}}mcChanged();}
-    private void mcChanged(){try{mcSyncEditor();}catch(Exception mcEx){mcError(mcEx);return;}mcDirty=true;mcUpdateEditorSaveStatus();mcStatus.setText("Cambios sin guardar");mcRenderDocument();}
-    private void mcUpdateZoom(){double mcViewport=mcRichEditor.getWidth();if(mcViewport<=0||!mcEditorReady)return;double mcScale=switch(mcZoomMode){case "Página"->Math.min((mcViewport-56)/mcPageWidth,(mcRichEditor.getHeight()-80)/mcPageHeight);case "Ancho"->(mcViewport-56)/mcPageWidth;default->Double.parseDouble(mcZoomMode.replace("%",""))/100.0;};mcScale=Math.max(.25,Math.min(3,mcScale));mcEditorZoom=mcScale;mcZoomPercent.setText(Math.round(mcScale*100)+"%");mcRichEditor.getEngine().executeScript("window.mcStudio.mcZoom("+mcScale+")");mcUpdatePageIndicator();}
-    private void mcUpdatePageIndicator(){if(!mcEditorReady)return;try{int mcCurrent=((Number)mcRichEditor.getEngine().executeScript("window.mcStudio.mcCurrentPage()")).intValue(),mcCount=((Number)mcRichEditor.getEngine().executeScript("window.mcStudio.mcPageCount()")).intValue();mcPageIndicator.setText("Página "+Math.min(mcCurrent,mcCount)+" de "+mcCount);}catch(Exception mcIgnored){}}
-    private void mcSetPaperSize(){if(mcDocument==null)return;mcPageWidth="Carta".equals(mcPaperChoice.getValue())?816:794;mcPageHeight="Carta".equals(mcPaperChoice.getValue())?1056:1123;var mcSect=mcDocument.getDocument().getBody().isSetSectPr()?mcDocument.getDocument().getBody().getSectPr():mcDocument.getDocument().getBody().addNewSectPr();var mcSize=mcSect.isSetPgSz()?mcSect.getPgSz():mcSect.addNewPgSz();mcSize.setW(java.math.BigInteger.valueOf(Math.round(mcPageWidth*15)));mcSize.setH(java.math.BigInteger.valueOf(Math.round(mcPageHeight*15)));mcChanged();}
-    private void mcToggleOrientation(){if(mcDocument==null)return;double mcW=mcPageWidth;mcPageWidth=mcPageHeight;mcPageHeight=mcW;var mcSect=mcDocument.getDocument().getBody().isSetSectPr()?mcDocument.getDocument().getBody().getSectPr():mcDocument.getDocument().getBody().addNewSectPr();var mcSize=mcSect.isSetPgSz()?mcSect.getPgSz():mcSect.addNewPgSz();mcSize.setW(java.math.BigInteger.valueOf(Math.round(mcPageWidth*15)));mcSize.setH(java.math.BigInteger.valueOf(Math.round(mcPageHeight*15)));mcChanged();}
-    private void mcSetMargins(int mcTwips){if(mcDocument==null)return;var mcSect=mcDocument.getDocument().getBody().isSetSectPr()?mcDocument.getDocument().getBody().getSectPr():mcDocument.getDocument().getBody().addNewSectPr();var mcMargin=mcSect.isSetPgMar()?mcSect.getPgMar():mcSect.addNewPgMar();long mcN=mcTwips;mcMargin.setLeft(java.math.BigInteger.valueOf(mcN));mcMargin.setRight(java.math.BigInteger.valueOf(mcN));mcMargin.setTop(java.math.BigInteger.valueOf(mcN));mcMargin.setBottom(java.math.BigInteger.valueOf(mcN));mcChanged();}
-    private void mcInsertTable(){if(mcDocument==null)return;mcDocument.createTable(2,2);mcChanged();}
-    private void mcInsertPageBreak(){if(mcDocument==null)return;XWPFParagraph mcP=mcDocument.createParagraph();mcP.setPageBreak(true);mcChanged();}
-    private void mcAddHeaderFooter(boolean mcHeader){if(mcDocument==null)return;XWPFHeaderFooter mcPart=mcHeader?(mcDocument.getHeaderList().isEmpty()?mcDocument.createHeader(HeaderFooterType.DEFAULT):mcDocument.getHeaderList().get(0)):(mcDocument.getFooterList().isEmpty()?mcDocument.createFooter(HeaderFooterType.DEFAULT):mcDocument.getFooterList().get(0));mcPart.createParagraph().createRun().setText(mcHeader?"Encabezado":"Pie de página");mcChanged();}
-    private void mcInsertPageNumber(){if(mcDocument==null)return;XWPFFooter mcFooter=mcDocument.getFooterList().isEmpty()?mcDocument.createFooter(HeaderFooterType.DEFAULT):mcDocument.getFooterList().get(0);XWPFRun mcRun=mcFooter.createParagraph().createRun();mcRun.getCTR().addNewFldChar().setFldCharType(org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType.BEGIN);XWPFRun mcInstruction=mcFooter.getParagraphs().get(mcFooter.getParagraphs().size()-1).createRun();mcInstruction.getCTR().addNewInstrText().setStringValue(" PAGE ");XWPFRun mcEnd=mcFooter.getParagraphs().get(mcFooter.getParagraphs().size()-1).createRun();mcEnd.getCTR().addNewFldChar().setFldCharType(org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType.END);mcChanged();}
-    private void mcInsertImage(boolean mcHeader){if(mcDocument==null)return;FileChooser mcChooser=new FileChooser();mcChooser.setTitle("Insertar imagen");mcChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes PNG/JPG","*.png","*.jpg","*.jpeg"));File mcFile=mcChooser.showOpenDialog(mcStage);if(mcFile==null)return;try(InputStream mcIn=Files.newInputStream(mcFile.toPath())){Image mcSource=new Image(mcFile.toURI().toString());if(mcSource.isError()||mcSource.getWidth()<=0)throw new IOException("No se pudo leer la imagen.");double mcWidth=Math.min(300,mcSource.getWidth()*72/96),mcHeight=mcWidth*mcSource.getHeight()/mcSource.getWidth();if(mcHeight>600){mcWidth*=600/mcHeight;mcHeight=600;}if(!mcHeader&&mcEditorReady){String mcMime=mcFile.getName().toLowerCase().endsWith(".png")?"image/png":"image/jpeg";String mcUri="data:"+mcMime+";base64,"+Base64.getEncoder().encodeToString(Files.readAllBytes(mcFile.toPath()));if(Boolean.TRUE.equals(mcRichEditor.getEngine().executeScript("window.mcStudio.mcInsertImage("+mcJsonString(mcUri)+","+Math.round(mcWidth*96/72)+","+Math.round(mcHeight*96/72)+")")))return;throw new IllegalArgumentException("Coloque el cursor en el documento antes de insertar la imagen.");}XWPFHeader mcH=mcDocument.getHeaderList().isEmpty()?mcDocument.createHeader(HeaderFooterType.DEFAULT):mcDocument.getHeaderList().get(0);XWPFParagraph mcP=mcH.createParagraph();int mcType=mcFile.getName().toLowerCase().endsWith(".png")?XWPFDocument.PICTURE_TYPE_PNG:XWPFDocument.PICTURE_TYPE_JPEG;mcP.createRun().addPicture(mcIn,mcType,mcFile.getName(),Units.toEMU(mcWidth),Units.toEMU(mcHeight));mcChanged();}catch(Exception mcE){mcError(mcE);}}
-    private void mcInsertImageInFooter(){if(mcDocument==null)return;FileChooser mcChooser=new FileChooser();mcChooser.setTitle("Imagen en pie de página");mcChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes PNG/JPG","*.png","*.jpg","*.jpeg"));File mcFile=mcChooser.showOpenDialog(mcStage);if(mcFile==null)return;try(InputStream mcIn=Files.newInputStream(mcFile.toPath())){Image mcSource=new Image(mcFile.toURI().toString());if(mcSource.isError()||mcSource.getWidth()<=0)throw new IOException("No se pudo leer la imagen.");double mcWidth=Math.min(300,mcSource.getWidth()*72/96),mcHeight=mcWidth*mcSource.getHeight()/mcSource.getWidth();XWPFFooter mcFooter=mcDocument.getFooterList().isEmpty()?mcDocument.createFooter(HeaderFooterType.DEFAULT):mcDocument.getFooterList().get(0);int mcType=mcFile.getName().toLowerCase().endsWith(".png")?XWPFDocument.PICTURE_TYPE_PNG:XWPFDocument.PICTURE_TYPE_JPEG;mcFooter.createParagraph().createRun().addPicture(mcIn,mcType,mcFile.getName(),Units.toEMU(mcWidth),Units.toEMU(mcHeight));mcChanged();}catch(Exception mcEx){mcError(mcEx);}}
-    private void mcResizePicture(XWPFRun mcRun,XWPFPicture mcPicture,double mcFactor){var mcInline=mcRun.getCTR().getDrawingArray(0).getInlineArray(0);if(mcInline.getExtent()==null)return;long mcWidth=Math.max(Units.toEMU(20),Math.round(mcInline.getExtent().getCx()*mcFactor));long mcHeight=Math.max(Units.toEMU(20),Math.round(mcInline.getExtent().getCy()*mcFactor));mcInline.getExtent().setCx(mcWidth);mcInline.getExtent().setCy(mcHeight);var mcShape=mcPicture.getCTPicture().getSpPr();if(mcShape!=null&&mcShape.isSetXfrm()&&mcShape.getXfrm().isSetExt()){mcShape.getXfrm().getExt().setCx(mcWidth);mcShape.getXfrm().getExt().setCy(mcHeight);}mcChanged();}
-    private boolean mcInsertToken(TextField mcField,String mcReference){
-        if(mcCurrentTemplate==null){mcSaved("Primero cree o importe una plantilla");return false;}
+    private void MCeditorScript(String MCcommand){if(MCeditorReady)MCrichEditor.getEngine().executeScript("window.MCstudio."+MCcommand);}
+    private void MCupdateEditorView(){if(MCeditorReady){MCeditorScript("MCview('guides',"+MCguidesView.isSelected()+")");MCeditorScript("MCview('rulers',"+MCrulersView.isSelected()+")");}}
+    private void MCadjustEditorZoom(double MCchange){MCsetEditorZoom(MCeditorZoom+MCchange);}
+    private void MCsetEditorZoom(double MCscale){MCzoomChoice.setValue(Math.round(Math.max(.25,Math.min(3,MCscale))*100)+"%");}
+    private void MCupdateEditorSaveStatus(){MCeditorSaveStatus.setText(MCcurrentTemplate==null?"Sin plantilla":MCdirty?"Cambios sin guardar":"Guardado");}
+    private void MCsetLineSpacing(double MCspacing){if(MCselectedParagraph==null)return;MCselectedParagraph.setSpacingBetween(MCspacing);MCchanged();}
+    private void MCadjustParagraphSpacing(boolean MCbefore,int MCchange){if(MCselectedParagraph==null)return;if(MCbefore)MCselectedParagraph.setSpacingBefore(Math.max(0,MCselectedParagraph.getSpacingBefore()+MCchange));else MCselectedParagraph.setSpacingAfter(Math.max(0,MCselectedParagraph.getSpacingAfter()+MCchange));MCchanged();}
+    private void MCadjustIndent(int MCchange){if(MCselectedParagraph==null)return;MCselectedParagraph.setIndentationLeft(Math.max(0,MCselectedParagraph.getIndentationLeft()+MCchange));MCchanged();}
+    private void MCsetHeading(String MCstyle){if(MCselectedParagraph==null)return;MCselectedParagraph.setStyle(MCstyle);MCchanged();}
+    private void MCclearFormat(){if(MCselectedRun==null)return;MCselectedRun.setBold(false);MCselectedRun.setItalic(false);MCselectedRun.setUnderline(UnderlinePatterns.NONE);MCselectedRun.setStrikeThrough(false);MCselectedRun.setColor("000000");MCselectedRun.setTextHighlightColor("none");if(MCselectedRun.getCTR().isSetRPr()){var MCprops=MCselectedRun.getCTR().getRPr();while(MCprops.sizeOfShdArray()>0)MCprops.removeShd(0);}MCchanged();}
+    private void MCadjustTable(boolean MCrow,boolean MCadd){if(MCselectedParagraph==null||!(MCselectedParagraph.getBody() instanceof XWPFTableCell MCcell))return;XWPFTable MCtable=MCcell.getTableRow().getTable();if(MCrow){if(MCadd)MCtable.createRow();else if(MCtable.getNumberOfRows()>1)MCtable.removeRow(MCtable.getRows().indexOf(MCcell.getTableRow()));}else{int MCcolumn=MCcell.getTableRow().getTableCells().indexOf(MCcell);for(XWPFTableRow MCr:MCtable.getRows()){if(MCadd)MCr.addNewTableCell();else if(MCr.getTableCells().size()>1)MCr.removeCell(Math.min(MCcolumn,MCr.getTableCells().size()-1));}}MCchanged();}
+    private void MCchanged(){try{MCsyncEditor();}catch(Exception MCex){MCerror(MCex);return;}MCdirty=true;MCupdateEditorSaveStatus();MCstatus.setText("Cambios sin guardar");MCrenderDocument();}
+    private void MCupdateZoom(){double MCviewport=MCrichEditor.getWidth();if(MCviewport<=0||!MCeditorReady)return;double MCscale=switch(MCzoomMode){case "Página"->Math.min((MCviewport-56)/MCpageWidth,(MCrichEditor.getHeight()-80)/MCpageHeight);case "Ancho"->(MCviewport-56)/MCpageWidth;default->Double.parseDouble(MCzoomMode.replace("%",""))/100.0;};MCscale=Math.max(.25,Math.min(3,MCscale));MCeditorZoom=MCscale;MCzoomPercent.setText(Math.round(MCscale*100)+"%");MCrichEditor.getEngine().executeScript("window.MCstudio.MCzoom("+MCscale+")");MCupdatePageIndicator();}
+    private void MCupdatePageIndicator(){if(!MCeditorReady)return;try{int MCcurrent=((Number)MCrichEditor.getEngine().executeScript("window.MCstudio.MCcurrentPage()")).intValue(),MCcount=((Number)MCrichEditor.getEngine().executeScript("window.MCstudio.MCpageCount()")).intValue();MCpageIndicator.setText("Página "+Math.min(MCcurrent,MCcount)+" de "+MCcount);}catch(Exception MCignored){}}
+    private void MCsetPaperSize(){if(MCdocument==null)return;MCpageWidth="Carta".equals(MCpaperChoice.getValue())?816:794;MCpageHeight="Carta".equals(MCpaperChoice.getValue())?1056:1123;var MCsect=MCdocument.getDocument().getBody().isSetSectPr()?MCdocument.getDocument().getBody().getSectPr():MCdocument.getDocument().getBody().addNewSectPr();var MCsize=MCsect.isSetPgSz()?MCsect.getPgSz():MCsect.addNewPgSz();MCsize.setW(java.math.BigInteger.valueOf(Math.round(MCpageWidth*15)));MCsize.setH(java.math.BigInteger.valueOf(Math.round(MCpageHeight*15)));MCchanged();}
+    private void MCtoggleOrientation(){if(MCdocument==null)return;double MCw=MCpageWidth;MCpageWidth=MCpageHeight;MCpageHeight=MCw;var MCsect=MCdocument.getDocument().getBody().isSetSectPr()?MCdocument.getDocument().getBody().getSectPr():MCdocument.getDocument().getBody().addNewSectPr();var MCsize=MCsect.isSetPgSz()?MCsect.getPgSz():MCsect.addNewPgSz();MCsize.setW(java.math.BigInteger.valueOf(Math.round(MCpageWidth*15)));MCsize.setH(java.math.BigInteger.valueOf(Math.round(MCpageHeight*15)));MCchanged();}
+    private void MCsetMargins(int MCtwips){if(MCdocument==null)return;var MCsect=MCdocument.getDocument().getBody().isSetSectPr()?MCdocument.getDocument().getBody().getSectPr():MCdocument.getDocument().getBody().addNewSectPr();var MCmargin=MCsect.isSetPgMar()?MCsect.getPgMar():MCsect.addNewPgMar();long MCn=MCtwips;MCmargin.setLeft(java.math.BigInteger.valueOf(MCn));MCmargin.setRight(java.math.BigInteger.valueOf(MCn));MCmargin.setTop(java.math.BigInteger.valueOf(MCn));MCmargin.setBottom(java.math.BigInteger.valueOf(MCn));MCchanged();}
+    private void MCinsertTable(){if(MCdocument==null)return;MCdocument.createTable(2,2);MCchanged();}
+    private void MCinsertPageBreak(){if(MCdocument==null)return;XWPFParagraph MCp=MCdocument.createParagraph();MCp.setPageBreak(true);MCchanged();}
+    private void MCaddHeaderFooter(boolean MCheader){if(MCdocument==null)return;XWPFHeaderFooter MCpart=MCheader?(MCdocument.getHeaderList().isEmpty()?MCdocument.createHeader(HeaderFooterType.DEFAULT):MCdocument.getHeaderList().get(0)):(MCdocument.getFooterList().isEmpty()?MCdocument.createFooter(HeaderFooterType.DEFAULT):MCdocument.getFooterList().get(0));MCpart.createParagraph().createRun().setText(MCheader?"Encabezado":"Pie de página");MCchanged();}
+    private void MCinsertPageNumber(){if(MCdocument==null)return;XWPFFooter MCfooter=MCdocument.getFooterList().isEmpty()?MCdocument.createFooter(HeaderFooterType.DEFAULT):MCdocument.getFooterList().get(0);XWPFRun MCrun=MCfooter.createParagraph().createRun();MCrun.getCTR().addNewFldChar().setFldCharType(org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType.BEGIN);XWPFRun MCinstruction=MCfooter.getParagraphs().get(MCfooter.getParagraphs().size()-1).createRun();MCinstruction.getCTR().addNewInstrText().setStringValue(" PAGE ");XWPFRun MCend=MCfooter.getParagraphs().get(MCfooter.getParagraphs().size()-1).createRun();MCend.getCTR().addNewFldChar().setFldCharType(org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType.END);MCchanged();}
+    private void MCinsertImage(boolean MCheader){if(MCdocument==null)return;FileChooser MCchooser=new FileChooser();MCchooser.setTitle("Insertar imagen");MCchooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes PNG/JPG","*.png","*.jpg","*.jpeg"));File MCfile=MCchooser.showOpenDialog(MCstage);if(MCfile==null)return;try(InputStream MCin=Files.newInputStream(MCfile.toPath())){Image MCsource=new Image(MCfile.toURI().toString());if(MCsource.isError()||MCsource.getWidth()<=0)throw new IOException("No se pudo leer la imagen.");double MCwidth=Math.min(300,MCsource.getWidth()*72/96),MCheight=MCwidth*MCsource.getHeight()/MCsource.getWidth();if(MCheight>600){MCwidth*=600/MCheight;MCheight=600;}if(!MCheader&&MCeditorReady){String MCmime=MCfile.getName().toLowerCase().endsWith(".png")?"image/png":"image/jpeg";String MCuri="data:"+MCmime+";base64,"+Base64.getEncoder().encodeToString(Files.readAllBytes(MCfile.toPath()));if(Boolean.TRUE.equals(MCrichEditor.getEngine().executeScript("window.MCstudio.MCinsertImage("+MCjsonString(MCuri)+","+Math.round(MCwidth*96/72)+","+Math.round(MCheight*96/72)+")")))return;throw new IllegalArgumentException("Coloque el cursor en el documento antes de insertar la imagen.");}XWPFHeader MCh=MCdocument.getHeaderList().isEmpty()?MCdocument.createHeader(HeaderFooterType.DEFAULT):MCdocument.getHeaderList().get(0);XWPFParagraph MCp=MCh.createParagraph();int MCtype=MCfile.getName().toLowerCase().endsWith(".png")?XWPFDocument.PICTURE_TYPE_PNG:XWPFDocument.PICTURE_TYPE_JPEG;MCp.createRun().addPicture(MCin,MCtype,MCfile.getName(),Units.toEMU(MCwidth),Units.toEMU(MCheight));MCchanged();}catch(Exception MCe){MCerror(MCe);}}
+    private void MCinsertImageInFooter(){if(MCdocument==null)return;FileChooser MCchooser=new FileChooser();MCchooser.setTitle("Imagen en pie de página");MCchooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes PNG/JPG","*.png","*.jpg","*.jpeg"));File MCfile=MCchooser.showOpenDialog(MCstage);if(MCfile==null)return;try(InputStream MCin=Files.newInputStream(MCfile.toPath())){Image MCsource=new Image(MCfile.toURI().toString());if(MCsource.isError()||MCsource.getWidth()<=0)throw new IOException("No se pudo leer la imagen.");double MCwidth=Math.min(300,MCsource.getWidth()*72/96),MCheight=MCwidth*MCsource.getHeight()/MCsource.getWidth();XWPFFooter MCfooter=MCdocument.getFooterList().isEmpty()?MCdocument.createFooter(HeaderFooterType.DEFAULT):MCdocument.getFooterList().get(0);int MCtype=MCfile.getName().toLowerCase().endsWith(".png")?XWPFDocument.PICTURE_TYPE_PNG:XWPFDocument.PICTURE_TYPE_JPEG;MCfooter.createParagraph().createRun().addPicture(MCin,MCtype,MCfile.getName(),Units.toEMU(MCwidth),Units.toEMU(MCheight));MCchanged();}catch(Exception MCex){MCerror(MCex);}}
+    private void MCresizePicture(XWPFRun MCrun,XWPFPicture MCpicture,double MCfactor){var MCinline=MCrun.getCTR().getDrawingArray(0).getInlineArray(0);if(MCinline.getExtent()==null)return;long MCwidth=Math.max(Units.toEMU(20),Math.round(MCinline.getExtent().getCx()*MCfactor));long MCheight=Math.max(Units.toEMU(20),Math.round(MCinline.getExtent().getCy()*MCfactor));MCinline.getExtent().setCx(MCwidth);MCinline.getExtent().setCy(MCheight);var MCshape=MCpicture.getCTPicture().getSpPr();if(MCshape!=null&&MCshape.isSetXfrm()&&MCshape.getXfrm().isSetExt()){MCshape.getXfrm().getExt().setCx(MCwidth);MCshape.getXfrm().getExt().setCy(MCheight);}MCchanged();}
+    private boolean MCinsertToken(TextField MCfield,String MCreference){
+        if(MCcurrentTemplate==null){MCsaved("Primero cree o importe una plantilla");return false;}
         try{
-            String mcKey=mcReference;
-            if(mcReference.startsWith("definition:")){
-                long mcId=Long.parseLong(mcReference.substring("definition:".length()));
-                MCDefinition mcD=mcStore.mcDefinitions().stream().filter(mcX->mcX.mcId()==mcId).findFirst().orElseThrow(()->new IllegalArgumentException("Variable inexistente."));mcKey=mcD.mcKey();
-                MCVariable mcBound=mcStore.mcVariables(mcCurrentTemplate.mcId()).stream().filter(mcV->mcV.mcKey().equals(mcD.mcKey())).findFirst().orElse(null);
-                if(mcBound==null)mcStore.mcBindDefinition(mcCurrentTemplate.mcId(),mcId,false,mcStore.mcVariables(mcCurrentTemplate.mcId()).size()+1);
-                else if(mcStore.mcDefinitionId(mcBound.mcId())!=mcId)throw new IllegalArgumentException("Esta plantilla ya utiliza '"+mcKey+"' con otra definición. Use otro identificador.");
+            String MCkey=MCreference;
+            if(MCreference.startsWith("definition:")){
+                long MCid=Long.parseLong(MCreference.substring("definition:".length()));
+                MCDefinition MCd=MCstore.MCdefinitions().stream().filter(MCx->MCx.MCid()==MCid).findFirst().orElseThrow(()->new IllegalArgumentException("Variable inexistente."));MCkey=MCd.MCkey();
+                MCVariable MCbound=MCstore.MCvariables(MCcurrentTemplate.MCid()).stream().filter(MCv->MCv.MCkey().equals(MCd.MCkey())).findFirst().orElse(null);
+                if(MCbound==null)MCstore.MCbindDefinition(MCcurrentTemplate.MCid(),MCid,false,MCstore.MCvariables(MCcurrentTemplate.MCid()).size()+1);
+                else if(MCstore.MCdefinitionId(MCbound.MCid())!=MCid)throw new IllegalArgumentException("Esta plantilla ya utiliza '"+MCkey+"' con otra definición. Use otro identificador.");
             }
-            mcField.insertText(mcField.getCaretPosition(),"{{"+mcKey+"}}");mcRenderDocument();mcDirty=true;mcSaved("Variable insertada · Guarde la plantilla");return true;
-        }catch(Exception mcE){mcError(mcE);return false;}
+            MCfield.insertText(MCfield.getCaretPosition(),"{{"+MCkey+"}}");MCrenderDocument();MCdirty=true;MCsaved("Variable insertada · Guarde la plantilla");return true;
+        }catch(Exception MCe){MCerror(MCe);return false;}
     }
 
-    private void mcRenderDocument(){mcSelectedText=null;if(mcDocument==null)return;
-        mcPageWidth=794;mcPageHeight=1123;var mcSect=mcDocument.getDocument().getBody().getSectPr();if(mcSect!=null&&mcSect.isSetPgSz()){mcPageWidth=((Number)mcSect.getPgSz().getW()).doubleValue()/15.0;mcPageHeight=((Number)mcSect.getPgSz().getH()).doubleValue()/15.0;}mcReadingPageSize=true;mcPaperChoice.setValue(Math.abs(mcPageWidth-816)<15?"Carta":"A4");mcReadingPageSize=false;
-        double mcLeft=mcSect!=null&&mcSect.isSetPgMar()&&mcSect.getPgMar().getLeft()!=null?((Number)mcSect.getPgMar().getLeft()).doubleValue()/15.0:72;
-        double mcRight=mcSect!=null&&mcSect.isSetPgMar()&&mcSect.getPgMar().getRight()!=null?((Number)mcSect.getPgMar().getRight()).doubleValue()/15.0:mcLeft;
-        double mcTop=mcSect!=null&&mcSect.isSetPgMar()&&mcSect.getPgMar().getTop()!=null?((Number)mcSect.getPgMar().getTop()).doubleValue()/15.0:72;
-        double mcBottom=mcSect!=null&&mcSect.isSetPgMar()&&mcSect.getPgMar().getBottom()!=null?((Number)mcSect.getPgMar().getBottom()).doubleValue()/15.0:mcTop;
-        mcRichModel=new MCContinuousDocxEditor(mcDocument,mcEditorPersonaNames);
-        try(InputStream mcIn=Objects.requireNonNull(getClass().getResourceAsStream("/editor/document-editor.html"))){String mcShell=new String(mcIn.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);String mcHtml=mcShell.replace("__DOCUMENT_CONTENT__",mcRichModel.mcHtml());mcEditorLeft=mcLeft;mcEditorRight=mcRight;mcEditorTop=mcTop;mcEditorBottom=mcBottom;mcEditorReady=false;mcRichEditor.getEngine().loadContent(mcHtml);}catch(Exception mcEx){mcError(mcEx);}
+    private void MCrenderDocument(){MCselectedText=null;if(MCdocument==null)return;
+        MCpageWidth=794;MCpageHeight=1123;var MCsect=MCdocument.getDocument().getBody().getSectPr();if(MCsect!=null&&MCsect.isSetPgSz()){MCpageWidth=((Number)MCsect.getPgSz().getW()).doubleValue()/15.0;MCpageHeight=((Number)MCsect.getPgSz().getH()).doubleValue()/15.0;}MCreadingPageSize=true;MCpaperChoice.setValue(Math.abs(MCpageWidth-816)<15?"Carta":"A4");MCreadingPageSize=false;
+        double MCleft=MCsect!=null&&MCsect.isSetPgMar()&&MCsect.getPgMar().getLeft()!=null?((Number)MCsect.getPgMar().getLeft()).doubleValue()/15.0:72;
+        double MCright=MCsect!=null&&MCsect.isSetPgMar()&&MCsect.getPgMar().getRight()!=null?((Number)MCsect.getPgMar().getRight()).doubleValue()/15.0:MCleft;
+        double MCtop=MCsect!=null&&MCsect.isSetPgMar()&&MCsect.getPgMar().getTop()!=null?((Number)MCsect.getPgMar().getTop()).doubleValue()/15.0:72;
+        double MCbottom=MCsect!=null&&MCsect.isSetPgMar()&&MCsect.getPgMar().getBottom()!=null?((Number)MCsect.getPgMar().getBottom()).doubleValue()/15.0:MCtop;
+        MCrichModel=new MCContinuousDocxEditor(MCdocument,MCeditorPersonaNames);
+        try(InputStream MCin=Objects.requireNonNull(getClass().getResourceAsStream("/editor/document-editor.html"))){String MCshell=new String(MCin.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);String MChtml=MCshell.replace("__DOCUMENT_CONTENT__",MCrichModel.MChtml());MCeditorLeft=MCleft;MCeditorRight=MCright;MCeditorTop=MCtop;MCeditorBottom=MCbottom;MCeditorReady=false;MCrichEditor.getEngine().loadContent(MChtml);}catch(Exception MCex){MCerror(MCex);}
     }
-    private VBox mcNewPage(double mcMargin,double mcTop){VBox mcPage=new VBox(5);mcPage.getStyleClass().add("paper");mcPage.setPrefSize(mcPageWidth,mcPageHeight);mcPage.setMinSize(mcPageWidth,mcPageHeight);mcPage.setMaxWidth(mcPageWidth);mcPage.setPadding(new Insets(mcTop,mcMargin,Math.min(mcTop,72),mcMargin));VBox mcBody=new VBox(5);for(XWPFHeader mcHeader:mcDocument.getHeaderList())for(XWPFParagraph mcP:mcHeader.getParagraphs())mcPage.getChildren().add(mcRenderParagraph(mcP,true));mcPage.getChildren().add(mcBody);Region mcSpacer=new Region();VBox.setVgrow(mcSpacer,Priority.ALWAYS);mcPage.getChildren().add(mcSpacer);for(XWPFFooter mcFooter:mcDocument.getFooterList())for(XWPFParagraph mcP:mcFooter.getParagraphs())mcPage.getChildren().add(mcRenderParagraph(mcP,true));mcPaper.getChildren().add(mcPage);return mcBody;}
-    private double mcEstimateHeight(Node mcNode){if(mcNode instanceof FlowPane mcLine){double mcWidth=Math.max(100,mcPageWidth-150);double mcLength=mcLine.getChildren().stream().mapToDouble(mcN->mcN instanceof TextField mcF?mcF.getPrefWidth():mcN instanceof ImageView mcI?mcI.getFitWidth():70).sum();return Math.max(30,Math.ceil(mcLength/mcWidth)*28);}return 40;}
-    private Node mcRenderParagraph(XWPFParagraph mcP,boolean mcEditable){FlowPane mcLine=new FlowPane(2,3);mcLine.getStyleClass().add("doc-paragraph");mcLine.setAlignment(switch(mcP.getAlignment()){case CENTER->Pos.CENTER;case RIGHT->Pos.CENTER_RIGHT;default->Pos.CENTER_LEFT;});
-        if(mcP.getRuns().isEmpty()&&mcEditable)mcP.createRun().setText("");
-        for(XWPFRun mcRun:mcP.getRuns()){
-            String mcRaw=mcRun.getText(0);if(mcRaw!=null){Matcher mcM=mcTOKEN.matcher(mcRaw);int mcAt=0;while(mcM.find()){if(mcM.start()>mcAt)mcAddTextSegment(mcLine,mcRun,mcP,mcRaw.substring(mcAt,mcM.start()),mcEditable);mcAddToken(mcLine,mcRun,mcM.group(1),mcEditable,mcM.start());mcAt=mcM.end();}if(mcAt<mcRaw.length()||mcRaw.isEmpty())mcAddTextSegment(mcLine,mcRun,mcP,mcRaw.substring(mcAt),mcEditable);}
-            for(XWPFPicture mcPicture:mcRun.getEmbeddedPictures()){try{ImageView mcImage=new ImageView(new Image(new ByteArrayInputStream(mcPicture.getPictureData().getData())));mcImage.setPreserveRatio(true);mcImage.setFitWidth(Math.min(mcPageWidth-160,Math.max(80,mcPicture.getWidth()*96/72)));if(mcEditable&&mcRun.getEmbeddedPictures().size()==1&&mcRun.getCTR().sizeOfDrawingArray()==1&&mcRun.getCTR().getDrawingArray(0).sizeOfInlineArray()==1){MenuItem mcSmaller=new MenuItem("Reducir a 75 %"),mcLarger=new MenuItem("Ampliar a 125 %"),mcRemove=new MenuItem("Eliminar imagen");mcSmaller.setOnAction(mcE->mcResizePicture(mcRun,mcPicture,.75));mcLarger.setOnAction(mcE->mcResizePicture(mcRun,mcPicture,1.25));mcRemove.setOnAction(mcE->{mcRun.getCTR().removeDrawing(0);mcChanged();});mcImage.setOnContextMenuRequested(mcE->new ContextMenu(mcSmaller,mcLarger,mcRemove).show(mcImage,mcE.getScreenX(),mcE.getScreenY()));}mcLine.getChildren().add(mcImage);}catch(Exception mcIgnored){mcLine.getChildren().add(new Label("[Imagen no previsualizable]"));}}
+    private VBox MCnewPage(double MCmargin,double MCtop){VBox MCpage=new VBox(5);MCpage.getStyleClass().add("paper");MCpage.setPrefSize(MCpageWidth,MCpageHeight);MCpage.setMinSize(MCpageWidth,MCpageHeight);MCpage.setMaxWidth(MCpageWidth);MCpage.setPadding(new Insets(MCtop,MCmargin,Math.min(MCtop,72),MCmargin));VBox MCbody=new VBox(5);for(XWPFHeader MCheader:MCdocument.getHeaderList())for(XWPFParagraph MCp:MCheader.getParagraphs())MCpage.getChildren().add(MCrenderParagraph(MCp,true));MCpage.getChildren().add(MCbody);Region MCspacer=new Region();VBox.setVgrow(MCspacer,Priority.ALWAYS);MCpage.getChildren().add(MCspacer);for(XWPFFooter MCfooter:MCdocument.getFooterList())for(XWPFParagraph MCp:MCfooter.getParagraphs())MCpage.getChildren().add(MCrenderParagraph(MCp,true));MCpaper.getChildren().add(MCpage);return MCbody;}
+    private double MCestimateHeight(Node MCnode){if(MCnode instanceof FlowPane MCline){double MCwidth=Math.max(100,MCpageWidth-150);double MClength=MCline.getChildren().stream().mapToDouble(MCn->MCn instanceof TextField MCf?MCf.getPrefWidth():MCn instanceof ImageView MCi?MCi.getFitWidth():70).sum();return Math.max(30,Math.ceil(MClength/MCwidth)*28);}return 40;}
+    private Node MCrenderParagraph(XWPFParagraph MCp,boolean MCeditable){FlowPane MCline=new FlowPane(2,3);MCline.getStyleClass().add("doc-paragraph");MCline.setAlignment(switch(MCp.getAlignment()){case CENTER->Pos.CENTER;case RIGHT->Pos.CENTER_RIGHT;default->Pos.CENTER_LEFT;});
+        if(MCp.getRuns().isEmpty()&&MCeditable)MCp.createRun().setText("");
+        for(XWPFRun MCrun:MCp.getRuns()){
+            String MCraw=MCrun.getText(0);if(MCraw!=null){Matcher MCm=MCTOKEN.matcher(MCraw);int MCat=0;while(MCm.find()){if(MCm.start()>MCat)MCaddTextSegment(MCline,MCrun,MCp,MCraw.substring(MCat,MCm.start()),MCeditable);MCaddToken(MCline,MCrun,MCm.group(1),MCeditable,MCm.start());MCat=MCm.end();}if(MCat<MCraw.length()||MCraw.isEmpty())MCaddTextSegment(MCline,MCrun,MCp,MCraw.substring(MCat),MCeditable);}
+            for(XWPFPicture MCpicture:MCrun.getEmbeddedPictures()){try{ImageView MCimage=new ImageView(new Image(new ByteArrayInputStream(MCpicture.getPictureData().getData())));MCimage.setPreserveRatio(true);MCimage.setFitWidth(Math.min(MCpageWidth-160,Math.max(80,MCpicture.getWidth()*96/72)));if(MCeditable&&MCrun.getEmbeddedPictures().size()==1&&MCrun.getCTR().sizeOfDrawingArray()==1&&MCrun.getCTR().getDrawingArray(0).sizeOfInlineArray()==1){MenuItem MCsmaller=new MenuItem("Reducir a 75 %"),MClarger=new MenuItem("Ampliar a 125 %"),MCremove=new MenuItem("Eliminar imagen");MCsmaller.setOnAction(MCe->MCresizePicture(MCrun,MCpicture,.75));MClarger.setOnAction(MCe->MCresizePicture(MCrun,MCpicture,1.25));MCremove.setOnAction(MCe->{MCrun.getCTR().removeDrawing(0);MCchanged();});MCimage.setOnContextMenuRequested(MCe->new ContextMenu(MCsmaller,MClarger,MCremove).show(MCimage,MCe.getScreenX(),MCe.getScreenY()));}MCline.getChildren().add(MCimage);}catch(Exception MCignored){MCline.getChildren().add(new Label("[Imagen no previsualizable]"));}}
         }
-        if(mcLine.getChildren().isEmpty())mcLine.getChildren().add(new Label(" "));return mcLine;}
-    private void mcAddTextSegment(FlowPane mcLine,XWPFRun mcRun,XWPFParagraph mcP,String mcText,boolean mcEditable){
-        if(!mcEditable){Text mcT=new Text(mcText);mcT.setFont(Font.font(mcRun.getFontFamily()==null?"Serif":mcRun.getFontFamily(),mcRun.isBold()?FontWeight.BOLD:FontWeight.NORMAL,mcRun.getFontSize()>0?mcRun.getFontSize():13));mcLine.getChildren().add(mcT);return;}
-        TextField mcField=new TextField(mcText);mcField.getStyleClass().add("run-field");mcField.setPrefWidth(Math.max(28,Math.min(700,mcText.length()*8+25)));mcField.setStyle("-fx-font-family:'"+(mcRun.getFontFamily()==null?"Serif":mcRun.getFontFamily())+"';-fx-font-size:"+(mcRun.getFontSize()>0?mcRun.getFontSize():13)+"px;"+(mcRun.isBold()?"-fx-font-weight:bold;":"")+(mcRun.isItalic()?"-fx-font-style:italic;":"")+(mcRun.getColor()!=null?"-fx-text-fill:#"+mcRun.getColor()+";":""));
-        mcField.focusedProperty().addListener((mcO,mcA,mcB)->{if(mcB){mcSelectedRun=mcRun;mcSelectedParagraph=mcP;mcSelectedText=mcField;}});
-        mcField.textProperty().addListener((mcO,mcA,mcB)->{mcField.setPrefWidth(Math.max(28,Math.min(700,mcB.length()*8+25)));StringBuilder mcAll=new StringBuilder();for(Node mcN:mcLine.getChildren()){if(mcN.getUserData()==mcRun){if(mcN instanceof TextField mcF)mcAll.append(mcF.getText());else if(mcN instanceof Label mcL)mcAll.append("{{").append(mcN.getProperties().get("key")).append("}}");}}mcRun.setText(mcAll.toString(),0);mcDirty=true;mcUpdateEditorSaveStatus();mcStatus.setText("Cambios sin guardar");});
-        mcField.setUserData(mcRun);mcField.setOnDragOver(mcE->{if(mcE.getDragboard().hasString())mcE.acceptTransferModes(TransferMode.COPY,TransferMode.MOVE);mcE.consume();});mcField.setOnDragDropped(mcE->{String mcKey=mcE.getDragboard().getString();if(mcKey!=null){if(mcField.getSkin() instanceof TextFieldSkin mcSkin)mcField.positionCaret(mcSkin.getIndex(mcE.getX(),mcE.getY()).getInsertionIndex());mcDragTargetRun=mcRun;mcDragTargetOffset=mcRunOffset(mcLine,mcField)+mcField.getCaretPosition();mcE.setDropCompleted(mcInsertToken(mcField,mcKey));}mcE.consume();});
-        mcLine.getChildren().add(mcField);
+        if(MCline.getChildren().isEmpty())MCline.getChildren().add(new Label(" "));return MCline;}
+    private void MCaddTextSegment(FlowPane MCline,XWPFRun MCrun,XWPFParagraph MCp,String MCtext,boolean MCeditable){
+        if(!MCeditable){Text MCt=new Text(MCtext);MCt.setFont(Font.font(MCrun.getFontFamily()==null?"Serif":MCrun.getFontFamily(),MCrun.isBold()?FontWeight.BOLD:FontWeight.NORMAL,MCrun.getFontSize()>0?MCrun.getFontSize():13));MCline.getChildren().add(MCt);return;}
+        TextField MCfield=new TextField(MCtext);MCfield.getStyleClass().add("run-field");MCfield.setPrefWidth(Math.max(28,Math.min(700,MCtext.length()*8+25)));MCfield.setStyle("-fx-font-family:'"+(MCrun.getFontFamily()==null?"Serif":MCrun.getFontFamily())+"';-fx-font-size:"+(MCrun.getFontSize()>0?MCrun.getFontSize():13)+"px;"+(MCrun.isBold()?"-fx-font-weight:bold;":"")+(MCrun.isItalic()?"-fx-font-style:italic;":"")+(MCrun.getColor()!=null?"-fx-text-fill:#"+MCrun.getColor()+";":""));
+        MCfield.focusedProperty().addListener((MCo,MCa,MCb)->{if(MCb){MCselectedRun=MCrun;MCselectedParagraph=MCp;MCselectedText=MCfield;}});
+        MCfield.textProperty().addListener((MCo,MCa,MCb)->{MCfield.setPrefWidth(Math.max(28,Math.min(700,MCb.length()*8+25)));StringBuilder MCall=new StringBuilder();for(Node MCn:MCline.getChildren()){if(MCn.getUserData()==MCrun){if(MCn instanceof TextField MCf)MCall.append(MCf.getText());else if(MCn instanceof Label MCl)MCall.append("{{").append(MCn.getProperties().get("key")).append("}}");}}MCrun.setText(MCall.toString(),0);MCdirty=true;MCupdateEditorSaveStatus();MCstatus.setText("Cambios sin guardar");});
+        MCfield.setUserData(MCrun);MCfield.setOnDragOver(MCe->{if(MCe.getDragboard().hasString())MCe.acceptTransferModes(TransferMode.COPY,TransferMode.MOVE);MCe.consume();});MCfield.setOnDragDropped(MCe->{String MCkey=MCe.getDragboard().getString();if(MCkey!=null){if(MCfield.getSkin() instanceof TextFieldSkin MCskin)MCfield.positionCaret(MCskin.getIndex(MCe.getX(),MCe.getY()).getInsertionIndex());MCdragTargetRun=MCrun;MCdragTargetOffset=MCrunOffset(MCline,MCfield)+MCfield.getCaretPosition();MCe.setDropCompleted(MCinsertToken(MCfield,MCkey));}MCe.consume();});
+        MCline.getChildren().add(MCfield);
     }
-    private int mcRunOffset(FlowPane mcLine,Node mcTarget){int mcOffset=0;for(Node mcN:mcLine.getChildren()){if(mcN==mcTarget)break;if(mcN.getUserData()==mcTarget.getUserData()){if(mcN instanceof TextField mcF)mcOffset+=mcF.getText().length();else if(mcN instanceof Label mcL)mcOffset+=String.valueOf(mcL.getProperties().get("key")).length()+4;}}return mcOffset;}
-    private void mcAddToken(FlowPane mcLine,XWPFRun mcRun,String mcKey,boolean mcEditable,int mcOffset){Label mcChip=new Label("⟦"+mcKey+"⟧");mcChip.getStyleClass().add("token");mcChip.setUserData(mcRun);mcChip.getProperties().put("key",mcKey);mcChip.setTooltip(new Tooltip("{{"+mcKey+"}} · Arrastre, copie o elimine esta aparición"));if(mcEditable){mcChip.setOnDragDetected(mcE->{mcDragSourceRun=mcRun;mcDragSourceToken="{{"+mcKey+"}}";mcDragSourceOffset=mcRunOffset(mcLine,mcChip);mcDragTargetRun=null;Dragboard mcDb=mcChip.startDragAndDrop(TransferMode.MOVE);ClipboardContent mcCc=new ClipboardContent();mcCc.putString(mcKey);mcDb.setContent(mcCc);mcE.consume();});mcChip.setOnDragDone(mcE->{if(mcE.getTransferMode()==TransferMode.MOVE&&mcDragSourceRun!=null){String mcTxt=mcDragSourceRun.getText(0);int mcPos=mcDragSourceOffset+(mcDragSourceRun==mcDragTargetRun&&mcDragTargetOffset<=mcDragSourceOffset?mcDragSourceToken.length():0);if(mcTxt!=null&&mcPos>=0&&mcPos+mcDragSourceToken.length()<=mcTxt.length()&&mcTxt.startsWith(mcDragSourceToken,mcPos))mcDragSourceRun.setText(mcTxt.substring(0,mcPos)+mcTxt.substring(mcPos+mcDragSourceToken.length()),0);mcDirty=true;mcRenderDocument();}mcDragSourceRun=null;mcDragTargetRun=null;mcE.consume();});MenuItem mcCopy=new MenuItem("Copiar variable"),mcCut=new MenuItem("Cortar variable"),mcDelete=new MenuItem("Eliminar aparición");mcCopy.setOnAction(mcE->mcCopyToken(mcKey));mcCut.setOnAction(mcE->{mcCopyToken(mcKey);mcRemoveToken(mcLine,mcChip,mcRun,mcKey);});mcDelete.setOnAction(mcE->mcRemoveToken(mcLine,mcChip,mcRun,mcKey));mcChip.setContextMenu(new ContextMenu(mcCopy,mcCut,mcDelete));mcChip.setOnMouseClicked(mcE->{if(mcE.getClickCount()==2)mcRemoveToken(mcLine,mcChip,mcRun,mcKey);});}mcLine.getChildren().add(mcChip);}
-    private void mcCopyToken(String mcKey){ClipboardContent mcContent=new ClipboardContent();mcContent.putString("{{"+mcKey+"}}");Clipboard.getSystemClipboard().setContent(mcContent);}
-    private void mcRemoveToken(FlowPane mcLine,Node mcChip,XWPFRun mcRun,String mcKey){String mcTxt=mcRun.getText(0);int mcAt=mcRunOffset(mcLine,mcChip);if(mcTxt!=null&&mcTxt.startsWith("{{"+mcKey+"}}",mcAt)){mcRun.setText(mcTxt.substring(0,mcAt)+mcTxt.substring(mcAt+mcKey.length()+4),0);mcChanged();}}
-    private void mcStyleRun(String mcAction){if(mcSelectedRun==null)return;switch(mcAction){case "bold"->mcSelectedRun.setBold(!mcSelectedRun.isBold());case "italic"->mcSelectedRun.setItalic(!mcSelectedRun.isItalic());case "underline"->mcSelectedRun.setUnderline(mcSelectedRun.getUnderline()==UnderlinePatterns.NONE?UnderlinePatterns.SINGLE:UnderlinePatterns.NONE);case "strike"->mcSelectedRun.setStrikeThrough(!mcSelectedRun.isStrikeThrough());case "smaller"->mcSelectedRun.setFontSize(Math.max(8,mcSelectedRun.getFontSize()-1));case "larger"->mcSelectedRun.setFontSize((mcSelectedRun.getFontSize()>0?mcSelectedRun.getFontSize():12)+1);}mcChanged();}
-    private void mcAlign(ParagraphAlignment mcA){if(mcSelectedParagraph==null)return;mcSelectedParagraph.setAlignment(mcA);mcDirty=true;mcRenderDocument();}
-    private void mcAddParagraph(){if(mcDocument==null)return;mcDocument.createParagraph().createRun().setText("");mcDirty=true;mcRenderDocument();}
+    private int MCrunOffset(FlowPane MCline,Node MCtarget){int MCoffset=0;for(Node MCn:MCline.getChildren()){if(MCn==MCtarget)break;if(MCn.getUserData()==MCtarget.getUserData()){if(MCn instanceof TextField MCf)MCoffset+=MCf.getText().length();else if(MCn instanceof Label MCl)MCoffset+=String.valueOf(MCl.getProperties().get("key")).length()+4;}}return MCoffset;}
+    private void MCaddToken(FlowPane MCline,XWPFRun MCrun,String MCkey,boolean MCeditable,int MCoffset){Label MCchip=new Label("⟦"+MCkey+"⟧");MCchip.getStyleClass().add("token");MCchip.setUserData(MCrun);MCchip.getProperties().put("key",MCkey);MCchip.setTooltip(new Tooltip("{{"+MCkey+"}} · Arrastre, copie o elimine esta aparición"));if(MCeditable){MCchip.setOnDragDetected(MCe->{MCdragSourceRun=MCrun;MCdragSourceToken="{{"+MCkey+"}}";MCdragSourceOffset=MCrunOffset(MCline,MCchip);MCdragTargetRun=null;Dragboard MCdb=MCchip.startDragAndDrop(TransferMode.MOVE);ClipboardContent MCcc=new ClipboardContent();MCcc.putString(MCkey);MCdb.setContent(MCcc);MCe.consume();});MCchip.setOnDragDone(MCe->{if(MCe.getTransferMode()==TransferMode.MOVE&&MCdragSourceRun!=null){String MCtxt=MCdragSourceRun.getText(0);int MCpos=MCdragSourceOffset+(MCdragSourceRun==MCdragTargetRun&&MCdragTargetOffset<=MCdragSourceOffset?MCdragSourceToken.length():0);if(MCtxt!=null&&MCpos>=0&&MCpos+MCdragSourceToken.length()<=MCtxt.length()&&MCtxt.startsWith(MCdragSourceToken,MCpos))MCdragSourceRun.setText(MCtxt.substring(0,MCpos)+MCtxt.substring(MCpos+MCdragSourceToken.length()),0);MCdirty=true;MCrenderDocument();}MCdragSourceRun=null;MCdragTargetRun=null;MCe.consume();});MenuItem MCcopy=new MenuItem("Copiar variable"),MCcut=new MenuItem("Cortar variable"),MCdelete=new MenuItem("Eliminar aparición");MCcopy.setOnAction(MCe->MCcopyToken(MCkey));MCcut.setOnAction(MCe->{MCcopyToken(MCkey);MCremoveToken(MCline,MCchip,MCrun,MCkey);});MCdelete.setOnAction(MCe->MCremoveToken(MCline,MCchip,MCrun,MCkey));MCchip.setContextMenu(new ContextMenu(MCcopy,MCcut,MCdelete));MCchip.setOnMouseClicked(MCe->{if(MCe.getClickCount()==2)MCremoveToken(MCline,MCchip,MCrun,MCkey);});}MCline.getChildren().add(MCchip);}
+    private void MCcopyToken(String MCkey){ClipboardContent MCcontent=new ClipboardContent();MCcontent.putString("{{"+MCkey+"}}");Clipboard.getSystemClipboard().setContent(MCcontent);}
+    private void MCremoveToken(FlowPane MCline,Node MCchip,XWPFRun MCrun,String MCkey){String MCtxt=MCrun.getText(0);int MCat=MCrunOffset(MCline,MCchip);if(MCtxt!=null&&MCtxt.startsWith("{{"+MCkey+"}}",MCat)){MCrun.setText(MCtxt.substring(0,MCat)+MCtxt.substring(MCat+MCkey.length()+4),0);MCchanged();}}
+    private void MCstyleRun(String MCaction){if(MCselectedRun==null)return;switch(MCaction){case "bold"->MCselectedRun.setBold(!MCselectedRun.isBold());case "italic"->MCselectedRun.setItalic(!MCselectedRun.isItalic());case "underline"->MCselectedRun.setUnderline(MCselectedRun.getUnderline()==UnderlinePatterns.NONE?UnderlinePatterns.SINGLE:UnderlinePatterns.NONE);case "strike"->MCselectedRun.setStrikeThrough(!MCselectedRun.isStrikeThrough());case "smaller"->MCselectedRun.setFontSize(Math.max(8,MCselectedRun.getFontSize()-1));case "larger"->MCselectedRun.setFontSize((MCselectedRun.getFontSize()>0?MCselectedRun.getFontSize():12)+1);}MCchanged();}
+    private void MCalign(ParagraphAlignment MCa){if(MCselectedParagraph==null)return;MCselectedParagraph.setAlignment(MCa);MCdirty=true;MCrenderDocument();}
+    private void MCaddParagraph(){if(MCdocument==null)return;MCdocument.createParagraph().createRun().setText("");MCdirty=true;MCrenderDocument();}
 
-    private BorderPane mcCatalogPage;
-    private void mcBuildCatalog(){mcCatalogPage=new BorderPane();mcCatalogPage.getStyleClass().add("page");VBox mcLeft=new VBox(8,mcKindSearch,mcKindList,mcButton("+ Nuevo tipo",this::mcNewKind),mcButton("Duplicar",this::mcDuplicateKind),mcButton("Eliminar",this::mcDeleteKind));mcLeft.getStyleClass().add("side-panel");mcLeft.setPrefWidth(250);VBox.setVgrow(mcKindList,Priority.ALWAYS);mcKindSearch.setPromptText("Buscar título o categoría");mcKindSearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshKinds());mcKindList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->mcLoadKind(mcB));mcCatalogPage.setLeft(mcLeft);
-        mcKindDescription.setPrefRowCount(3);mcFieldList.setPrefHeight(230);mcKindActive.setSelected(true);
-        HBox mcOrder=new HBox(8,mcButton("↑",()->mcMoveField(-1)),mcButton("↓",()->mcMoveField(1)),mcButton("Quitar campo",()->{MCVariable mcV=mcFieldList.getSelectionModel().getSelectedItem();if(mcV!=null)mcFieldList.getItems().remove(mcV);}));
-        HBox mcAddField=new HBox(8,mcAddFieldChoice,mcButton("Añadir campo",()->{MCVariable mcV=mcAddFieldChoice.getValue();if(mcV!=null&&mcFieldList.getItems().stream().noneMatch(mcX->mcX.mcKey().equals(mcV.mcKey())))mcFieldList.getItems().add(mcV);}));
-        mcFieldList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->{mcLoadingFieldRequired=true;mcFieldRequired.setDisable(mcB==null);mcFieldDefault.setDisable(mcB==null);mcFieldRequired.setSelected(mcB!=null&&mcKindRequiredChoices.getOrDefault(mcB.mcKey(),mcB.mcRequired()));mcFieldDefault.setText(mcB==null?"":mcKindDefaultChoices.getOrDefault(mcB.mcKey(),""));mcLoadingFieldRequired=false;});
-        mcFieldRequired.setDisable(true);mcFieldRequired.setOnAction(mcE->{MCVariable mcV=mcFieldList.getSelectionModel().getSelectedItem();if(mcV!=null&&!mcLoadingFieldRequired)mcKindRequiredChoices.put(mcV.mcKey(),mcFieldRequired.isSelected());});
-        mcFieldDefault.setDisable(true);mcFieldDefault.setPromptText("Valor predeterminado solo para este documento");mcFieldDefault.textProperty().addListener((mcO,mcA,mcB)->{MCVariable mcV=mcFieldList.getSelectionModel().getSelectedItem();if(mcV!=null&&!mcLoadingFieldRequired)mcKindDefaultChoices.put(mcV.mcKey(),mcB);});
-        mcBindingGroup.setPromptText("Ej.: persona_1");mcBindingKind.getItems().setAll("Persona","Empresa");mcBindingKind.setValue("Persona");mcBindingKind.setOnAction(mcE->mcRefreshBindingFields());mcRefreshBindingFields();mcBindingList.setPrefHeight(150);
-        HBox mcBindingRow=new HBox(8,mcBindingGroup,mcBindingKind,mcBindingField,mcBindingVariable);mcBindingGroup.setPrefWidth(130);mcBindingField.setPrefWidth(165);mcBindingVariable.setPrefWidth(190);
-        VBox mcForm=new VBox(12,new Label("CONFIGURAR GENERACIÓN"),mcLabelled("Título",mcKindTitle),mcLabelled("Categoría opcional",mcKindCategory),mcLabelled("Descripción opcional",mcKindDescription),mcLabelled("Plantilla",mcKindTemplate),mcKindActive,new Label("CAMPOS DEL FORMULARIO · Ordene con ↑ ↓"),mcFieldList,mcFieldRequired,mcLabelled("Valor predeterminado del campo seleccionado",mcFieldDefault),mcOrder,mcAddField,mcButton("Guardar documento",this::mcSaveKind),new Separator(),new Label("VINCULACIÓN LOCAL DE PERSONAS Y EMPRESAS"),new Label("Cree un grupo por cada registro independiente. La generación guardará datos asociados con documento válido."),mcBindingRow,mcButton("Añadir asociación",this::mcSaveContactBinding),mcBindingList,mcButton("Eliminar asociación",this::mcDeleteContactBinding));mcForm.getStyleClass().add("catalog-form");ScrollPane mcScroll=new ScrollPane(mcForm);mcScroll.setFitToWidth(true);mcCatalogPage.setCenter(mcScroll);
-        mcKindTemplate.setOnAction(mcE->mcLoadFieldsForTemplate());
+    private BorderPane MCcatalogPage;
+    private void MCbuildCatalog(){MCcatalogPage=new BorderPane();MCcatalogPage.getStyleClass().add("page");VBox MCleft=new VBox(8,MCkindSearch,MCkindList,MCbutton("+ Nuevo tipo",this::MCnewKind),MCbutton("Duplicar",this::MCduplicateKind),MCbutton("Eliminar",this::MCdeleteKind));MCleft.getStyleClass().add("side-panel");MCleft.setPrefWidth(250);VBox.setVgrow(MCkindList,Priority.ALWAYS);MCkindSearch.setPromptText("Buscar título o categoría");MCkindSearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshKinds());MCkindList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->MCloadKind(MCb));MCcatalogPage.setLeft(MCleft);
+        MCkindDescription.setPrefRowCount(3);MCfieldList.setPrefHeight(230);MCkindActive.setSelected(true);
+        HBox MCorder=new HBox(8,MCbutton("↑",()->MCmoveField(-1)),MCbutton("↓",()->MCmoveField(1)),MCbutton("Quitar campo",()->{MCVariable MCv=MCfieldList.getSelectionModel().getSelectedItem();if(MCv!=null)MCfieldList.getItems().remove(MCv);}));
+        HBox MCaddField=new HBox(8,MCaddFieldChoice,MCbutton("Añadir campo",()->{MCVariable MCv=MCaddFieldChoice.getValue();if(MCv!=null&&MCfieldList.getItems().stream().noneMatch(MCx->MCx.MCkey().equals(MCv.MCkey())))MCfieldList.getItems().add(MCv);}));
+        MCfieldList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->{MCloadingFieldRequired=true;MCfieldRequired.setDisable(MCb==null);MCfieldDefault.setDisable(MCb==null);MCfieldRequired.setSelected(MCb!=null&&MCkindRequiredChoices.getOrDefault(MCb.MCkey(),MCb.MCrequired()));MCfieldDefault.setText(MCb==null?"":MCkindDefaultChoices.getOrDefault(MCb.MCkey(),""));MCloadingFieldRequired=false;});
+        MCfieldRequired.setDisable(true);MCfieldRequired.setOnAction(MCe->{MCVariable MCv=MCfieldList.getSelectionModel().getSelectedItem();if(MCv!=null&&!MCloadingFieldRequired)MCkindRequiredChoices.put(MCv.MCkey(),MCfieldRequired.isSelected());});
+        MCfieldDefault.setDisable(true);MCfieldDefault.setPromptText("Valor predeterminado solo para este documento");MCfieldDefault.textProperty().addListener((MCo,MCa,MCb)->{MCVariable MCv=MCfieldList.getSelectionModel().getSelectedItem();if(MCv!=null&&!MCloadingFieldRequired)MCkindDefaultChoices.put(MCv.MCkey(),MCb);});
+        MCbindingGroup.setPromptText("Ej.: persona_1");MCbindingKind.getItems().setAll("Persona","Empresa");MCbindingKind.setValue("Persona");MCbindingKind.setOnAction(MCe->MCrefreshBindingFields());MCrefreshBindingFields();MCbindingList.setPrefHeight(150);
+        HBox MCbindingRow=new HBox(8,MCbindingGroup,MCbindingKind,MCbindingField,MCbindingVariable);MCbindingGroup.setPrefWidth(130);MCbindingField.setPrefWidth(165);MCbindingVariable.setPrefWidth(190);
+        VBox MCform=new VBox(12,new Label("CONFIGURAR GENERACIÓN"),MClabelled("Título",MCkindTitle),MClabelled("Categoría opcional",MCkindCategory),MClabelled("Descripción opcional",MCkindDescription),MClabelled("Plantilla",MCkindTemplate),MCkindActive,new Label("CAMPOS DEL FORMULARIO · Ordene con ↑ ↓"),MCfieldList,MCfieldRequired,MClabelled("Valor predeterminado del campo seleccionado",MCfieldDefault),MCorder,MCaddField,MCbutton("Guardar documento",this::MCsaveKind),new Separator(),new Label("VINCULACIÓN LOCAL DE PERSONAS Y EMPRESAS"),new Label("Cree un grupo por cada registro independiente. La generación guardará datos asociados con documento válido."),MCbindingRow,MCbutton("Añadir asociación",this::MCsaveContactBinding),MCbindingList,MCbutton("Eliminar asociación",this::MCdeleteContactBinding));MCform.getStyleClass().add("catalog-form");ScrollPane MCscroll=new ScrollPane(MCform);MCscroll.setFitToWidth(true);MCcatalogPage.setCenter(MCscroll);
+        MCkindTemplate.setOnAction(MCe->MCloadFieldsForTemplate());
     }
-    private void mcShowCatalog(){mcShowEditor();mcRefreshKinds();mcEditorTabs.getSelectionModel().select(1);}
-    private void mcRefreshKinds(){
-        if(mcRefreshingGenerator)return;mcRefreshingGenerator=true;
+    private void MCshowCatalog(){MCshowEditor();MCrefreshKinds();MCeditorTabs.getSelectionModel().select(1);}
+    private void MCrefreshKinds(){
+        if(MCrefreshingGenerator)return;MCrefreshingGenerator=true;
         try{
-            String mcQ=mcKindSearch.getText().toLowerCase(Locale.ROOT);mcKindList.getItems().setAll(mcStore.mcKinds().stream().filter(mcK->mcK.mcTitle().toLowerCase(Locale.ROOT).contains(mcQ)||(mcK.mcCategory()!=null&&mcK.mcCategory().toLowerCase(Locale.ROOT).contains(mcQ))).toList());
-            MCTemplate mcSelected=mcGenerateTemplate.getValue();MCTemplateGroup mcGroup=mcGenerateGroup.getValue();String mcSearch=mcGenerateSearch.getText().trim();List<MCTemplate> mcChoices=new ArrayList<>();
-            if(mcGroup!=null)for(MCTemplate mcTemplate:mcStore.mcTemplates())if(mcStore.mcInGroup(mcTemplate.mcId(),mcGroup.mcId())&&mcLibraryMatches(mcTemplate.mcName(),mcSearch))mcChoices.add(mcTemplate);
-            mcGenerateTemplate.getItems().setAll(mcChoices);
-            MCTemplate mcRestored=mcSelected==null?null:mcChoices.stream().filter(mcT->mcT.mcId()==mcSelected.mcId()).findFirst().orElse(null);mcGenerateTemplate.getSelectionModel().select(mcRestored);
-            if(mcRestored==null){mcHistoricalTemplate=null;mcBuildDynamicForm();}
-        }catch(Exception mcE){mcError(mcE);}finally{mcRefreshingGenerator=false;}
+            String MCq=MCkindSearch.getText().toLowerCase(Locale.ROOT);MCkindList.getItems().setAll(MCstore.MCkinds().stream().filter(MCk->MCk.MCtitle().toLowerCase(Locale.ROOT).contains(MCq)||(MCk.MCcategory()!=null&&MCk.MCcategory().toLowerCase(Locale.ROOT).contains(MCq))).toList());
+            MCTemplate MCselected=MCgenerateTemplate.getValue();MCTemplateGroup MCgroup=MCgenerateGroup.getValue();String MCsearch=MCgenerateSearch.getText().trim();List<MCTemplate> MCchoices=new ArrayList<>();
+            if(MCgroup!=null)for(MCTemplate MCtemplate:MCstore.MCtemplates())if(MCstore.MCinGroup(MCtemplate.MCid(),MCgroup.MCid())&&MClibraryMatches(MCtemplate.MCname(),MCsearch))MCchoices.add(MCtemplate);
+            MCgenerateTemplate.getItems().setAll(MCchoices);
+            MCTemplate MCrestored=MCselected==null?null:MCchoices.stream().filter(MCt->MCt.MCid()==MCselected.MCid()).findFirst().orElse(null);MCgenerateTemplate.getSelectionModel().select(MCrestored);
+            if(MCrestored==null){MChistoricalTemplate=null;MCbuildDynamicForm();}
+        }catch(Exception MCe){MCerror(MCe);}finally{MCrefreshingGenerator=false;}
     }
 
 
 
-    private MCDefinition mcDefinitionFor(MCVariable mcVariable,List<MCDefinition> mcDefinitions){long mcId=mcSafeDefinitionId(mcVariable);return mcDefinitions.stream().filter(mcD->mcD.mcId()==mcId).findFirst().orElse(null);}
-    private List<MCVariable> mcVariablesForTemplate(MCTemplate mcTemplate)throws Exception{
-        List<MCVariable> mcBound=mcStore.mcVariables(mcTemplate.mcId());Map<String,MCVariable> mcResult=new LinkedHashMap<>();List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();
-        try(XWPFDocument mcDoc=MCDocumentEngine.mcOpen(mcTemplate.mcEdited())){for(String mcMarker:MCDocumentEngine.mcMarkers(mcDoc)){
-            MCVariable mcExisting=mcBound.stream().filter(mcV->mcV.mcKey().equals(mcMarker)).findFirst().orElse(null);MCDefinition mcDefinition=mcExisting==null?mcDefinitions.stream().filter(mcD->mcD.mcKey().equals(MCDocumentEngine.mcBaseKey(mcMarker))).findFirst().orElse(null):mcDefinitionFor(mcExisting,mcDefinitions);
-            if(mcDefinition!=null&&!mcDefinition.mcBindToClient()){String mcKey=mcDefinition.mcKey();mcResult.putIfAbsent(mcKey,new MCVariable(-mcDefinition.mcId(),mcTemplate.mcId(),mcKey,mcDefinition.mcLabel(),mcDefinition.mcType(),mcDefinition.mcDefaultValue(),false,mcResult.size()+1));}
-            else if(mcExisting!=null)mcResult.putIfAbsent(mcMarker,mcExisting);
-            else if(mcDefinition!=null)mcResult.putIfAbsent(mcMarker,new MCVariable(-mcDefinition.mcId(),mcTemplate.mcId(),mcMarker,mcDefinition.mcLabel(),mcDefinition.mcType(),mcDefinition.mcDefaultValue(),false,mcResult.size()+1));
-            else mcResult.putIfAbsent(mcMarker,new MCVariable(0,mcTemplate.mcId(),mcMarker,MCDocumentEngine.mcBaseKey(mcMarker),"Texto corto","",false,mcResult.size()+1));
-        }}return new ArrayList<>(mcResult.values());
+    private MCDefinition MCdefinitionFor(MCVariable MCvariable,List<MCDefinition> MCdefinitions){long MCid=MCsafeDefinitionId(MCvariable);return MCdefinitions.stream().filter(MCd->MCd.MCid()==MCid).findFirst().orElse(null);}
+    private List<MCVariable> MCvariablesForTemplate(MCTemplate MCtemplate)throws Exception{
+        List<MCVariable> MCbound=MCstore.MCvariables(MCtemplate.MCid());Map<String,MCVariable> MCresult=new LinkedHashMap<>();List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();
+        try(XWPFDocument MCdoc=MCDocumentEngine.MCopen(MCtemplate.MCedited())){for(String MCmarker:MCDocumentEngine.MCmarkers(MCdoc)){
+            MCVariable MCexisting=MCbound.stream().filter(MCv->MCv.MCkey().equals(MCmarker)).findFirst().orElse(null);MCDefinition MCdefinition=MCexisting==null?MCdefinitions.stream().filter(MCd->MCd.MCkey().equals(MCDocumentEngine.MCbaseKey(MCmarker))).findFirst().orElse(null):MCdefinitionFor(MCexisting,MCdefinitions);
+            if(MCdefinition!=null&&!MCdefinition.MCbindToClient()){String MCkey=MCdefinition.MCkey();MCresult.putIfAbsent(MCkey,new MCVariable(-MCdefinition.MCid(),MCtemplate.MCid(),MCkey,MCdefinition.MClabel(),MCdefinition.MCtype(),MCdefinition.MCdefaultValue(),false,MCresult.size()+1));}
+            else if(MCexisting!=null)MCresult.putIfAbsent(MCmarker,MCexisting);
+            else if(MCdefinition!=null)MCresult.putIfAbsent(MCmarker,new MCVariable(-MCdefinition.MCid(),MCtemplate.MCid(),MCmarker,MCdefinition.MClabel(),MCdefinition.MCtype(),MCdefinition.MCdefaultValue(),false,MCresult.size()+1));
+            else MCresult.putIfAbsent(MCmarker,new MCVariable(0,MCtemplate.MCid(),MCmarker,MCDocumentEngine.MCbaseKey(MCmarker),"Texto corto","",false,MCresult.size()+1));
+        }}return new ArrayList<>(MCresult.values());
     }
-    private Map<String,String> mcDocumentValues(byte[] mcSource,Map<String,String> mcValues)throws Exception{
-        Map<String,String> mcResult=new LinkedHashMap<>(mcValues);List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();MCTemplate mcTemplate=mcGenerateTemplate.getValue();List<MCVariable> mcBound=mcTemplate==null?List.of():mcStore.mcVariables(mcTemplate.mcId());
-        try(XWPFDocument mcDoc=MCDocumentEngine.mcOpen(mcSource)){for(String mcMarker:MCDocumentEngine.mcMarkers(mcDoc))if(!MCDocumentEngine.mcPersonaKey(mcMarker).isEmpty()){
-            MCVariable mcVariable=mcBound.stream().filter(mcV->mcV.mcKey().equals(mcMarker)).findFirst().orElse(null);MCDefinition mcDefinition=mcVariable==null?mcDefinitions.stream().filter(mcD->mcD.mcKey().equals(MCDocumentEngine.mcBaseKey(mcMarker))).findFirst().orElse(null):mcDefinitionFor(mcVariable,mcDefinitions);
-            if(mcDefinition!=null&&!mcDefinition.mcBindToClient())mcResult.put(mcMarker,mcValues.getOrDefault(mcDefinition.mcKey(),mcDefinition.mcInitialValue()));
-        }}return mcResult;
+    private Map<String,String> MCdocumentValues(byte[] MCsource,Map<String,String> MCvalues)throws Exception{
+        Map<String,String> MCresult=new LinkedHashMap<>(MCvalues);List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();MCTemplate MCtemplate=MCgenerateTemplate.getValue();List<MCVariable> MCbound=MCtemplate==null?List.of():MCstore.MCvariables(MCtemplate.MCid());
+        try(XWPFDocument MCdoc=MCDocumentEngine.MCopen(MCsource)){for(String MCmarker:MCDocumentEngine.MCmarkers(MCdoc))if(!MCDocumentEngine.MCpersonaKey(MCmarker).isEmpty()){
+            MCVariable MCvariable=MCbound.stream().filter(MCv->MCv.MCkey().equals(MCmarker)).findFirst().orElse(null);MCDefinition MCdefinition=MCvariable==null?MCdefinitions.stream().filter(MCd->MCd.MCkey().equals(MCDocumentEngine.MCbaseKey(MCmarker))).findFirst().orElse(null):MCdefinitionFor(MCvariable,MCdefinitions);
+            if(MCdefinition!=null&&!MCdefinition.MCbindToClient())MCresult.put(MCmarker,MCvalues.getOrDefault(MCdefinition.MCkey(),MCdefinition.MCinitialValue()));
+        }}return MCresult;
     }
-    private void mcNewKind(){mcCurrentKind=null;mcKindRequiredChoices.clear();mcKindDefaultChoices.clear();mcKindList.getSelectionModel().clearSelection();mcKindTitle.clear();mcKindCategory.clear();mcKindDescription.clear();mcKindActive.setSelected(true);mcKindTemplate.setValue(mcCurrentTemplate);mcFieldList.getItems().clear();mcBindingList.getItems().clear();}
-    private void mcLoadKind(MCKind mcK){if(mcK==null)return;mcCurrentKind=mcK;mcKindTitle.setText(mcK.mcTitle());mcKindCategory.setText(mcK.mcCategory());mcKindDescription.setText(mcK.mcDescription());mcKindActive.setSelected(mcK.mcActive());mcKindTemplate.getSelectionModel().select(mcKindTemplate.getItems().stream().filter(mcT->mcT.mcId()==mcK.mcTemplateId()).findFirst().orElse(null));mcLoadFieldsForTemplate();mcRefreshContactBindings();try{mcKindRequiredChoices.putAll(mcStore.mcKindRequirements(mcK.mcId()));mcKindDefaultChoices.clear();mcKindDefaultChoices.putAll(mcStore.mcKindDefaults(mcK.mcId()));}catch(Exception mcE){mcError(mcE);}Map<String,MCVariable> mcVars=new HashMap<>();for(MCVariable mcV:mcAddFieldChoice.getItems())mcVars.put(mcV.mcKey(),mcV);List<MCVariable> mcOrdered=new ArrayList<>();for(String mcKey:mcK.mcFields().split(",")){MCVariable mcV=mcVars.get(mcKey);if(mcV!=null)mcOrdered.add(mcV);}mcFieldList.getItems().setAll(mcOrdered);}
-    private void mcLoadFieldsForTemplate(){MCTemplate mcT=mcKindTemplate.getValue();try{mcKindRequiredChoices.clear();mcKindDefaultChoices.clear();List<MCVariable> mcVars;if(mcT==null)mcVars=List.of();else{Set<String> mcUsed;try(XWPFDocument mcDoc=MCDocumentEngine.mcOpen(mcT.mcEdited())){mcUsed=MCDocumentEngine.mcMarkers(mcDoc);}mcVars=mcStore.mcVariables(mcT.mcId()).stream().filter(mcV->mcUsed.contains(mcV.mcKey())).toList();}mcFieldList.getItems().setAll(mcVars);mcAddFieldChoice.getItems().setAll(mcVars);List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();mcBindingVariable.getItems().setAll(mcVars.stream().filter(mcV->MCContactReuse.mcClientKey(mcV.mcKey(),mcDefinitions)).toList());mcRefreshContactBindings();}catch(Exception mcE){mcError(mcE);}}
-    private void mcRefreshBindingFields(){mcBindingField.getItems().setAll("Empresa".equals(mcBindingKind.getValue())?List.of("Razón social","RUC","Domicilio fiscal","Representantes"):List.of("Nombres","Apellidos","Tipo de documento","Número de documento","Domicilio"));mcBindingField.getSelectionModel().selectFirst();}
-    private void mcRefreshContactBindings(){MCTemplate mcT=mcKindTemplate.getValue();try{mcBindingList.getItems().setAll(mcT==null?List.of():mcData.mcContactBindings(mcT.mcId()));}catch(Exception mcE){mcError(mcE);}}
-    private void mcSaveContactBinding(){MCTemplate mcT=mcKindTemplate.getValue();MCVariable mcV=mcBindingVariable.getValue();if(mcT==null||mcV==null||mcBindingGroup.getText().isBlank())throw new IllegalArgumentException("Seleccione plantilla, grupo, dato y variable.");try{String mcField=switch(mcBindingField.getValue()){case "Nombres","Razón social"->"given";case "Apellidos"->"family";case "Tipo de documento"->"document_type";case "Número de documento","RUC"->"number";case "Domicilio","Domicilio fiscal"->"address";case "Representantes"->"representatives";default->throw new IllegalArgumentException("Dato no admitido.");};mcData.mcSaveContactBinding(new MCContactBinding(0,mcT.mcId(),mcBindingGroup.getText().trim(),mcBindingKind.getValue(),mcField,mcV.mcKey()));mcRefreshContactBindings();mcSaved("Asociación local guardada");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteContactBinding(){MCContactBinding mcB=mcBindingList.getSelectionModel().getSelectedItem();if(mcB==null)return;try{mcData.mcDeleteContactBinding(mcB.mcId());mcRefreshContactBindings();mcSaved("Asociación eliminada");}catch(Exception mcE){mcError(mcE);}}
-    private void mcMoveField(int mcDelta){int mcI=mcFieldList.getSelectionModel().getSelectedIndex();int mcJ=mcI+mcDelta;if(mcI<0||mcJ<0||mcJ>=mcFieldList.getItems().size())return;Collections.swap(mcFieldList.getItems(),mcI,mcJ);mcFieldList.getSelectionModel().select(mcJ);}
-    private void mcSaveKind(){MCTemplate mcT=mcKindTemplate.getValue();if(mcT==null||mcKindTitle.getText().isBlank())throw new IllegalArgumentException("Título y plantilla son obligatorios.");try{Set<String> mcMarkers;try(XWPFDocument mcDoc=MCDocumentEngine.mcOpen(mcT.mcEdited())){mcMarkers=MCDocumentEngine.mcMarkers(mcDoc);}Map<String,MCVariable> mcBound=new HashMap<>();for(MCVariable mcV:mcStore.mcVariables(mcT.mcId()))mcBound.put(mcV.mcKey(),mcV);Set<String> mcShown=new HashSet<>();for(MCVariable mcV:mcFieldList.getItems())mcShown.add(mcV.mcKey());for(String mcMarker:mcMarkers){MCVariable mcV=mcBound.get(mcMarker);if(mcV==null)throw new IllegalArgumentException("Variable sin vincular en la plantilla: "+mcMarker);if(!mcShown.contains(mcMarker)&&(mcKindDefaultChoices.getOrDefault(mcMarker,mcV.mcDefaultValue())==null||mcKindDefaultChoices.getOrDefault(mcMarker,mcV.mcDefaultValue()).isBlank()))throw new IllegalArgumentException("La variable '"+mcMarker+"' no está en el formulario ni tiene valor predeterminado.");}String mcFields=String.join(",",mcFieldList.getItems().stream().map(MCVariable::mcKey).toList());MCKind mcK=mcStore.mcSaveKind(new MCKind(mcCurrentKind==null?0:mcCurrentKind.mcId(),mcKindTitle.getText().trim(),mcKindCategory.getText().trim(),mcKindDescription.getText().trim(),mcT.mcId(),mcFields,mcKindActive.isSelected()));Map<String,Boolean> mcRequirements=new HashMap<>();for(MCVariable mcV:mcFieldList.getItems())mcRequirements.put(mcV.mcKey(),mcKindRequiredChoices.getOrDefault(mcV.mcKey(),mcV.mcRequired()));mcStore.mcSaveKindFieldRules(mcK.mcId(),mcRequirements,mcKindDefaultChoices);mcCurrentKind=mcK;mcRefreshKinds();mcKindList.getSelectionModel().select(mcK);mcSaved("Tipo documental guardado");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDuplicateKind(){MCKind mcK=mcKindList.getSelectionModel().getSelectedItem();if(mcK==null)return;try{MCKind mcCopy=mcStore.mcSaveKind(new MCKind(0,mcK.mcTitle()+" (copia)",mcK.mcCategory(),mcK.mcDescription(),mcK.mcTemplateId(),mcK.mcFields(),mcK.mcActive()));mcStore.mcSaveKindFieldRules(mcCopy.mcId(),mcStore.mcKindRequirements(mcK.mcId()),mcStore.mcKindDefaults(mcK.mcId()));mcRefreshKinds();mcSaved("Tipo duplicado");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteKind(){MCKind mcK=mcKindList.getSelectionModel().getSelectedItem();if(mcK==null)return;try{mcStore.mcDeleteKind(mcK.mcId());mcNewKind();mcRefreshKinds();mcSaved("Tipo eliminado");}catch(Exception mcE){mcError(mcE);}}
+    private void MCnewKind(){MCcurrentKind=null;MCkindRequiredChoices.clear();MCkindDefaultChoices.clear();MCkindList.getSelectionModel().clearSelection();MCkindTitle.clear();MCkindCategory.clear();MCkindDescription.clear();MCkindActive.setSelected(true);MCkindTemplate.setValue(MCcurrentTemplate);MCfieldList.getItems().clear();MCbindingList.getItems().clear();}
+    private void MCloadKind(MCKind MCk){if(MCk==null)return;MCcurrentKind=MCk;MCkindTitle.setText(MCk.MCtitle());MCkindCategory.setText(MCk.MCcategory());MCkindDescription.setText(MCk.MCdescription());MCkindActive.setSelected(MCk.MCactive());MCkindTemplate.getSelectionModel().select(MCkindTemplate.getItems().stream().filter(MCt->MCt.MCid()==MCk.MCtemplateId()).findFirst().orElse(null));MCloadFieldsForTemplate();MCrefreshContactBindings();try{MCkindRequiredChoices.putAll(MCstore.MCkindRequirements(MCk.MCid()));MCkindDefaultChoices.clear();MCkindDefaultChoices.putAll(MCstore.MCkindDefaults(MCk.MCid()));}catch(Exception MCe){MCerror(MCe);}Map<String,MCVariable> MCvars=new HashMap<>();for(MCVariable MCv:MCaddFieldChoice.getItems())MCvars.put(MCv.MCkey(),MCv);List<MCVariable> MCordered=new ArrayList<>();for(String MCkey:MCk.MCfields().split(",")){MCVariable MCv=MCvars.get(MCkey);if(MCv!=null)MCordered.add(MCv);}MCfieldList.getItems().setAll(MCordered);}
+    private void MCloadFieldsForTemplate(){MCTemplate MCt=MCkindTemplate.getValue();try{MCkindRequiredChoices.clear();MCkindDefaultChoices.clear();List<MCVariable> MCvars;if(MCt==null)MCvars=List.of();else{Set<String> MCused;try(XWPFDocument MCdoc=MCDocumentEngine.MCopen(MCt.MCedited())){MCused=MCDocumentEngine.MCmarkers(MCdoc);}MCvars=MCstore.MCvariables(MCt.MCid()).stream().filter(MCv->MCused.contains(MCv.MCkey())).toList();}MCfieldList.getItems().setAll(MCvars);MCaddFieldChoice.getItems().setAll(MCvars);List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();MCbindingVariable.getItems().setAll(MCvars.stream().filter(MCv->MCContactReuse.MCclientKey(MCv.MCkey(),MCdefinitions)).toList());MCrefreshContactBindings();}catch(Exception MCe){MCerror(MCe);}}
+    private void MCrefreshBindingFields(){MCbindingField.getItems().setAll("Empresa".equals(MCbindingKind.getValue())?List.of("Razón social","RUC","Domicilio fiscal","Representantes"):List.of("Nombres","Apellidos","Tipo de documento","Número de documento","Domicilio"));MCbindingField.getSelectionModel().selectFirst();}
+    private void MCrefreshContactBindings(){MCTemplate MCt=MCkindTemplate.getValue();try{MCbindingList.getItems().setAll(MCt==null?List.of():MCdata.MCcontactBindings(MCt.MCid()));}catch(Exception MCe){MCerror(MCe);}}
+    private void MCsaveContactBinding(){MCTemplate MCt=MCkindTemplate.getValue();MCVariable MCv=MCbindingVariable.getValue();if(MCt==null||MCv==null||MCbindingGroup.getText().isBlank())throw new IllegalArgumentException("Seleccione plantilla, grupo, dato y variable.");try{String MCfield=switch(MCbindingField.getValue()){case "Nombres","Razón social"->"given";case "Apellidos"->"family";case "Tipo de documento"->"document_type";case "Número de documento","RUC"->"number";case "Domicilio","Domicilio fiscal"->"address";case "Representantes"->"representatives";default->throw new IllegalArgumentException("Dato no admitido.");};MCdata.MCsaveContactBinding(new MCContactBinding(0,MCt.MCid(),MCbindingGroup.getText().trim(),MCbindingKind.getValue(),MCfield,MCv.MCkey()));MCrefreshContactBindings();MCsaved("Asociación local guardada");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteContactBinding(){MCContactBinding MCb=MCbindingList.getSelectionModel().getSelectedItem();if(MCb==null)return;try{MCdata.MCdeleteContactBinding(MCb.MCid());MCrefreshContactBindings();MCsaved("Asociación eliminada");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCmoveField(int MCdelta){int MCi=MCfieldList.getSelectionModel().getSelectedIndex();int MCj=MCi+MCdelta;if(MCi<0||MCj<0||MCj>=MCfieldList.getItems().size())return;Collections.swap(MCfieldList.getItems(),MCi,MCj);MCfieldList.getSelectionModel().select(MCj);}
+    private void MCsaveKind(){MCTemplate MCt=MCkindTemplate.getValue();if(MCt==null||MCkindTitle.getText().isBlank())throw new IllegalArgumentException("Título y plantilla son obligatorios.");try{Set<String> MCmarkers;try(XWPFDocument MCdoc=MCDocumentEngine.MCopen(MCt.MCedited())){MCmarkers=MCDocumentEngine.MCmarkers(MCdoc);}Map<String,MCVariable> MCbound=new HashMap<>();for(MCVariable MCv:MCstore.MCvariables(MCt.MCid()))MCbound.put(MCv.MCkey(),MCv);Set<String> MCshown=new HashSet<>();for(MCVariable MCv:MCfieldList.getItems())MCshown.add(MCv.MCkey());for(String MCmarker:MCmarkers){MCVariable MCv=MCbound.get(MCmarker);if(MCv==null)throw new IllegalArgumentException("Variable sin vincular en la plantilla: "+MCmarker);if(!MCshown.contains(MCmarker)&&(MCkindDefaultChoices.getOrDefault(MCmarker,MCv.MCdefaultValue())==null||MCkindDefaultChoices.getOrDefault(MCmarker,MCv.MCdefaultValue()).isBlank()))throw new IllegalArgumentException("La variable '"+MCmarker+"' no está en el formulario ni tiene valor predeterminado.");}String MCfields=String.join(",",MCfieldList.getItems().stream().map(MCVariable::MCkey).toList());MCKind MCk=MCstore.MCsaveKind(new MCKind(MCcurrentKind==null?0:MCcurrentKind.MCid(),MCkindTitle.getText().trim(),MCkindCategory.getText().trim(),MCkindDescription.getText().trim(),MCt.MCid(),MCfields,MCkindActive.isSelected()));Map<String,Boolean> MCrequirements=new HashMap<>();for(MCVariable MCv:MCfieldList.getItems())MCrequirements.put(MCv.MCkey(),MCkindRequiredChoices.getOrDefault(MCv.MCkey(),MCv.MCrequired()));MCstore.MCsaveKindFieldRules(MCk.MCid(),MCrequirements,MCkindDefaultChoices);MCcurrentKind=MCk;MCrefreshKinds();MCkindList.getSelectionModel().select(MCk);MCsaved("Tipo documental guardado");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCduplicateKind(){MCKind MCk=MCkindList.getSelectionModel().getSelectedItem();if(MCk==null)return;try{MCKind MCcopy=MCstore.MCsaveKind(new MCKind(0,MCk.MCtitle()+" (copia)",MCk.MCcategory(),MCk.MCdescription(),MCk.MCtemplateId(),MCk.MCfields(),MCk.MCactive()));MCstore.MCsaveKindFieldRules(MCcopy.MCid(),MCstore.MCkindRequirements(MCk.MCid()),MCstore.MCkindDefaults(MCk.MCid()));MCrefreshKinds();MCsaved("Tipo duplicado");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteKind(){MCKind MCk=MCkindList.getSelectionModel().getSelectedItem();if(MCk==null)return;try{MCstore.MCdeleteKind(MCk.MCid());MCnewKind();MCrefreshKinds();MCsaved("Tipo eliminado");}catch(Exception MCe){MCerror(MCe);}}
 
-    private BorderPane mcGeneratorPage;
-    private void mcBuildGenerator(){
-        mcGeneratorPage=new BorderPane();mcGeneratorPage.getStyleClass().add("page");
-        GridPane mcTop=new GridPane();mcTop.setHgap(10);for(double mcWidth:new double[]{24,46,30}){ColumnConstraints mcCol=new ColumnConstraints();mcCol.setPercentWidth(mcWidth);mcTop.getColumnConstraints().add(mcCol);}
-        mcGenerateGroup.setOnAction(mcE->{if(!mcRefreshingGenerator){mcUpdatingClientDocument=null;mcUpdatingClient=null;mcRefreshKinds();}});mcGenerateTemplate.setOnAction(mcE->{if(!mcRefreshingGenerator)mcClientAction(()->{mcUpdatingClientDocument=null;mcUpdatingClient=null;mcHistoricalTemplate=null;mcBuildDynamicForm();});});mcGenerateSearch.setPromptText("Buscar entre plantillas");mcGenerateSearch.textProperty().addListener((mcO,mcA,mcB)->{mcUpdatingClientDocument=null;mcUpdatingClient=null;mcRefreshKinds();});
-        mcTop.add(mcLabelled("Grupo",mcGenerateGroup),0,0);mcTop.add(mcLabelled("Documento o plantilla",mcGenerateTemplate),1,0);mcTop.add(mcLabelled("Buscar",mcGenerateSearch),2,0);mcTop.getStyleClass().add("toolbar");mcGeneratorPage.setTop(mcTop);BorderPane.setMargin(mcTop,new Insets(0,0,12,0));
-        mcGeneratedForm.getStyleClass().add("generator-form");ScrollPane mcFormScroll=mcScrolling(mcGeneratedForm);
-        mcPreview.setMinSize(0,0);mcPreview.setContextMenuEnabled(false);
-        mcPreview.getEngine().getLoadWorker().stateProperty().addListener((mcO,mcA,mcB)->{if(mcB==Worker.State.SUCCEEDED&&mcGenerationModel!=null&&Boolean.TRUE.equals(mcPreview.getEngine().executeScript("typeof window.mcStudio !== 'undefined'"))){mcGenerationReady=true;((JSObject)mcPreview.getEngine().executeScript("window")).setMember("mcJavaBridge",mcGenerationBridge);mcClientAction(()->{var mcSect=mcGenerationDocument.getDocument().getBody().getSectPr();double mcW=794,mcH=1123,mcL=72,mcR=72,mcT=72,mcD=72;if(mcSect!=null){if(mcSect.isSetPgSz()){mcW=((Number)mcSect.getPgSz().getW()).doubleValue()/15;mcH=((Number)mcSect.getPgSz().getH()).doubleValue()/15;}if(mcSect.isSetPgMar()){var mcM=mcSect.getPgMar();if(mcM.getLeft()!=null)mcL=((Number)mcM.getLeft()).doubleValue()/15;if(mcM.getRight()!=null)mcR=((Number)mcM.getRight()).doubleValue()/15;if(mcM.getTop()!=null)mcT=((Number)mcM.getTop()).doubleValue()/15;if(mcM.getBottom()!=null)mcD=((Number)mcM.getBottom()).doubleValue()/15;}}mcPreview.getEngine().executeScript("window.mcStudio.mcPaper("+mcW+","+mcH+","+mcL+","+mcT+","+mcR+","+mcD+")");mcPreview.getEngine().executeScript("window.mcStudio.mcGeneration("+mcJsonString(mcGenerationDisplayValues)+")");});}});
-        GridPane mcActions=new GridPane();mcActions.setHgap(8);mcActions.setVgap(8);mcActions.getStyleClass().addAll("action-bar","generator-actions");
-        for(int mcI=0;mcI<2;mcI++){ColumnConstraints mcCol=new ColumnConstraints();mcCol.setPercentWidth(50);mcActions.getColumnConstraints().add(mcCol);}
-        int mcActionIndex=0;for(Button mcAction:List.of(mcButton("Previsualizar",this::mcMakePreview),mcButton("Guardar DOCX",this::mcSaveGenerated),mcButton("Guardar PDF",this::mcSavePdf),mcButton("Abrir en Word",this::mcOpenGeneratedInWord),mcButton("Imprimir",this::mcPrintGenerated))){mcAction.setGraphic(null);mcAction.setMinWidth(0);mcAction.setMaxWidth(Double.MAX_VALUE);mcAction.setWrapText(true);mcActions.add(mcAction,mcActionIndex%2,mcActionIndex/2);mcActionIndex++;}
-        mcUpdateDocumentButton.setOnAction(mcE->mcClientAction(this::mcUpdateClientDocumentFromGenerator));mcUpdateDocumentButton.setVisible(false);mcUpdateDocumentButton.setManaged(false);
-        mcUpdateDocumentBanner.setWrapText(true);mcUpdateDocumentBanner.getStyleClass().add("client-update-banner");mcUpdateDocumentBanner.setVisible(false);mcUpdateDocumentBanner.setManaged(false);
-        VBox mcRight=new VBox(10,mcUpdateDocumentBanner,new Label("DOCUMENTO"),mcPreview,mcUpdateDocumentButton,mcActions);mcRight.setMinWidth(0);mcRight.getStyleClass().add("preview-panel");VBox.setVgrow(mcPreview,Priority.ALWAYS);
-        mcGeneratorVariablesToggle.setOnAction(mcE->mcToggleGeneratorVariables());Region mcSpace=new Region();HBox.setHgrow(mcSpace,Priority.ALWAYS);Label mcVariablesTitle=new Label("Variables");HBox mcHeading=new HBox(8,mcVariablesTitle,mcSpace,mcGeneratorVariablesToggle);mcHeading.setAlignment(Pos.CENTER_LEFT);
-        mcGeneratorVariablesPanel=new VBox(10,mcHeading,mcFormScroll);mcGeneratorVariablesPanel.getStyleClass().add("generator-variables-panel");mcGeneratorVariablesPanel.setMinWidth(0);VBox.setVgrow(mcFormScroll,Priority.ALWAYS);
-        mcGeneratorColumns=new GridPane();mcGeneratorColumns.setHgap(14);mcGeneratorFormColumn=new ColumnConstraints();mcGeneratorDocumentColumn=new ColumnConstraints();mcGeneratorColumns.getColumnConstraints().addAll(mcGeneratorFormColumn,mcGeneratorDocumentColumn);RowConstraints mcRow=new RowConstraints();mcRow.setVgrow(Priority.ALWAYS);mcGeneratorColumns.getRowConstraints().add(mcRow);mcGeneratorColumns.add(mcGeneratorVariablesPanel,0,0);mcGeneratorColumns.add(mcRight,1,0);GridPane.setVgrow(mcGeneratorVariablesPanel,Priority.ALWAYS);GridPane.setVgrow(mcRight,Priority.ALWAYS);mcGeneratorPage.setCenter(mcGeneratorColumns);mcUpdateGeneratorColumns();
+    private BorderPane MCgeneratorPage;
+    private void MCbuildGenerator(){
+        MCgeneratorPage=new BorderPane();MCgeneratorPage.getStyleClass().add("page");
+        GridPane MCtop=new GridPane();MCtop.setHgap(10);for(double MCwidth:new double[]{24,46,30}){ColumnConstraints MCcol=new ColumnConstraints();MCcol.setPercentWidth(MCwidth);MCtop.getColumnConstraints().add(MCcol);}
+        MCgenerateGroup.setOnAction(MCe->{if(!MCrefreshingGenerator){MCupdatingClientDocument=null;MCupdatingClient=null;MCrefreshKinds();}});MCgenerateTemplate.setOnAction(MCe->{if(!MCrefreshingGenerator)MCclientAction(()->{MCupdatingClientDocument=null;MCupdatingClient=null;MChistoricalTemplate=null;MCbuildDynamicForm();});});MCgenerateSearch.setPromptText("Buscar entre plantillas");MCgenerateSearch.textProperty().addListener((MCo,MCa,MCb)->{MCupdatingClientDocument=null;MCupdatingClient=null;MCrefreshKinds();});
+        MCtop.add(MClabelled("Grupo",MCgenerateGroup),0,0);MCtop.add(MClabelled("Documento o plantilla",MCgenerateTemplate),1,0);MCtop.add(MClabelled("Buscar",MCgenerateSearch),2,0);MCtop.getStyleClass().add("toolbar");MCgeneratorPage.setTop(MCtop);BorderPane.setMargin(MCtop,new Insets(0,0,12,0));
+        MCgeneratedForm.getStyleClass().add("generator-form");ScrollPane MCformScroll=MCscrolling(MCgeneratedForm);
+        MCpreview.setMinSize(0,0);MCpreview.setContextMenuEnabled(false);
+        MCpreview.getEngine().getLoadWorker().stateProperty().addListener((MCo,MCa,MCb)->{if(MCb==Worker.State.SUCCEEDED&&MCgenerationModel!=null&&Boolean.TRUE.equals(MCpreview.getEngine().executeScript("typeof window.MCstudio !== 'undefined'"))){MCgenerationReady=true;((JSObject)MCpreview.getEngine().executeScript("window")).setMember("MCjavaBridge",MCgenerationBridge);MCclientAction(()->{var MCsect=MCgenerationDocument.getDocument().getBody().getSectPr();double MCw=794,MCh=1123,MCl=72,MCr=72,MCt=72,MCd=72;if(MCsect!=null){if(MCsect.isSetPgSz()){MCw=((Number)MCsect.getPgSz().getW()).doubleValue()/15;MCh=((Number)MCsect.getPgSz().getH()).doubleValue()/15;}if(MCsect.isSetPgMar()){var MCm=MCsect.getPgMar();if(MCm.getLeft()!=null)MCl=((Number)MCm.getLeft()).doubleValue()/15;if(MCm.getRight()!=null)MCr=((Number)MCm.getRight()).doubleValue()/15;if(MCm.getTop()!=null)MCt=((Number)MCm.getTop()).doubleValue()/15;if(MCm.getBottom()!=null)MCd=((Number)MCm.getBottom()).doubleValue()/15;}}MCpreview.getEngine().executeScript("window.MCstudio.MCpaper("+MCw+","+MCh+","+MCl+","+MCt+","+MCr+","+MCd+")");MCpreview.getEngine().executeScript("window.MCstudio.MCgeneration("+MCjsonString(MCgenerationDisplayValues)+")");});}});
+        GridPane MCactions=new GridPane();MCactions.setHgap(8);MCactions.setVgap(8);MCactions.getStyleClass().addAll("action-bar","generator-actions");
+        for(int MCi=0;MCi<2;MCi++){ColumnConstraints MCcol=new ColumnConstraints();MCcol.setPercentWidth(50);MCactions.getColumnConstraints().add(MCcol);}
+        int MCactionIndex=0;for(Button MCaction:List.of(MCbutton("Previsualizar",this::MCmakePreview),MCbutton("Guardar DOCX",this::MCsaveGenerated),MCbutton("Guardar PDF",this::MCsavePdf),MCbutton("Abrir en Word",this::MCopenGeneratedInWord),MCbutton("Imprimir",this::MCprintGenerated))){MCaction.setGraphic(null);MCaction.setMinWidth(0);MCaction.setMaxWidth(Double.MAX_VALUE);MCaction.setWrapText(true);MCactions.add(MCaction,MCactionIndex%2,MCactionIndex/2);MCactionIndex++;}
+        MCupdateDocumentButton.setOnAction(MCe->MCclientAction(this::MCupdateClientDocumentFromGenerator));MCupdateDocumentButton.setVisible(false);MCupdateDocumentButton.setManaged(false);
+        MCupdateDocumentBanner.setWrapText(true);MCupdateDocumentBanner.getStyleClass().add("client-update-banner");MCupdateDocumentBanner.setVisible(false);MCupdateDocumentBanner.setManaged(false);
+        VBox MCright=new VBox(10,MCupdateDocumentBanner,new Label("DOCUMENTO"),MCpreview,MCupdateDocumentButton,MCactions);MCright.setMinWidth(0);MCright.getStyleClass().add("preview-panel");VBox.setVgrow(MCpreview,Priority.ALWAYS);
+        MCgeneratorVariablesToggle.setOnAction(MCe->MCtoggleGeneratorVariables());Region MCspace=new Region();HBox.setHgrow(MCspace,Priority.ALWAYS);Label MCvariablesTitle=new Label("Variables");HBox MCheading=new HBox(8,MCvariablesTitle,MCspace,MCgeneratorVariablesToggle);MCheading.setAlignment(Pos.CENTER_LEFT);
+        MCgeneratorVariablesPanel=new VBox(10,MCheading,MCformScroll);MCgeneratorVariablesPanel.getStyleClass().add("generator-variables-panel");MCgeneratorVariablesPanel.setMinWidth(0);VBox.setVgrow(MCformScroll,Priority.ALWAYS);
+        MCgeneratorColumns=new GridPane();MCgeneratorColumns.setHgap(14);MCgeneratorFormColumn=new ColumnConstraints();MCgeneratorDocumentColumn=new ColumnConstraints();MCgeneratorColumns.getColumnConstraints().addAll(MCgeneratorFormColumn,MCgeneratorDocumentColumn);RowConstraints MCrow=new RowConstraints();MCrow.setVgrow(Priority.ALWAYS);MCgeneratorColumns.getRowConstraints().add(MCrow);MCgeneratorColumns.add(MCgeneratorVariablesPanel,0,0);MCgeneratorColumns.add(MCright,1,0);GridPane.setVgrow(MCgeneratorVariablesPanel,Priority.ALWAYS);GridPane.setVgrow(MCright,Priority.ALWAYS);MCgeneratorPage.setCenter(MCgeneratorColumns);MCupdateGeneratorColumns();
     }
-    private void mcToggleGeneratorVariables(){mcGeneratorVariablesCollapsed=!mcGeneratorVariablesCollapsed;mcUpdateGeneratorColumns();}
-    private void mcUpdateGeneratorColumns(){
-        boolean mcCollapsed=mcGeneratorVariablesCollapsed;mcGeneratorFormColumn.setPercentWidth(mcCollapsed?-1:46);mcGeneratorFormColumn.setMinWidth(mcCollapsed?48:0);mcGeneratorFormColumn.setPrefWidth(mcCollapsed?48:-1);mcGeneratorFormColumn.setMaxWidth(mcCollapsed?48:Double.MAX_VALUE);mcGeneratorDocumentColumn.setPercentWidth(mcCollapsed?-1:54);mcGeneratorDocumentColumn.setHgrow(Priority.ALWAYS);mcGeneratorDocumentColumn.setMinWidth(0);
-        mcGeneratorVariablesToggle.setGraphic(new FontIcon(mcCollapsed?Feather.CHEVRONS_RIGHT:Feather.CHEVRONS_LEFT));mcGeneratorVariablesToggle.setTooltip(new Tooltip(mcCollapsed?"Mostrar panel de variables":"Minimizar panel de variables"));
-        HBox mcHeading=(HBox)mcGeneratorVariablesPanel.getChildren().get(0);for(Node mcNode:mcHeading.getChildren())if(mcNode!=mcGeneratorVariablesToggle){mcNode.setVisible(!mcCollapsed);mcNode.setManaged(!mcCollapsed);}Node mcContent=mcGeneratorVariablesPanel.getChildren().get(1);mcContent.setVisible(!mcCollapsed);mcContent.setManaged(!mcCollapsed);mcGeneratorVariablesPanel.getStyleClass().remove("collapsed");if(mcCollapsed)mcGeneratorVariablesPanel.getStyleClass().add("collapsed");
+    private void MCtoggleGeneratorVariables(){MCgeneratorVariablesCollapsed=!MCgeneratorVariablesCollapsed;MCupdateGeneratorColumns();}
+    private void MCupdateGeneratorColumns(){
+        boolean MCcollapsed=MCgeneratorVariablesCollapsed;MCgeneratorFormColumn.setPercentWidth(MCcollapsed?-1:46);MCgeneratorFormColumn.setMinWidth(MCcollapsed?48:0);MCgeneratorFormColumn.setPrefWidth(MCcollapsed?48:-1);MCgeneratorFormColumn.setMaxWidth(MCcollapsed?48:Double.MAX_VALUE);MCgeneratorDocumentColumn.setPercentWidth(MCcollapsed?-1:54);MCgeneratorDocumentColumn.setHgrow(Priority.ALWAYS);MCgeneratorDocumentColumn.setMinWidth(0);
+        MCgeneratorVariablesToggle.setGraphic(new FontIcon(MCcollapsed?Feather.CHEVRONS_RIGHT:Feather.CHEVRONS_LEFT));MCgeneratorVariablesToggle.setTooltip(new Tooltip(MCcollapsed?"Mostrar panel de variables":"Minimizar panel de variables"));
+        HBox MCheading=(HBox)MCgeneratorVariablesPanel.getChildren().get(0);for(Node MCnode:MCheading.getChildren())if(MCnode!=MCgeneratorVariablesToggle){MCnode.setVisible(!MCcollapsed);MCnode.setManaged(!MCcollapsed);}Node MCcontent=MCgeneratorVariablesPanel.getChildren().get(1);MCcontent.setVisible(!MCcollapsed);MCcontent.setManaged(!MCcollapsed);MCgeneratorVariablesPanel.getStyleClass().remove("collapsed");if(MCcollapsed)MCgeneratorVariablesPanel.getStyleClass().add("collapsed");
     }
 
-    private void mcShowGenerator(){
-        mcRefreshingGenerator=true;
+    private void MCshowGenerator(){
+        MCrefreshingGenerator=true;
         try{
-            MCTemplateGroup mcPrevious=mcGenerateGroup.getValue();List<MCTemplateGroup> mcGroups=mcStore.mcGroups();mcGenerateGroup.getItems().setAll(mcGroups);
-            mcGenerateGroup.getSelectionModel().select(mcGroups.stream().filter(mcG->mcPrevious!=null&&mcG.mcId()==mcPrevious.mcId()).findFirst().orElse(mcGroups.isEmpty()?null:mcGroups.get(0)));
-        }catch(Exception mcE){mcError(mcE);}finally{mcRefreshingGenerator=false;}
-        if(mcUpdatingClientDocument==null)mcRefreshKinds();mcPage("Generar documentos",mcGeneratorPage);
-        if(mcGenerateTemplate.getValue()==null)mcGeneratedForm.getChildren().setAll(new Label(mcGenerateGroup.getItems().isEmpty()?"Cree un grupo y asocie sus plantillas desde Plantillas.":"Seleccione una plantilla del grupo."));
+            MCTemplateGroup MCprevious=MCgenerateGroup.getValue();List<MCTemplateGroup> MCgroups=MCstore.MCgroups();MCgenerateGroup.getItems().setAll(MCgroups);
+            MCgenerateGroup.getSelectionModel().select(MCgroups.stream().filter(MCg->MCprevious!=null&&MCg.MCid()==MCprevious.MCid()).findFirst().orElse(MCgroups.isEmpty()?null:MCgroups.get(0)));
+        }catch(Exception MCe){MCerror(MCe);}finally{MCrefreshingGenerator=false;}
+        if(MCupdatingClientDocument==null)MCrefreshKinds();MCpage("Generar documentos",MCgeneratorPage);
+        if(MCgenerateTemplate.getValue()==null)MCgeneratedForm.getChildren().setAll(new Label(MCgenerateGroup.getItems().isEmpty()?"Cree un grupo y asocie sus plantillas desde Plantillas.":"Seleccione una plantilla del grupo."));
     }
-    private void mcBuildDynamicForm(){
-        mcLookupDelays.values().forEach(PauseTransition::stop);mcLookupDelays.clear();mcComplementDelays.values().forEach(PauseTransition::stop);mcComplementDelays.clear();mcComplementMenus.values().forEach(ContextMenu::hide);mcComplementMenus.clear();mcComplementTargets.clear();mcActiveComplementDefinitions.clear();mcActiveComplementLinks.clear();
-        MCTemplate mcTemplate=mcGenerateTemplate.getValue();mcGeneratedBytes=null;mcGeneratedPdf=null;mcGeneratedHistoryId=0;mcGenerationReady=false;mcGenerationModel=null;if(mcGenerationDocument!=null)try{mcGenerationDocument.close();}catch(IOException mcIgnored){}mcGenerationDocument=null;mcPreview.getEngine().loadContent("");
-        boolean mcUpdating=mcUpdatingClientDocument!=null;mcUpdateDocumentButton.setVisible(mcUpdating);mcUpdateDocumentButton.setManaged(mcUpdating);mcUpdateDocumentBanner.setVisible(mcUpdating);mcUpdateDocumentBanner.setManaged(mcUpdating);if(mcUpdating)mcUpdateDocumentBanner.setText("Actualizando documento de "+mcClientName(mcUpdatingClient)+": "+mcUpdatingClientDocument.mcTitle());mcInputs.clear();mcFormVariables.clear();mcFormDefinitions.clear();mcManuallyEdited.clear();mcLocalValueOverrides.clear();mcGeneratedForm.getChildren().clear();
-        if(mcTemplate==null)return;
+    private void MCbuildDynamicForm(){
+        MClookupDelays.values().forEach(PauseTransition::stop);MClookupDelays.clear();MCcomplementDelays.values().forEach(PauseTransition::stop);MCcomplementDelays.clear();MCcomplementMenus.values().forEach(ContextMenu::hide);MCcomplementMenus.clear();MCcomplementTargets.clear();MCactiveComplementDefinitions.clear();MCactiveComplementLinks.clear();
+        MCTemplate MCtemplate=MCgenerateTemplate.getValue();MCgeneratedBytes=null;MCgeneratedPdf=null;MCgeneratedHistoryId=0;MCgenerationReady=false;MCgenerationModel=null;if(MCgenerationDocument!=null)try{MCgenerationDocument.close();}catch(IOException MCignored){}MCgenerationDocument=null;MCpreview.getEngine().loadContent("");
+        boolean MCupdating=MCupdatingClientDocument!=null;MCupdateDocumentButton.setVisible(MCupdating);MCupdateDocumentButton.setManaged(MCupdating);MCupdateDocumentBanner.setVisible(MCupdating);MCupdateDocumentBanner.setManaged(MCupdating);if(MCupdating)MCupdateDocumentBanner.setText("Actualizando documento de "+MCclientName(MCupdatingClient)+": "+MCupdatingClientDocument.MCtitle());MCinputs.clear();MCformVariables.clear();MCformDefinitions.clear();MCmanuallyEdited.clear();MClocalValueOverrides.clear();MCgeneratedForm.getChildren().clear();
+        if(MCtemplate==null)return;
         try{
-            List<MCVariable> mcVariables=mcVariablesForTemplate(mcTemplate);List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();Map<String,String> mcNames=new LinkedHashMap<>();for(var mcPerson:mcStore.mcPersonas(mcTemplate.mcId()))mcNames.put(mcPerson.mcPersonaKey(),mcPerson.mcDisplayName());
-            String mcIndependentScope="!independent";
-            Map<String,List<MCVariable>> mcClients=new LinkedHashMap<>();mcClients.put("",new ArrayList<>());for(String mcKey:mcNames.keySet())mcClients.put(mcKey,new ArrayList<>());
-            List<MCVariable> mcIndependent=new ArrayList<>();
-            for(MCVariable mcVariable:mcVariables){
-                MCDefinition mcDefinition=mcDefinitionFor(mcVariable,mcDefinitions);if(mcDefinition!=null)mcFormDefinitions.put(mcVariable.mcKey(),mcDefinition);
-                if(mcDefinition!=null&&!mcDefinition.mcBindToClient())mcIndependent.add(mcVariable);
-                else mcClients.computeIfAbsent(MCDocumentEngine.mcPersonaKey(mcVariable.mcKey()),mcKey->new ArrayList<>()).add(mcVariable);
+            List<MCVariable> MCvariables=MCvariablesForTemplate(MCtemplate);List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();Map<String,String> MCnames=new LinkedHashMap<>();for(var MCperson:MCstore.MCpersonas(MCtemplate.MCid()))MCnames.put(MCperson.MCpersonaKey(),MCperson.MCdisplayName());
+            String MCindependentScope="!independent";
+            Map<String,List<MCVariable>> MCclients=new LinkedHashMap<>();MCclients.put("",new ArrayList<>());for(String MCkey:MCnames.keySet())MCclients.put(MCkey,new ArrayList<>());
+            List<MCVariable> MCindependent=new ArrayList<>();
+            for(MCVariable MCvariable:MCvariables){
+                MCDefinition MCdefinition=MCdefinitionFor(MCvariable,MCdefinitions);if(MCdefinition!=null)MCformDefinitions.put(MCvariable.MCkey(),MCdefinition);
+                if(MCdefinition!=null&&!MCdefinition.MCbindToClient())MCindependent.add(MCvariable);
+                else MCclients.computeIfAbsent(MCDocumentEngine.MCpersonaKey(MCvariable.MCkey()),MCkey->new ArrayList<>()).add(MCvariable);
             }
-            List<String> mcScopes=new ArrayList<>(mcClients.entrySet().stream().filter(mcEntry->!mcEntry.getValue().isEmpty())
-                .sorted(Comparator.comparingInt((Map.Entry<String,List<MCVariable>> mcEntry)->mcEntry.getValue().size()).reversed()).map(Map.Entry::getKey).toList());
-            if(!mcIndependent.isEmpty())mcScopes.add(mcIndependentScope);
-            Map<String,GridPane> mcGrids=new LinkedHashMap<>();Map<String,Integer> mcSlots=new HashMap<>();VBox mcIndependentCard=null;
-            for(String mcScope:mcScopes){
-                GridPane mcGrid=mcTwoColumns();mcGrids.put(mcScope,mcGrid);boolean mcGlobal=mcScope.equals(mcIndependentScope);
-                VBox mcCard=new VBox(10,new Label(mcGlobal?"Variables independientes":mcScope.isEmpty()?"Cliente / Solicitante":mcNames.getOrDefault(mcScope,mcScope.replace('_',' '))),mcGrid);mcCard.getStyleClass().add("binding-card");
-                if(mcGlobal)mcIndependentCard=mcCard;else{mcCard.getProperties().put("persona-key",mcScope);mcGeneratedForm.getChildren().add(mcCard);}
+            List<String> MCscopes=new ArrayList<>(MCclients.entrySet().stream().filter(MCentry->!MCentry.getValue().isEmpty())
+                .sorted(Comparator.comparingInt((Map.Entry<String,List<MCVariable>> MCentry)->MCentry.getValue().size()).reversed()).map(Map.Entry::getKey).toList());
+            if(!MCindependent.isEmpty())MCscopes.add(MCindependentScope);
+            Map<String,GridPane> MCgrids=new LinkedHashMap<>();Map<String,Integer> MCslots=new HashMap<>();VBox MCindependentCard=null;
+            for(String MCscope:MCscopes){
+                GridPane MCgrid=MCtwoColumns();MCgrids.put(MCscope,MCgrid);boolean MCglobal=MCscope.equals(MCindependentScope);
+                VBox MCcard=new VBox(10,new Label(MCglobal?"Variables independientes":MCscope.isEmpty()?"Cliente / Solicitante":MCnames.getOrDefault(MCscope,MCscope.replace('_',' '))),MCgrid);MCcard.getStyleClass().add("binding-card");
+                if(MCglobal)MCindependentCard=MCcard;else{MCcard.getProperties().put("persona-key",MCscope);MCgeneratedForm.getChildren().add(MCcard);}
             }
-            for(MCVariable mcVariable:mcVariables){
-                MCDefinition mcDefinition=mcFormDefinitions.get(mcVariable.mcKey());String mcScope=mcDefinition!=null&&!mcDefinition.mcBindToClient()?mcIndependentScope:MCDocumentEngine.mcPersonaKey(mcVariable.mcKey());GridPane mcGrid=mcGrids.get(mcScope);int mcSlot=mcSlots.getOrDefault(mcScope,0);
-                String mcInitial=mcDefinition!=null?mcDefinition.mcInitialValue():MCVariableInput.mcInitialValue(mcVariable.mcType(),mcVariable.mcDefaultValue());Control mcInput;
-                if(mcDefinition!=null&&(!mcDefinition.mcBindToClient()||mcDefinition.mcAutoCurrentDate()))mcInput=new TextField(mcInitial);
-                else if(List.of("Texto largo","Domicilio").contains(mcVariable.mcType())){TextArea mcArea=new TextArea(mcInitial);mcArea.setPrefRowCount(3);mcArea.setWrapText(true);mcInput=mcArea;}
-                else if("Fecha".equals(mcVariable.mcType())){DatePicker mcDate=new DatePicker();try{mcDate.setValue(LocalDate.parse(mcInitial));}catch(Exception mcIgnored){mcDate.setValue(LocalDate.now());}mcInput=mcDate;}
-                else mcInput=new TextField(mcInitial);
-                if(mcInput instanceof TextInputControl mcEditable)mcEditable.textProperty().addListener((mcO,mcA,mcB)->{if(!mcApplyingApi)mcManuallyEdited.add(mcVariable.mcKey());});
-                else if(mcInput instanceof DatePicker mcDate)mcDate.valueProperty().addListener((mcO,mcA,mcB)->{if(!mcApplyingApi)mcManuallyEdited.add(mcVariable.mcKey());});
-                mcInputs.put(mcVariable.mcKey(),mcInput);mcFormVariables.put(mcVariable.mcKey(),mcVariable);Node mcControl=mcInput;
-                String mcService=mcQueryService(mcTemplate.mcId(),mcVariable);
-                if(mcService!=null&&mcInput instanceof TextField mcField){
-                    PauseTransition mcDelay=new PauseTransition(Duration.millis(350));mcLookupDelays.put(mcVariable.mcKey(),mcDelay);
-                    Runnable mcConsult=()->{mcDelay.stop();mcLookupForField(mcTemplate,mcVariable,mcField,mcService);};
-                    mcDelay.setOnFinished(mcE->{if(mcInputs.get(mcVariable.mcKey())!=mcField||!mcValidQueryNumber(mcService,mcField.getText()))return;if(mcApiQueryRunning)mcDelay.playFromStart();else mcSafe(mcConsult);});
-                    mcField.textProperty().addListener((mcO,mcA,mcB)->{
-                        mcDelay.stop();if(mcApplyingApi||!mcValidQueryNumber(mcService,mcB))return;
-                        try{mcResetContactEdits(mcTemplate,mcVariable,mcService);if(!mcLoadLocalForField(mcTemplate,mcVariable,mcField,mcService))mcDelay.playFromStart();}catch(Exception mcEx){mcError(mcEx);}
+            for(MCVariable MCvariable:MCvariables){
+                MCDefinition MCdefinition=MCformDefinitions.get(MCvariable.MCkey());String MCscope=MCdefinition!=null&&!MCdefinition.MCbindToClient()?MCindependentScope:MCDocumentEngine.MCpersonaKey(MCvariable.MCkey());GridPane MCgrid=MCgrids.get(MCscope);int MCslot=MCslots.getOrDefault(MCscope,0);
+                String MCinitial=MCdefinition!=null?MCdefinition.MCinitialValue():MCVariableInput.MCinitialValue(MCvariable.MCtype(),MCvariable.MCdefaultValue());Control MCinput;
+                if(MCdefinition!=null&&(!MCdefinition.MCbindToClient()||MCdefinition.MCautoCurrentDate()))MCinput=new TextField(MCinitial);
+                else if(List.of("Texto largo","Domicilio").contains(MCvariable.MCtype())){TextArea MCarea=new TextArea(MCinitial);MCarea.setPrefRowCount(3);MCarea.setWrapText(true);MCinput=MCarea;}
+                else if("Fecha".equals(MCvariable.MCtype())){DatePicker MCdate=new DatePicker();try{MCdate.setValue(LocalDate.parse(MCinitial));}catch(Exception MCignored){MCdate.setValue(LocalDate.now());}MCinput=MCdate;}
+                else MCinput=new TextField(MCinitial);
+                if(MCinput instanceof TextInputControl MCeditable)MCeditable.textProperty().addListener((MCo,MCa,MCb)->{if(!MCapplyingApi)MCmanuallyEdited.add(MCvariable.MCkey());});
+                else if(MCinput instanceof DatePicker MCdate)MCdate.valueProperty().addListener((MCo,MCa,MCb)->{if(!MCapplyingApi)MCmanuallyEdited.add(MCvariable.MCkey());});
+                MCinputs.put(MCvariable.MCkey(),MCinput);MCformVariables.put(MCvariable.MCkey(),MCvariable);Node MCcontrol=MCinput;
+                String MCservice=MCqueryService(MCtemplate.MCid(),MCvariable);
+                if(MCservice!=null&&MCinput instanceof TextField MCfield){
+                    PauseTransition MCdelay=new PauseTransition(Duration.millis(350));MClookupDelays.put(MCvariable.MCkey(),MCdelay);
+                    Runnable MCconsult=()->{MCdelay.stop();MClookupForField(MCtemplate,MCvariable,MCfield,MCservice);};
+                    MCdelay.setOnFinished(MCe->{if(MCinputs.get(MCvariable.MCkey())!=MCfield||!MCvalidQueryNumber(MCservice,MCfield.getText()))return;if(MCapiQueryRunning)MCdelay.playFromStart();else MCsafe(MCconsult);});
+                    MCfield.textProperty().addListener((MCo,MCa,MCb)->{
+                        MCdelay.stop();if(MCapplyingApi||!MCvalidQueryNumber(MCservice,MCb))return;
+                        try{MCresetContactEdits(MCtemplate,MCvariable,MCservice);if(!MCloadLocalForField(MCtemplate,MCvariable,MCfield,MCservice))MCdelay.playFromStart();}catch(Exception MCex){MCerror(MCex);}
                     });
-                    Button mcLookup=mcButton("Consultar API",mcConsult);mcLookup.setTooltip(new Tooltip("Busca primero en Clientes locales; si no existe, consulta la API."));mcField.setMinWidth(0);
-                    mcLookup.setGraphic(null);mcLookup.getStyleClass().add("lookup-button");HBox mcQuery=new HBox(6,mcField,mcLookup);HBox.setHgrow(mcField,Priority.ALWAYS);mcControl=mcQuery;
+                    Button MClookup=MCbutton("Consultar API",MCconsult);MClookup.setTooltip(new Tooltip("Busca primero en Clientes locales; si no existe, consulta la API."));MCfield.setMinWidth(0);
+                    MClookup.setGraphic(null);MClookup.getStyleClass().add("lookup-button");HBox MCquery=new HBox(6,MCfield,MClookup);HBox.setHgrow(MCfield,Priority.ALWAYS);MCcontrol=MCquery;
                 }
-                VBox mcField=mcLabelled(mcVariable.mcLabel(),mcControl);
-                if(mcInput instanceof TextArea){if(mcSlot%2!=0)mcSlot++;mcGrid.add(mcField,0,mcSlot/2,2,1);mcSlot+=2;}
-                else{mcGrid.add(mcField,mcSlot%2,mcSlot/2);mcSlot++;}mcSlots.put(mcScope,mcSlot);
+                VBox MCfield=MClabelled(MCvariable.MClabel(),MCcontrol);
+                if(MCinput instanceof TextArea){if(MCslot%2!=0)MCslot++;MCgrid.add(MCfield,0,MCslot/2,2,1);MCslot+=2;}
+                else{MCgrid.add(MCfield,MCslot%2,MCslot/2);MCslot++;}MCslots.put(MCscope,MCslot);
             }
-            mcConfigureComplements(mcVariables);mcAddContactSelectors(mcTemplate);if(mcIndependentCard!=null)mcGeneratedForm.getChildren().add(mcIndependentCard);
-            mcRenderPreview(mcHistoricalTemplate==null?mcTemplate.mcEdited():mcHistoricalTemplate);if(mcInputs.isEmpty()){Label mcMessage=new Label("Este documento no contiene variables. Puedes editar su contenido directamente en el panel del documento.");mcMessage.setWrapText(true);mcGeneratedForm.getChildren().add(mcMessage);}
-            mcInputs.values().forEach(mcInput->{if(mcInput instanceof TextInputControl mcText)mcText.textProperty().addListener((mcO,mcA,mcB)->mcClientAction(this::mcRefreshGenerationValues));else if(mcInput instanceof DatePicker mcDate)mcDate.valueProperty().addListener((mcO,mcA,mcB)->mcClientAction(this::mcRefreshGenerationValues));});
-        }catch(Exception mcE){mcError(mcE);}
+            MCconfigureComplements(MCvariables);MCaddContactSelectors(MCtemplate);if(MCindependentCard!=null)MCgeneratedForm.getChildren().add(MCindependentCard);
+            MCrenderPreview(MChistoricalTemplate==null?MCtemplate.MCedited():MChistoricalTemplate);if(MCinputs.isEmpty()){Label MCmessage=new Label("Este documento no contiene variables. Puedes editar su contenido directamente en el panel del documento.");MCmessage.setWrapText(true);MCgeneratedForm.getChildren().add(MCmessage);}
+            MCinputs.values().forEach(MCinput->{if(MCinput instanceof TextInputControl MCtext)MCtext.textProperty().addListener((MCo,MCa,MCb)->MCclientAction(this::MCrefreshGenerationValues));else if(MCinput instanceof DatePicker MCdate)MCdate.valueProperty().addListener((MCo,MCa,MCb)->MCclientAction(this::MCrefreshGenerationValues));});
+        }catch(Exception MCe){MCerror(MCe);}
     }
-    private void mcAddContactSelectors(MCTemplate mcTemplate)throws Exception{
-        Map<String,List<MCContactBinding>> mcGroups=new LinkedHashMap<>();for(MCContactBinding mcBinding:mcData.mcContactBindings(mcTemplate.mcId()))if(MCContactReuse.mcClientKey(mcBinding.mcVariableKey(),mcStore.mcDefinitions()))mcGroups.computeIfAbsent(mcBinding.mcGroupKey(),mcIgnored->new ArrayList<>()).add(mcBinding);
-        for(var mcEntry:mcGroups.entrySet()){
-            List<MCContactBinding> mcGroup=mcEntry.getValue();String mcKind=mcGroup.get(0).mcKind();TextField mcSearch=new TextField();mcSearch.setPromptText("Buscar por nombre o documento");
-            ComboBox<MCContact> mcChoice=new ComboBox<>();mcChoice.setPromptText("Seleccionar "+mcKind.toLowerCase());mcChoice.setMaxWidth(Double.MAX_VALUE);mcChoice.setMinWidth(0);
-            Runnable mcFilter=()->{try{String mcQ=mcSearch.getText().trim().toLowerCase();mcChoice.getItems().setAll(mcData.mcContacts().stream().filter(mcC->mcKind.equals(mcC.mcKind())).filter(mcC->(mcC.mcGiven()+" "+mcC.mcFamily()+" "+mcC.mcNumber()).toLowerCase().contains(mcQ)).toList());}catch(Exception mcEx){mcError(mcEx);}};
-            mcSearch.textProperty().addListener((mcO,mcA,mcB)->mcFilter.run());mcChoice.setOnShowing(mcE->mcFilter.run());mcFilter.run();
-            VBox mcRow=new VBox(8,mcSearch,mcChoice,mcButton("Usar registro",()->{MCContact mcSelected=mcChoice.getValue();if(mcSelected==null)return;Map<String,String> mcValues=MCContactReuse.mcValuesFor(mcSelected,mcGroup);for(var mcMapped:mcValues.entrySet()){Control mcTarget=mcInputs.get(mcMapped.getKey());if(mcTarget!=null)mcSetInput(mcTarget,mcMapped.getValue());else mcLocalValueOverrides.put(mcMapped.getKey(),mcMapped.getValue());}mcSaved("Datos locales aplicados a "+mcEntry.getKey()+"; puede editarlos antes de generar");}));
-            mcGeneratedForm.getChildren().add(mcLabelled("REGISTRO LOCAL · "+mcEntry.getKey()+" · "+mcKind,mcRow));
+    private void MCaddContactSelectors(MCTemplate MCtemplate)throws Exception{
+        Map<String,List<MCContactBinding>> MCgroups=new LinkedHashMap<>();for(MCContactBinding MCbinding:MCdata.MCcontactBindings(MCtemplate.MCid()))if(MCContactReuse.MCclientKey(MCbinding.MCvariableKey(),MCstore.MCdefinitions()))MCgroups.computeIfAbsent(MCbinding.MCgroupKey(),MCignored->new ArrayList<>()).add(MCbinding);
+        for(var MCentry:MCgroups.entrySet()){
+            List<MCContactBinding> MCgroup=MCentry.getValue();String MCkind=MCgroup.get(0).MCkind();TextField MCsearch=new TextField();MCsearch.setPromptText("Buscar por nombre o documento");
+            ComboBox<MCContact> MCchoice=new ComboBox<>();MCchoice.setPromptText("Seleccionar "+MCkind.toLowerCase());MCchoice.setMaxWidth(Double.MAX_VALUE);MCchoice.setMinWidth(0);
+            Runnable MCfilter=()->{try{String MCq=MCsearch.getText().trim().toLowerCase();MCchoice.getItems().setAll(MCdata.MCcontacts().stream().filter(MCc->MCkind.equals(MCc.MCkind())).filter(MCc->(MCc.MCgiven()+" "+MCc.MCfamily()+" "+MCc.MCnumber()).toLowerCase().contains(MCq)).toList());}catch(Exception MCex){MCerror(MCex);}};
+            MCsearch.textProperty().addListener((MCo,MCa,MCb)->MCfilter.run());MCchoice.setOnShowing(MCe->MCfilter.run());MCfilter.run();
+            VBox MCrow=new VBox(8,MCsearch,MCchoice,MCbutton("Usar registro",()->{MCContact MCselected=MCchoice.getValue();if(MCselected==null)return;Map<String,String> MCvalues=MCContactReuse.MCvaluesFor(MCselected,MCgroup);for(var MCmapped:MCvalues.entrySet()){Control MCtarget=MCinputs.get(MCmapped.getKey());if(MCtarget!=null)MCsetInput(MCtarget,MCmapped.getValue());else MClocalValueOverrides.put(MCmapped.getKey(),MCmapped.getValue());}MCsaved("Datos locales aplicados a "+MCentry.getKey()+"; puede editarlos antes de generar");}));
+            MCgeneratedForm.getChildren().add(MClabelled("REGISTRO LOCAL · "+MCentry.getKey()+" · "+MCkind,MCrow));
         }
     }
-    private Map<String,String> mcCurrentFormValues(){Map<String,String> mcValues=new LinkedHashMap<>(mcLocalValueOverrides);mcInputs.forEach((mcKey,mcInput)->mcValues.put(mcKey,mcReadInput(mcInput)));return mcValues;}
-    private void mcRenderPreview(byte[] mcBytes)throws Exception{
-        mcGenerationReady=false;mcGenerationDocument=MCDocumentEngine.mcOpen(mcBytes);mcGenerationModel=new MCContinuousDocxEditor(mcGenerationDocument);mcGenerationDisplayValues=mcDocumentValues(mcBytes,mcCurrentFormValues());mcGenerationValueAliases.clear();for(String mcKey:mcGenerationDisplayValues.keySet()){MCDefinition mcDefinition=mcFormDefinitions.get(MCDocumentEngine.mcBaseKey(mcKey));mcGenerationValueAliases.put(mcKey,mcDefinition!=null&&!mcDefinition.mcBindToClient()?mcDefinition.mcKey():mcKey);}mcPreview.getEngine().loadContent(mcGenerationModel.mcGenerationHtml());
+    private Map<String,String> MCcurrentFormValues(){Map<String,String> MCvalues=new LinkedHashMap<>(MClocalValueOverrides);MCinputs.forEach((MCkey,MCinput)->MCvalues.put(MCkey,MCreadInput(MCinput)));return MCvalues;}
+    private void MCrenderPreview(byte[] MCbytes)throws Exception{
+        MCgenerationReady=false;MCgenerationDocument=MCDocumentEngine.MCopen(MCbytes);MCgenerationModel=new MCContinuousDocxEditor(MCgenerationDocument);MCgenerationDisplayValues=MCdocumentValues(MCbytes,MCcurrentFormValues());MCgenerationValueAliases.clear();for(String MCkey:MCgenerationDisplayValues.keySet()){MCDefinition MCdefinition=MCformDefinitions.get(MCDocumentEngine.MCbaseKey(MCkey));MCgenerationValueAliases.put(MCkey,MCdefinition!=null&&!MCdefinition.MCbindToClient()?MCdefinition.MCkey():MCkey);}MCpreview.getEngine().loadContent(MCgenerationModel.MCgenerationHtml());
     }
-    private void mcRefreshGenerationValues()throws Exception{if(mcGenerationDocument==null)return;Map<String,String> mcValues=mcCurrentFormValues();mcGenerationDisplayValues=new LinkedHashMap<>(mcValues);mcGenerationValueAliases.forEach((mcKey,mcSource)->mcGenerationDisplayValues.put(mcKey,mcValues.getOrDefault(mcSource,"")));if(mcGenerationReady)mcPreview.getEngine().executeScript("window.mcStudio.mcGeneration("+mcJsonString(mcGenerationDisplayValues)+")");}
-    private void mcSyncGenerationEditor()throws Exception{
-        if(!mcGenerationReady||mcGenerationModel==null)return;
-        mcGenerationModel.mcApply(String.valueOf(mcPreview.getEngine().executeScript("window.mcStudio.mcHtml()")));
-        XWPFDocument mcNormalized=MCDocumentEngine.mcOpen(MCDocumentEngine.mcBytes(mcGenerationDocument));mcGenerationDocument.close();mcGenerationDocument=mcNormalized;mcGenerationModel=new MCContinuousDocxEditor(mcNormalized);
-        mcPreview.getEngine().executeScript("window.mcStudio.mcAccept("+mcJsonString("<div>"+mcGenerationModel.mcHtml()+"</div>")+")");
+    private void MCrefreshGenerationValues()throws Exception{if(MCgenerationDocument==null)return;Map<String,String> MCvalues=MCcurrentFormValues();MCgenerationDisplayValues=new LinkedHashMap<>(MCvalues);MCgenerationValueAliases.forEach((MCkey,MCsource)->MCgenerationDisplayValues.put(MCkey,MCvalues.getOrDefault(MCsource,"")));if(MCgenerationReady)MCpreview.getEngine().executeScript("window.MCstudio.MCgeneration("+MCjsonString(MCgenerationDisplayValues)+")");}
+    private void MCsyncGenerationEditor()throws Exception{
+        if(!MCgenerationReady||MCgenerationModel==null)return;
+        MCgenerationModel.MCapply(String.valueOf(MCpreview.getEngine().executeScript("window.MCstudio.MChtml()")));
+        XWPFDocument MCnormalized=MCDocumentEngine.MCopen(MCDocumentEngine.MCbytes(MCgenerationDocument));MCgenerationDocument.close();MCgenerationDocument=MCnormalized;MCgenerationModel=new MCContinuousDocxEditor(MCnormalized);
+        MCpreview.getEngine().executeScript("window.MCstudio.MCaccept("+MCjsonString("<div>"+MCgenerationModel.MChtml()+"</div>")+")");
     }
-    /** @author MC */
     public final class MCGenerationBridge {
-        public void mcMarkDirty(){mcGeneratedHistoryId=0;mcGeneratedPdf=null;}
-        public void mcTableSelected(boolean mcSelected){} public void mcImageSelected(boolean mcSelected){}
-        public void mcOnSelectionFormatChanged(String mcState){}
-        public void mcSaveCurrentTemplate(){mcClientAction(()->{if(mcUpdatingClientDocument!=null)mcUpdateClientDocumentFromGenerator();else mcSaveGenerated();});}
+        public void MCmarkDirty(){MCgeneratedHistoryId=0;MCgeneratedPdf=null;}
+        public void MCtableSelected(boolean MCselected){} public void MCimageSelected(boolean MCselected){}
+        public void MConSelectionFormatChanged(String MCstate){}
+        public void MCsaveCurrentTemplate(){MCclientAction(()->{if(MCupdatingClientDocument!=null)MCupdateClientDocumentFromGenerator();else MCsaveGenerated();});}
     }
-    private void mcMakePreview(){
-        mcGeneratedBytes=null;mcGeneratedPdf=null;MCTemplate mcSelectedTemplate=mcGenerateTemplate.getValue();if(mcSelectedTemplate==null)throw new IllegalArgumentException("Seleccione una plantilla.");
+    private void MCmakePreview(){
+        MCgeneratedBytes=null;MCgeneratedPdf=null;MCTemplate MCselectedTemplate=MCgenerateTemplate.getValue();if(MCselectedTemplate==null)throw new IllegalArgumentException("Seleccione una plantilla.");
         try{
-            mcCompletingMissingComplements=true;try{for(String mcKey:mcComplementTargets.keySet())mcCompleteExactComplement(mcKey);}finally{mcCompletingMissingComplements=false;}
-            Map<String,String> mcValues=new LinkedHashMap<>();Map<String,MCVariable> mcVars=new HashMap<>();
-            for(MCVariable mcV:mcVariablesForTemplate(mcSelectedTemplate)){mcVars.put(mcV.mcKey(),mcV);mcValues.put(mcV.mcKey(),MCVariableInput.mcInitialValue(mcV.mcType(),mcV.mcDefaultValue()));}
-            mcValues.putAll(mcLocalValueOverrides);
-            for(var mcEntry:mcInputs.entrySet()){
-                Control mcInput=mcEntry.getValue();MCVariable mcV=mcVars.get(mcEntry.getKey());
-                if(mcV==null)throw new IllegalArgumentException("Variable sin definir: "+mcEntry.getKey());
-                String mcValue=mcFormDefinitions.containsKey(mcEntry.getKey())&&(!mcFormDefinitions.get(mcEntry.getKey()).mcBindToClient()||mcFormDefinitions.get(mcEntry.getKey()).mcAutoCurrentDate())?mcReadInput(mcInput):MCVariableInput.mcValidate(mcV.mcType(),mcReadInput(mcInput),Locale.getDefault());
-                mcValues.put(mcEntry.getKey(),mcValue);
+            MCcompletingMissingComplements=true;try{for(String MCkey:MCcomplementTargets.keySet())MCcompleteExactComplement(MCkey);}finally{MCcompletingMissingComplements=false;}
+            Map<String,String> MCvalues=new LinkedHashMap<>();Map<String,MCVariable> MCvars=new HashMap<>();
+            for(MCVariable MCv:MCvariablesForTemplate(MCselectedTemplate)){MCvars.put(MCv.MCkey(),MCv);MCvalues.put(MCv.MCkey(),MCVariableInput.MCinitialValue(MCv.MCtype(),MCv.MCdefaultValue()));}
+            MCvalues.putAll(MClocalValueOverrides);
+            for(var MCentry:MCinputs.entrySet()){
+                Control MCinput=MCentry.getValue();MCVariable MCv=MCvars.get(MCentry.getKey());
+                if(MCv==null)throw new IllegalArgumentException("Variable sin definir: "+MCentry.getKey());
+                String MCvalue=MCformDefinitions.containsKey(MCentry.getKey())&&(!MCformDefinitions.get(MCentry.getKey()).MCbindToClient()||MCformDefinitions.get(MCentry.getKey()).MCautoCurrentDate())?MCreadInput(MCinput):MCVariableInput.MCvalidate(MCv.MCtype(),MCreadInput(MCinput),Locale.getDefault());
+                MCvalues.put(MCentry.getKey(),MCvalue);
             }
-            if(!mcValues.equals(mcGeneratedValues))mcGeneratedHistoryId=0;
-            mcSyncGenerationEditor();byte[] mcSource=mcGenerationDocument==null?(mcHistoricalTemplate==null?mcSelectedTemplate.mcEdited():mcHistoricalTemplate):MCDocumentEngine.mcBytes(mcGenerationDocument);
-            mcGeneratedBytes=MCDocumentEngine.mcGenerate(mcSource,mcDocumentValues(mcSource,mcValues));mcGeneratedValues=mcValues;mcLearnScopedComplements(mcValues);mcAutoSaveContacts(mcSelectedTemplate);mcRefreshGenerationValues();
+            if(!MCvalues.equals(MCgeneratedValues))MCgeneratedHistoryId=0;
+            MCsyncGenerationEditor();byte[] MCsource=MCgenerationDocument==null?(MChistoricalTemplate==null?MCselectedTemplate.MCedited():MChistoricalTemplate):MCDocumentEngine.MCbytes(MCgenerationDocument);
+            MCgeneratedBytes=MCDocumentEngine.MCgenerate(MCsource,MCdocumentValues(MCsource,MCvalues));MCgeneratedValues=MCvalues;MClearnScopedComplements(MCvalues);MCautoSaveContacts(MCselectedTemplate);MCrefreshGenerationValues();
 
-            mcSaved("Vista previa generada"+mcContactSaveSummary);
-        }catch(Exception mcE){mcError(mcE);}
+            MCsaved("Vista previa generada"+MCcontactSaveSummary);
+        }catch(Exception MCe){MCerror(MCe);}
     }
-    private void mcSaveGenerated(){mcMakePreview();if(mcGeneratedBytes==null)return;FileChooser mcFc=new FileChooser();mcFc.setTitle("Guardar documento generado");mcFc.setInitialFileName(mcFileName()+".docx");mcFc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Word DOCX","*.docx"));File mcTarget=mcFc.showSaveDialog(mcStage);if(mcTarget==null)return;try{Files.write(mcTarget.toPath(),mcGeneratedBytes);mcRecordGeneration(mcTarget.toString(),null,null);mcSaved("DOCX guardado: "+mcTarget.getName()+mcContactSaveSummary);}catch(Exception mcE){mcError(mcE);}}
-    private void mcSavePdf(){mcMakePreview();if(mcGeneratedBytes==null)return;FileChooser mcFc=new FileChooser();mcFc.setTitle("Guardar PDF");mcFc.setInitialFileName(mcFileName()+".pdf");mcFc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF","*.pdf"));File mcTarget=mcFc.showSaveDialog(mcStage);if(mcTarget==null)return;try{mcGeneratedPdf=MCDocxPdfExporter.mcRender(mcGeneratedBytes);Files.write(mcTarget.toPath(),mcGeneratedPdf);mcRecordGeneration(null,mcTarget.toString(),mcGeneratedPdf);mcSaved("PDF guardado: "+mcTarget.getName()+mcContactSaveSummary);}catch(Exception mcE){mcError(mcE);}}
-    private void mcOpenGeneratedInWord(){
-        mcMakePreview();if(mcGeneratedBytes==null)return;
-        try{Path mcDocument=Files.createTempFile("documento-",".docx");Files.write(mcDocument,mcGeneratedBytes);mcDocument.toFile().deleteOnExit();if(mcUpdatingClientDocument==null)mcRecordGeneration(null,null,null);mcDocumentActions.mcOpen(mcDocument);mcSaved("Documento abierto en el procesador de texto"+mcContactSaveSummary);}catch(Exception mcE){mcError(mcE);}
+    private void MCsaveGenerated(){MCmakePreview();if(MCgeneratedBytes==null)return;FileChooser MCfc=new FileChooser();MCfc.setTitle("Guardar documento generado");MCfc.setInitialFileName(MCfileName()+".docx");MCfc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Word DOCX","*.docx"));File MCtarget=MCfc.showSaveDialog(MCstage);if(MCtarget==null)return;try{Files.write(MCtarget.toPath(),MCgeneratedBytes);MCrecordGeneration(MCtarget.toString(),null,null);MCsaved("DOCX guardado: "+MCtarget.getName()+MCcontactSaveSummary);}catch(Exception MCe){MCerror(MCe);}}
+    private void MCsavePdf(){MCmakePreview();if(MCgeneratedBytes==null)return;FileChooser MCfc=new FileChooser();MCfc.setTitle("Guardar PDF");MCfc.setInitialFileName(MCfileName()+".pdf");MCfc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF","*.pdf"));File MCtarget=MCfc.showSaveDialog(MCstage);if(MCtarget==null)return;try{MCgeneratedPdf=MCDocxPdfExporter.MCrender(MCgeneratedBytes);Files.write(MCtarget.toPath(),MCgeneratedPdf);MCrecordGeneration(null,MCtarget.toString(),MCgeneratedPdf);MCsaved("PDF guardado: "+MCtarget.getName()+MCcontactSaveSummary);}catch(Exception MCe){MCerror(MCe);}}
+    private void MCopenGeneratedInWord(){
+        MCmakePreview();if(MCgeneratedBytes==null)return;
+        try{Path MCdocument=Files.createTempFile("documento-",".docx");Files.write(MCdocument,MCgeneratedBytes);MCdocument.toFile().deleteOnExit();if(MCupdatingClientDocument==null)MCrecordGeneration(null,null,null);MCdocumentActions.MCopen(MCdocument);MCsaved("Documento abierto en el procesador de texto"+MCcontactSaveSummary);}catch(Exception MCe){MCerror(MCe);}
     }
-    private void mcPrintGenerated(){
-        mcMakePreview();if(mcGeneratedBytes==null)return;
-        try{mcGeneratedPdf=MCDocxPdfExporter.mcRender(mcGeneratedBytes);Path mcDocument=Files.createTempFile("documento-",".pdf");Files.write(mcDocument,mcGeneratedPdf);mcDocument.toFile().deleteOnExit();if(mcUpdatingClientDocument==null)mcRecordGeneration(null,null,mcGeneratedPdf);mcDocumentActions.mcPrint(mcDocument);mcSaved("Documento enviado a impresión"+mcContactSaveSummary);}catch(Exception mcE){mcError(mcE);}
+    private void MCprintGenerated(){
+        MCmakePreview();if(MCgeneratedBytes==null)return;
+        try{MCgeneratedPdf=MCDocxPdfExporter.MCrender(MCgeneratedBytes);Path MCdocument=Files.createTempFile("documento-",".pdf");Files.write(MCdocument,MCgeneratedPdf);MCdocument.toFile().deleteOnExit();if(MCupdatingClientDocument==null)MCrecordGeneration(null,null,MCgeneratedPdf);MCdocumentActions.MCprint(MCdocument);MCsaved("Documento enviado a impresión"+MCcontactSaveSummary);}catch(Exception MCe){MCerror(MCe);}
     }
-    private String mcFileName(){return mcGenerateTemplate.getValue().mcName().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚ _-]","");}
-    private void mcRecordGeneration(String mcDocxPath,String mcPdfPath,byte[] mcPdf)throws Exception{
-        if(mcUpdatingClientDocument!=null){mcReplaceUpdatingClientDocument();return;}
-        MCTemplate mcTemplate=mcGenerateTemplate.getValue();int mcVersion=mcData.mcRecordRevision(mcTemplate.mcId(),mcHistoricalTemplate==null?mcTemplate.mcEdited():mcHistoricalTemplate);
-        if(mcGeneratedHistoryId==0){MCHistory mcHistory=mcData.mcSaveHistory(new MCHistory(0,mcTemplate.mcName(),mcTemplate.mcId(),mcVersion,null,mcJson.writeValueAsString(mcGeneratedValues),mcDocxPath,mcPdfPath,mcGeneratedBytes,mcPdf));mcGeneratedHistoryId=mcHistory.mcId();}
-        else mcData.mcUpdateHistoryFiles(mcGeneratedHistoryId,mcDocxPath,mcPdfPath,mcPdf);
-        mcAutoSaveContacts(mcTemplate);mcRefreshClientDocuments();
+    private String MCfileName(){return MCgenerateTemplate.getValue().MCname().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚ _-]","");}
+    private void MCrecordGeneration(String MCdocxPath,String MCpdfPath,byte[] MCpdf)throws Exception{
+        if(MCupdatingClientDocument!=null){MCreplaceUpdatingClientDocument();return;}
+        MCTemplate MCtemplate=MCgenerateTemplate.getValue();int MCversion=MCdata.MCrecordRevision(MCtemplate.MCid(),MChistoricalTemplate==null?MCtemplate.MCedited():MChistoricalTemplate);
+        if(MCgeneratedHistoryId==0){MCHistory MChistory=MCdata.MCsaveHistory(new MCHistory(0,MCtemplate.MCname(),MCtemplate.MCid(),MCversion,null,MCjson.writeValueAsString(MCgeneratedValues),MCdocxPath,MCpdfPath,MCgeneratedBytes,MCpdf));MCgeneratedHistoryId=MChistory.MCid();}
+        else MCdata.MCupdateHistoryFiles(MCgeneratedHistoryId,MCdocxPath,MCpdfPath,MCpdf);
+        MCautoSaveContacts(MCtemplate);MCrefreshClientDocuments();
     }
-    private void mcAutoSaveContacts(MCTemplate mcTemplate){mcContactSaveSummary="";try{
-        List<MCVariable> mcVariables=mcVariablesForTemplate(mcTemplate);
-        Map<String,String> mcTypes=new HashMap<>();for(MCVariable mcV:mcVariables){String mcService=mcQueryService(mcTemplate.mcId(),mcV);mcTypes.put(mcV.mcKey(),mcService==null?mcV.mcType():mcService);}
-        MCContactReuse.MCResult mcResult=MCContactReuse.mcSave(mcData,mcContactFormBindings(mcTemplate.mcId(),mcVariables),mcGeneratedValues,mcTypes,mcStore.mcDefinitions());
-        mcContactSaveSummary=" · Clientes: "+mcResult.mcCreated()+" nuevos, "+mcResult.mcUpdated()+" actualizados";mcRefreshContacts();
-    }catch(Exception mcE){mcContactSaveSummary=" · No se pudo actualizar Clientes: "+mcE.getMessage();}}
-    private List<MCContactBinding> mcContactFormBindings(long mcTemplateId,List<MCVariable> mcVariables)throws Exception{
-        Map<String,MCApiBinding> mcApi=new LinkedHashMap<>();for(MCVariable mcV:mcVariables){long mcId=mcDefinitionId(mcV);MCApiBinding mcBinding=mcId>0?mcData.mcApiBinding(mcId):null;if(mcBinding!=null)mcApi.put(mcV.mcKey(),mcBinding);}
-        return MCContactReuse.mcFormBindings(mcTemplateId,mcVariables,mcData.mcContactBindings(mcTemplateId),mcData.mcApiContexts(mcTemplateId),mcApi,mcStore.mcDefinitions());
+    private void MCautoSaveContacts(MCTemplate MCtemplate){MCcontactSaveSummary="";try{
+        List<MCVariable> MCvariables=MCvariablesForTemplate(MCtemplate);
+        Map<String,String> MCtypes=new HashMap<>();for(MCVariable MCv:MCvariables){String MCservice=MCqueryService(MCtemplate.MCid(),MCv);MCtypes.put(MCv.MCkey(),MCservice==null?MCv.MCtype():MCservice);}
+        MCContactReuse.MCResult MCresult=MCContactReuse.MCsave(MCdata,MCcontactFormBindings(MCtemplate.MCid(),MCvariables),MCgeneratedValues,MCtypes,MCstore.MCdefinitions());
+        MCcontactSaveSummary=" · Clientes: "+MCresult.MCcreated()+" nuevos, "+MCresult.MCupdated()+" actualizados";MCrefreshContacts();
+    }catch(Exception MCe){MCcontactSaveSummary=" · No se pudo actualizar Clientes: "+MCe.getMessage();}}
+    private List<MCContactBinding> MCcontactFormBindings(long MCtemplateId,List<MCVariable> MCvariables)throws Exception{
+        Map<String,MCApiBinding> MCapi=new LinkedHashMap<>();for(MCVariable MCv:MCvariables){long MCid=MCdefinitionId(MCv);MCApiBinding MCbinding=MCid>0?MCdata.MCapiBinding(MCid):null;if(MCbinding!=null)MCapi.put(MCv.MCkey(),MCbinding);}
+        return MCContactReuse.MCformBindings(MCtemplateId,MCvariables,MCdata.MCcontactBindings(MCtemplateId),MCdata.MCapiContexts(MCtemplateId),MCapi,MCstore.MCdefinitions());
     }
 
-    private void mcBuildContacts(){
-        mcContactsPage=new BorderPane();mcContactsPage.getStyleClass().add("page");mcContactSearch.setPromptText("Buscar nombre, documento o dirección");mcContactSearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshContacts());mcContactList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->mcLoadContact(mcB));
-        mcTwoLineCells(mcContactList,mcC->("Empresa".equals(mcC.mcKind())?mcC.mcGiven():mcC.mcGiven()+" "+mcC.mcFamily()),mcC->mcC.mcDocumentType()+" · "+mcC.mcNumber());
-        VBox mcLeft=new VBox(8,mcContactSearch,mcContactList,mcButton("+ Nueva persona",this::mcNewContact),mcButton("Eliminar cliente",this::mcDeleteContact));mcLeft.getStyleClass().add("side-panel");mcFixedWidth(mcLeft,320);mcUniformButtons(mcLeft);VBox.setVgrow(mcContactList,Priority.ALWAYS);mcContactsPage.setLeft(mcLeft);BorderPane.setMargin(mcLeft,new Insets(0,14,0,0));
-        mcContactKind.getItems().setAll("Persona","Empresa");mcContactKind.setValue("Persona");mcContactKind.setOnAction(mcE->{boolean mcCompany="Empresa".equals(mcContactKind.getValue());mcContactFamily.setDisable(mcCompany);mcContactDocType.setDisable(mcCompany);if(mcCompany)mcContactDocType.setText("RUC");else if("RUC".equals(mcContactDocType.getText()))mcContactDocType.setText("DNI");});mcContactRepresentatives.setPrefRowCount(2);mcContactExtras.setPrefRowCount(3);mcContactRepresentatives.setWrapText(true);mcContactExtras.setWrapText(true);
-        GridPane mcFields=mcTwoColumns();mcFields.add(mcLabelled("Tipo de cliente",mcContactKind),0,0);mcFields.add(mcLabelled("Nombres / razón social",mcContactGiven),1,0);mcFields.add(mcLabelled("Apellidos",mcContactFamily),0,1);mcFields.add(mcLabelled("Tipo de documento",mcContactDocType),1,1);mcFields.add(mcLabelled("Número de documento / RUC",mcContactNumber),0,2);mcFields.add(mcLabelled("Domicilio / domicilio fiscal",mcContactAddress),1,2);mcFields.add(mcLabelled("Representantes (empresa)",mcContactRepresentatives),0,3,2,1);mcFields.add(mcLabelled("Datos adicionales · JSON",mcContactExtras),0,4,2,1);
-        VBox mcForm=new VBox(16,new Label("FICHA LOCAL"),mcFields,mcContactVariables());mcForm.getStyleClass().add("catalog-form");BorderPane mcDetail=new BorderPane(mcScrolling(mcForm));HBox mcActions=new HBox(mcButton("Guardar cliente",this::mcSaveContact));mcActions.getStyleClass().add("action-bar");mcDetail.setBottom(mcActions);mcClientDetailsPane=mcDetail;
-        mcTwoLineCells(mcClientDocumentList,MCClientDocument::mcTitle,mcD->mcD.mcExtension().toUpperCase(Locale.ROOT)+" · "+("GENERATED".equals(mcD.mcSourceType())?"Generado":"Subido")+" · "+mcD.mcUpdatedAt());
-        Button mcUpload=mcButton("+ Subir documento",this::mcUploadClientDocument),mcOpen=mcButton("Abrir",this::mcOpenClientDocument),mcDownload=mcButton("Descargar",this::mcDownloadClientDocument),mcGenerate=mcButton("Actualizar en Generar documentos",this::mcEditSelectedClientDocument),mcReplace=mcButton("Actualizar subiendo archivo",this::mcReplaceClientDocumentByUpload);
-        mcClientDocumentList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->{mcOpen.setDisable(mcB==null);mcDownload.setDisable(mcB==null);mcReplace.setDisable(mcB==null);mcGenerate.setDisable(mcB==null||!mcIsWordExtension(mcB.mcExtension()));});mcOpen.setDisable(true);mcDownload.setDisable(true);mcReplace.setDisable(true);mcGenerate.setDisable(true);
-        HBox mcDocumentTop=new HBox(mcUpload);mcDocumentTop.getStyleClass().add("action-bar");FlowPane mcDocumentActions=new FlowPane(8,8,mcOpen,mcDownload,mcGenerate,mcReplace);mcDocumentActions.getStyleClass().add("action-bar");mcClientDocumentsPane.setTop(mcDocumentTop);mcClientDocumentsPane.setCenter(mcClientDocumentList);mcClientDocumentsPane.setBottom(mcDocumentActions);
-        mcClientDetailsToggle.setOnAction(mcE->{mcShowingClientDetails=!mcShowingClientDetails;mcShowClientPanel();});Region mcGap=new Region();HBox.setHgrow(mcGap,Priority.ALWAYS);HBox mcHeading=new HBox(10,mcClientPanelTitle,mcGap,mcClientDetailsToggle);mcHeading.setAlignment(Pos.CENTER_LEFT);mcHeading.getStyleClass().add("client-panel-heading");BorderPane mcRight=new BorderPane();mcRight.setTop(mcHeading);mcRight.setCenter(mcClientDocumentsPane);mcContactsPage.setCenter(mcRight);mcNewContact();
+    private void MCbuildContacts(){
+        MCcontactsPage=new BorderPane();MCcontactsPage.getStyleClass().add("page");MCcontactSearch.setPromptText("Buscar nombre, documento o dirección");MCcontactSearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshContacts());MCcontactList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->MCloadContact(MCb));
+        MCtwoLineCells(MCcontactList,MCc->("Empresa".equals(MCc.MCkind())?MCc.MCgiven():MCc.MCgiven()+" "+MCc.MCfamily()),MCc->MCc.MCdocumentType()+" · "+MCc.MCnumber());
+        VBox MCleft=new VBox(8,MCcontactSearch,MCcontactList,MCbutton("+ Nueva persona",this::MCnewContact),MCbutton("Eliminar cliente",this::MCdeleteContact));MCleft.getStyleClass().add("side-panel");MCfixedWidth(MCleft,320);MCuniformButtons(MCleft);VBox.setVgrow(MCcontactList,Priority.ALWAYS);MCcontactsPage.setLeft(MCleft);BorderPane.setMargin(MCleft,new Insets(0,14,0,0));
+        MCcontactKind.getItems().setAll("Persona","Empresa");MCcontactKind.setValue("Persona");MCcontactKind.setOnAction(MCe->{boolean MCcompany="Empresa".equals(MCcontactKind.getValue());MCcontactFamily.setDisable(MCcompany);MCcontactDocType.setDisable(MCcompany);if(MCcompany)MCcontactDocType.setText("RUC");else if("RUC".equals(MCcontactDocType.getText()))MCcontactDocType.setText("DNI");});MCcontactRepresentatives.setPrefRowCount(2);MCcontactExtras.setPrefRowCount(3);MCcontactRepresentatives.setWrapText(true);MCcontactExtras.setWrapText(true);
+        GridPane MCfields=MCtwoColumns();MCfields.add(MClabelled("Tipo de cliente",MCcontactKind),0,0);MCfields.add(MClabelled("Nombres / razón social",MCcontactGiven),1,0);MCfields.add(MClabelled("Apellidos",MCcontactFamily),0,1);MCfields.add(MClabelled("Tipo de documento",MCcontactDocType),1,1);MCfields.add(MClabelled("Número de documento / RUC",MCcontactNumber),0,2);MCfields.add(MClabelled("Domicilio / domicilio fiscal",MCcontactAddress),1,2);MCfields.add(MClabelled("Representantes (empresa)",MCcontactRepresentatives),0,3,2,1);MCfields.add(MClabelled("Datos adicionales · JSON",MCcontactExtras),0,4,2,1);
+        VBox MCform=new VBox(16,new Label("FICHA LOCAL"),MCfields,MCcontactVariables());MCform.getStyleClass().add("catalog-form");BorderPane MCdetail=new BorderPane(MCscrolling(MCform));HBox MCactions=new HBox(MCbutton("Guardar cliente",this::MCsaveContact));MCactions.getStyleClass().add("action-bar");MCdetail.setBottom(MCactions);MCclientDetailsPane=MCdetail;
+        MCtwoLineCells(MCclientDocumentList,MCClientDocument::MCtitle,MCd->MCd.MCextension().toUpperCase(Locale.ROOT)+" · "+("GENERATED".equals(MCd.MCsourceType())?"Generado":"Subido")+" · "+MCd.MCupdatedAt());
+        Button MCupload=MCbutton("+ Subir documento",this::MCuploadClientDocument),MCopen=MCbutton("Abrir",this::MCopenClientDocument),MCdownload=MCbutton("Descargar",this::MCdownloadClientDocument),MCgenerate=MCbutton("Actualizar en Generar documentos",this::MCeditSelectedClientDocument),MCreplace=MCbutton("Actualizar subiendo archivo",this::MCreplaceClientDocumentByUpload);
+        MCclientDocumentList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->{MCopen.setDisable(MCb==null);MCdownload.setDisable(MCb==null);MCreplace.setDisable(MCb==null);MCgenerate.setDisable(MCb==null||!MCisWordExtension(MCb.MCextension()));});MCopen.setDisable(true);MCdownload.setDisable(true);MCreplace.setDisable(true);MCgenerate.setDisable(true);
+        HBox MCdocumentTop=new HBox(MCupload);MCdocumentTop.getStyleClass().add("action-bar");FlowPane MCdocumentActions=new FlowPane(8,8,MCopen,MCdownload,MCgenerate,MCreplace);MCdocumentActions.getStyleClass().add("action-bar");MCclientDocumentsPane.setTop(MCdocumentTop);MCclientDocumentsPane.setCenter(MCclientDocumentList);MCclientDocumentsPane.setBottom(MCdocumentActions);
+        MCclientDetailsToggle.setOnAction(MCe->{MCshowingClientDetails=!MCshowingClientDetails;MCshowClientPanel();});Region MCgap=new Region();HBox.setHgrow(MCgap,Priority.ALWAYS);HBox MCheading=new HBox(10,MCclientPanelTitle,MCgap,MCclientDetailsToggle);MCheading.setAlignment(Pos.CENTER_LEFT);MCheading.getStyleClass().add("client-panel-heading");BorderPane MCright=new BorderPane();MCright.setTop(MCheading);MCright.setCenter(MCclientDocumentsPane);MCcontactsPage.setCenter(MCright);MCnewContact();
     }
-    private void mcShowContacts(){try{mcContactExtraChoice.getItems().setAll(mcStore.mcDefinitions().stream().filter(MCDefinition::mcBindToClient).toList());}catch(Exception mcE){mcError(mcE);}mcRefreshContacts();mcPage("Clientes",mcContactsPage);}
-    private void mcRefreshContacts(){try{
-        long mcSelected=mcSelectedContact==null?0:mcSelectedContact.mcId();String mcQ=mcContactSearch.getText().toLowerCase(Locale.ROOT);
-        List<MCContact> mcContacts=mcData.mcFindContacts(mcQ);
-        mcContactList.getItems().setAll(mcContacts);mcContactList.getSelectionModel().select(mcContacts.stream().filter(mcC->mcC.mcId()==mcSelected).findFirst().orElse(mcContacts.isEmpty()?null:mcContacts.get(0)));
-        if(mcContacts.isEmpty())mcNewContact();
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcNewContact(){mcSelectedContact=null;mcContactList.getSelectionModel().clearSelection();mcContactKind.setValue("Persona");mcContactGiven.clear();mcContactFamily.clear();mcContactDocType.setText("DNI");mcContactNumber.clear();mcContactAddress.clear();mcContactRepresentatives.clear();mcContactExtras.setText("{}");mcContactExtraValue.clear();mcContactExtraChoice.getSelectionModel().clearSelection();mcShowingClientDetails=true;mcShowClientPanel();}
-    private void mcLoadContact(MCContact mcC){if(mcC==null){mcNewContact();return;}mcSelectedContact=mcC;mcContactKind.setValue(mcC.mcKind());mcContactGiven.setText(mcC.mcGiven());mcContactFamily.setText(mcC.mcFamily());mcContactDocType.setText(mcC.mcDocumentType());mcContactNumber.setText(mcC.mcNumber());mcContactAddress.setText(mcC.mcAddress());mcContactRepresentatives.setText(mcC.mcRepresentatives());mcContactExtras.setText(mcC.mcExtrasJson());mcShowingClientDetails=false;mcShowClientPanel();mcRefreshClientDocuments();}
-    private void mcSaveContact(){if(mcContactGiven.getText().isBlank())throw new IllegalArgumentException("Escriba nombre o razón social.");try{if(!mcJson.readTree(mcContactExtras.getText()).isObject())throw new IllegalArgumentException("Los datos adicionales deben ser un objeto JSON.");MCContact mcC=mcData.mcSaveContact(new MCContact(mcSelectedContact==null?0:mcSelectedContact.mcId(),mcContactKind.getValue(),mcContactGiven.getText().trim(),mcContactFamily.getText().trim(),"Empresa".equals(mcContactKind.getValue())?"RUC":mcContactDocType.getText().trim(),mcContactNumber.getText().trim(),mcContactAddress.getText().trim(),mcContactRepresentatives.getText().trim(),mcContactExtras.getText()));mcRefreshContacts();mcContactList.getSelectionModel().select(mcC);mcSaved("Registro local guardado");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteContact(){MCContact mcC=mcContactList.getSelectionModel().getSelectedItem();if(mcC==null)return;try{mcData.mcDeleteContact(mcC.mcId());mcNewContact();mcRefreshContacts();mcSaved("Registro eliminado");}catch(Exception mcE){mcError(mcE);}}
+    private void MCshowContacts(){try{MCcontactExtraChoice.getItems().setAll(MCstore.MCdefinitions().stream().filter(MCDefinition::MCbindToClient).toList());}catch(Exception MCe){MCerror(MCe);}MCrefreshContacts();MCpage("Clientes",MCcontactsPage);}
+    private void MCrefreshContacts(){try{
+        long MCselected=MCselectedContact==null?0:MCselectedContact.MCid();String MCq=MCcontactSearch.getText().toLowerCase(Locale.ROOT);
+        List<MCContact> MCcontacts=MCdata.MCfindContacts(MCq);
+        MCcontactList.getItems().setAll(MCcontacts);MCcontactList.getSelectionModel().select(MCcontacts.stream().filter(MCc->MCc.MCid()==MCselected).findFirst().orElse(MCcontacts.isEmpty()?null:MCcontacts.get(0)));
+        if(MCcontacts.isEmpty())MCnewContact();
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCnewContact(){MCselectedContact=null;MCcontactList.getSelectionModel().clearSelection();MCcontactKind.setValue("Persona");MCcontactGiven.clear();MCcontactFamily.clear();MCcontactDocType.setText("DNI");MCcontactNumber.clear();MCcontactAddress.clear();MCcontactRepresentatives.clear();MCcontactExtras.setText("{}");MCcontactExtraValue.clear();MCcontactExtraChoice.getSelectionModel().clearSelection();MCshowingClientDetails=true;MCshowClientPanel();}
+    private void MCloadContact(MCContact MCc){if(MCc==null){MCnewContact();return;}MCselectedContact=MCc;MCcontactKind.setValue(MCc.MCkind());MCcontactGiven.setText(MCc.MCgiven());MCcontactFamily.setText(MCc.MCfamily());MCcontactDocType.setText(MCc.MCdocumentType());MCcontactNumber.setText(MCc.MCnumber());MCcontactAddress.setText(MCc.MCaddress());MCcontactRepresentatives.setText(MCc.MCrepresentatives());MCcontactExtras.setText(MCc.MCextrasJson());MCshowingClientDetails=false;MCshowClientPanel();MCrefreshClientDocuments();}
+    private void MCsaveContact(){if(MCcontactGiven.getText().isBlank())throw new IllegalArgumentException("Escriba nombre o razón social.");try{if(!MCjson.readTree(MCcontactExtras.getText()).isObject())throw new IllegalArgumentException("Los datos adicionales deben ser un objeto JSON.");MCContact MCc=MCdata.MCsaveContact(new MCContact(MCselectedContact==null?0:MCselectedContact.MCid(),MCcontactKind.getValue(),MCcontactGiven.getText().trim(),MCcontactFamily.getText().trim(),"Empresa".equals(MCcontactKind.getValue())?"RUC":MCcontactDocType.getText().trim(),MCcontactNumber.getText().trim(),MCcontactAddress.getText().trim(),MCcontactRepresentatives.getText().trim(),MCcontactExtras.getText()));MCrefreshContacts();MCcontactList.getSelectionModel().select(MCc);MCsaved("Registro local guardado");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteContact(){MCContact MCc=MCcontactList.getSelectionModel().getSelectedItem();if(MCc==null)return;try{MCdata.MCdeleteContact(MCc.MCid());MCnewContact();MCrefreshContacts();MCsaved("Registro eliminado");}catch(Exception MCe){MCerror(MCe);}}
 
-    private static String mcClientName(MCContact mcClient){return mcClient==null?"":(mcClient.mcGiven()+" "+mcClient.mcFamily()).trim();}
-    private void mcShowClientPanel(){
-        if(mcClientDetailsPane==null)return;mcClientDetailsToggle.setText(mcShowingClientDetails?"Volver a documentos":"Ver detalles del cliente");mcClientPanelTitle.setText(mcShowingClientDetails?"Detalles del cliente":"Documentos del cliente");
-        ((BorderPane)mcContactsPage.getCenter()).setCenter(mcShowingClientDetails?mcClientDetailsPane:mcClientDocumentsPane);
+    private static String MCclientName(MCContact MCclient){return MCclient==null?"":(MCclient.MCgiven()+" "+MCclient.MCfamily()).trim();}
+    private void MCshowClientPanel(){
+        if(MCclientDetailsPane==null)return;MCclientDetailsToggle.setText(MCshowingClientDetails?"Volver a documentos":"Ver detalles del cliente");MCclientPanelTitle.setText(MCshowingClientDetails?"Detalles del cliente":"Documentos del cliente");
+        ((BorderPane)MCcontactsPage.getCenter()).setCenter(MCshowingClientDetails?MCclientDetailsPane:MCclientDocumentsPane);
     }
-    private void mcRefreshClientDocuments(){try{long mcSelected=mcClientDocumentList.getSelectionModel().getSelectedItem()==null?0:mcClientDocumentList.getSelectionModel().getSelectedItem().mcId();mcClientDocumentList.getItems().setAll(mcSelectedContact==null?List.of():mcData.mcClientDocuments(mcSelectedContact.mcId()));mcClientDocumentList.getSelectionModel().select(mcClientDocumentList.getItems().stream().filter(mcD->mcD.mcId()==mcSelected).findFirst().orElse(null));}catch(Exception mcE){mcError(mcE);}}
-    private static boolean mcIsWordExtension(String mcExtension){return Set.of("doc","docx","docm","dot","dotx","dotm").contains(mcExtension.toLowerCase(Locale.ROOT));}
-    private static String mcFileExtension(String mcName){int mcDot=mcName.lastIndexOf('.');return mcDot<0?"":mcName.substring(mcDot+1).toLowerCase(Locale.ROOT);}
-    private File mcChooseClientFile(){FileChooser mcChooser=new FileChooser();mcChooser.setTitle("Seleccionar documento del cliente");mcChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Todos los archivos","*"),new FileChooser.ExtensionFilter("Documentos de Word y PDF","*.doc","*.DOC","*.docx","*.DOCX","*.docm","*.DOCM","*.dot","*.DOT","*.dotx","*.DOTX","*.dotm","*.DOTM","*.pdf","*.PDF"));return mcChooser.showOpenDialog(mcStage);}
-    private void mcUploadClientDocument(){if(mcSelectedContact==null)throw new IllegalArgumentException("Seleccione o guarde primero un cliente.");File mcFile=mcChooseClientFile();if(mcFile!=null)mcClientAction(()->{mcData.mcAddClientDocument(mcSelectedContact.mcId(),mcFile.getName(),mcFile.getName(),mcFileExtension(mcFile.getName()),Files.readAllBytes(mcFile.toPath()));mcRefreshClientDocuments();mcSaved("Documento subido al cliente");});}
-    private MCClientDocument mcSelectedClientDocument(){MCClientDocument mcSelected=mcClientDocumentList.getSelectionModel().getSelectedItem();if(mcSelected==null)throw new IllegalArgumentException("Seleccione un documento del cliente.");return mcSelected;}
-    private void mcReplaceClientDocumentByUpload(){MCClientDocument mcSelected=mcSelectedClientDocument();File mcFile=mcChooseClientFile();if(mcFile!=null)mcClientAction(()->{mcData.mcReplaceClientDocument(mcSelected.mcId(),mcFile.getName(),mcFile.getName(),mcFileExtension(mcFile.getName()),Files.readAllBytes(mcFile.toPath()),"UPLOADED");mcRefreshClientDocuments();mcSaved("Documento del cliente reemplazado");});}
-    private void mcOpenClientDocument(){MCClientDocument mcSelected=mcSelectedClientDocument();mcClientAction(()->{Path mcDirectory=Files.createTempDirectory("studio-client-document-");Path mcPath=mcDirectory.resolve(Path.of(mcSelected.mcFileName()).getFileName().toString());Files.write(mcPath,mcSelected.mcContentBytes());mcDirectory.toFile().deleteOnExit();mcPath.toFile().deleteOnExit();mcDocumentActions.mcOpen(mcPath);});}
-    private void mcDownloadClientDocument(){MCClientDocument mcSelected=mcSelectedClientDocument();FileChooser mcChooser=new FileChooser();mcChooser.setTitle("Descargar documento del cliente");mcChooser.setInitialFileName(Path.of(mcSelected.mcFileName()).getFileName().toString());File mcTarget=mcChooser.showSaveDialog(mcStage);if(mcTarget!=null)mcClientAction(()->{Files.write(mcTarget.toPath(),mcSelected.mcContentBytes());mcSaved("Documento del cliente descargado");});}
-    private void mcEditSelectedClientDocument(){MCClientDocument mcSelected=mcSelectedClientDocument();mcClientAction(()->mcOpenClientDocumentForUpdate(mcSelectedContact,mcSelected));}
-    private void mcOpenClientDocumentForUpdate(MCContact mcContact,MCClientDocument mcSelected)throws Exception{
-        if(!mcIsWordExtension(mcSelected.mcExtension()))throw new IllegalArgumentException("Seleccione un documento de Word para actualizar en Generar documentos.");
-        byte[] mcBytes=MCWordDocumentImporter.mcImportToDocx(mcSelected.mcContentBytes(),"document."+mcSelected.mcExtension());
-        mcUpdatingClientDocument=mcSelected;mcUpdatingClient=mcContact;mcHistoricalTemplate=null;MCTemplate mcTemporary=new MCTemplate(0,mcSelected.mcTitle(),mcBytes,mcBytes);
-        mcRefreshingGenerator=true;try{mcGenerateTemplate.getItems().setAll(mcTemporary);mcGenerateTemplate.getSelectionModel().select(mcTemporary);}finally{mcRefreshingGenerator=false;}
-        mcBuildDynamicForm();mcPage("Generar documentos",mcGeneratorPage);
-        for(var mcEntry:mcInputs.entrySet()){String mcValue=mcData.mcContactValue(mcContact,MCDocumentEngine.mcBaseKey(mcEntry.getKey()));if(!mcValue.isBlank())mcSetInput(mcEntry.getValue(),mcValue);}
+    private void MCrefreshClientDocuments(){try{long MCselected=MCclientDocumentList.getSelectionModel().getSelectedItem()==null?0:MCclientDocumentList.getSelectionModel().getSelectedItem().MCid();MCclientDocumentList.getItems().setAll(MCselectedContact==null?List.of():MCdata.MCclientDocuments(MCselectedContact.MCid()));MCclientDocumentList.getSelectionModel().select(MCclientDocumentList.getItems().stream().filter(MCd->MCd.MCid()==MCselected).findFirst().orElse(null));}catch(Exception MCe){MCerror(MCe);}}
+    private static boolean MCisWordExtension(String MCextension){return Set.of("doc","docx","docm","dot","dotx","dotm").contains(MCextension.toLowerCase(Locale.ROOT));}
+    private static String MCfileExtension(String MCname){int MCdot=MCname.lastIndexOf('.');return MCdot<0?"":MCname.substring(MCdot+1).toLowerCase(Locale.ROOT);}
+    private File MCchooseClientFile(){FileChooser MCchooser=new FileChooser();MCchooser.setTitle("Seleccionar documento del cliente");MCchooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Todos los archivos","*"),new FileChooser.ExtensionFilter("Documentos de Word y PDF","*.doc","*.DOC","*.docx","*.DOCX","*.docm","*.DOCM","*.dot","*.DOT","*.dotx","*.DOTX","*.dotm","*.DOTM","*.pdf","*.PDF"));return MCchooser.showOpenDialog(MCstage);}
+    private void MCuploadClientDocument(){if(MCselectedContact==null)throw new IllegalArgumentException("Seleccione o guarde primero un cliente.");File MCfile=MCchooseClientFile();if(MCfile!=null)MCclientAction(()->{MCdata.MCaddClientDocument(MCselectedContact.MCid(),MCfile.getName(),MCfile.getName(),MCfileExtension(MCfile.getName()),Files.readAllBytes(MCfile.toPath()));MCrefreshClientDocuments();MCsaved("Documento subido al cliente");});}
+    private MCClientDocument MCselectedClientDocument(){MCClientDocument MCselected=MCclientDocumentList.getSelectionModel().getSelectedItem();if(MCselected==null)throw new IllegalArgumentException("Seleccione un documento del cliente.");return MCselected;}
+    private void MCreplaceClientDocumentByUpload(){MCClientDocument MCselected=MCselectedClientDocument();File MCfile=MCchooseClientFile();if(MCfile!=null)MCclientAction(()->{MCdata.MCreplaceClientDocument(MCselected.MCid(),MCfile.getName(),MCfile.getName(),MCfileExtension(MCfile.getName()),Files.readAllBytes(MCfile.toPath()),"UPLOADED");MCrefreshClientDocuments();MCsaved("Documento del cliente reemplazado");});}
+    private void MCopenClientDocument(){MCClientDocument MCselected=MCselectedClientDocument();MCclientAction(()->{Path MCdirectory=Files.createTempDirectory("studio-client-document-");Path MCpath=MCdirectory.resolve(Path.of(MCselected.MCfileName()).getFileName().toString());Files.write(MCpath,MCselected.MCcontentBytes());MCdirectory.toFile().deleteOnExit();MCpath.toFile().deleteOnExit();MCdocumentActions.MCopen(MCpath);});}
+    private void MCdownloadClientDocument(){MCClientDocument MCselected=MCselectedClientDocument();FileChooser MCchooser=new FileChooser();MCchooser.setTitle("Descargar documento del cliente");MCchooser.setInitialFileName(Path.of(MCselected.MCfileName()).getFileName().toString());File MCtarget=MCchooser.showSaveDialog(MCstage);if(MCtarget!=null)MCclientAction(()->{Files.write(MCtarget.toPath(),MCselected.MCcontentBytes());MCsaved("Documento del cliente descargado");});}
+    private void MCeditSelectedClientDocument(){MCClientDocument MCselected=MCselectedClientDocument();MCclientAction(()->MCopenClientDocumentForUpdate(MCselectedContact,MCselected));}
+    private void MCopenClientDocumentForUpdate(MCContact MCcontact,MCClientDocument MCselected)throws Exception{
+        if(!MCisWordExtension(MCselected.MCextension()))throw new IllegalArgumentException("Seleccione un documento de Word para actualizar en Generar documentos.");
+        byte[] MCbytes=MCWordDocumentImporter.MCimportToDocx(MCselected.MCcontentBytes(),"document."+MCselected.MCextension());
+        MCupdatingClientDocument=MCselected;MCupdatingClient=MCcontact;MChistoricalTemplate=null;MCTemplate MCtemporary=new MCTemplate(0,MCselected.MCtitle(),MCbytes,MCbytes);
+        MCrefreshingGenerator=true;try{MCgenerateTemplate.getItems().setAll(MCtemporary);MCgenerateTemplate.getSelectionModel().select(MCtemporary);}finally{MCrefreshingGenerator=false;}
+        MCbuildDynamicForm();MCpage("Generar documentos",MCgeneratorPage);
+        for(var MCentry:MCinputs.entrySet()){String MCvalue=MCdata.MCcontactValue(MCcontact,MCDocumentEngine.MCbaseKey(MCentry.getKey()));if(!MCvalue.isBlank())MCsetInput(MCentry.getValue(),MCvalue);}
     }
-    private void mcReplaceUpdatingClientDocument()throws Exception{
-        if(mcUpdatingClientDocument==null||mcGeneratedBytes==null)return;String mcName=mcUpdatingClientDocument.mcFileName();int mcDot=mcName.lastIndexOf('.');mcName=(mcDot<0?mcName:mcName.substring(0,mcDot))+".docx";
-        mcData.mcReplaceClientDocument(mcUpdatingClientDocument.mcId(),mcUpdatingClientDocument.mcTitle(),mcName,"docx",mcGeneratedBytes,"GENERATED");mcRefreshClientDocuments();
+    private void MCreplaceUpdatingClientDocument()throws Exception{
+        if(MCupdatingClientDocument==null||MCgeneratedBytes==null)return;String MCname=MCupdatingClientDocument.MCfileName();int MCdot=MCname.lastIndexOf('.');MCname=(MCdot<0?MCname:MCname.substring(0,MCdot))+".docx";
+        MCdata.MCreplaceClientDocument(MCupdatingClientDocument.MCid(),MCupdatingClientDocument.MCtitle(),MCname,"docx",MCgeneratedBytes,"GENERATED");MCrefreshClientDocuments();
     }
-    private void mcUpdateClientDocumentFromGenerator()throws Exception{mcMakePreview();if(mcGeneratedBytes==null)return;mcReplaceUpdatingClientDocument();mcSaved("Documento del cliente actualizado");}
+    private void MCupdateClientDocumentFromGenerator()throws Exception{MCmakePreview();if(MCgeneratedBytes==null)return;MCreplaceUpdatingClientDocument();MCsaved("Documento del cliente actualizado");}
 
-    private void mcDefinitionChoice(ComboBox<MCDefinition> mcChoice){
-        mcChoice.setCellFactory(mcList->new ListCell<>(){@Override protected void updateItem(MCDefinition mcDefinition,boolean mcEmpty){super.updateItem(mcDefinition,mcEmpty);setText(mcEmpty||mcDefinition==null?null:mcDefinition.mcLabel()+" {{"+mcDefinition.mcKey()+"}}");}});
-        mcChoice.setButtonCell(new ListCell<>(){@Override protected void updateItem(MCDefinition mcDefinition,boolean mcEmpty){super.updateItem(mcDefinition,mcEmpty);setText(mcEmpty||mcDefinition==null?null:mcDefinition.mcLabel());}});
+    private void MCdefinitionChoice(ComboBox<MCDefinition> MCchoice){
+        MCchoice.setCellFactory(MClist->new ListCell<>(){@Override protected void updateItem(MCDefinition MCdefinition,boolean MCempty){super.updateItem(MCdefinition,MCempty);setText(MCempty||MCdefinition==null?null:MCdefinition.MClabel()+" {{"+MCdefinition.MCkey()+"}}");}});
+        MCchoice.setButtonCell(new ListCell<>(){@Override protected void updateItem(MCDefinition MCdefinition,boolean MCempty){super.updateItem(MCdefinition,MCempty);setText(MCempty||MCdefinition==null?null:MCdefinition.MClabel());}});
     }
-    private void mcRefreshComplements(){try{
-        List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();mcComplementChoice.getItems().setAll(mcDefinitions.stream().filter(mcD->mcSelectedDefinition==null||mcD.mcId()!=mcSelectedDefinition.mcId()).toList());mcComplementLinks.getChildren().clear();
-        if(mcSelectedDefinition==null){mcComplementLinks.getChildren().add(mcDescription("Guarde la variable para vincular complementos."));return;}
-        Map<Long,MCDefinition> mcById=new HashMap<>();mcDefinitions.forEach(mcD->mcById.put(mcD.mcId(),mcD));
-        for(MCDocumentStore.MCComplement mcLink:mcStore.mcComplements(mcSelectedDefinition.mcId())){MCDefinition mcTarget=mcById.get(mcLink.mcTargetDefId());if(mcTarget==null)continue;Label mcLabel=new Label(mcTarget.mcLabel()+(mcLink.mcBidirectional()?" ↔":" →"));mcLabel.setWrapText(true);mcLabel.setMaxWidth(Double.MAX_VALUE);HBox.setHgrow(mcLabel,Priority.ALWAYS);Button mcRemove=mcButton("Quitar",()->{try{mcStore.mcDeleteComplement(mcLink.mcId());mcRefreshComplements();}catch(Exception mcE){mcError(mcE);}});mcRemove.setTooltip(new Tooltip("Quitar el vínculo con "+mcTarget.mcLabel()));HBox mcRow=new HBox(5,mcLabel,mcRemove);mcRow.setAlignment(Pos.CENTER_LEFT);mcComplementLinks.getChildren().add(mcRow);}
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcLinkComplement(){if(mcSelectedDefinition==null)throw new IllegalArgumentException("Guarde primero la variable.");MCDefinition mcTarget=mcComplementChoice.getValue();if(mcTarget==null)throw new IllegalArgumentException("Seleccione la variable complemento.");try{
-        List<MCDocumentStore.MCComplement> mcExisting=mcStore.mcComplements(mcSelectedDefinition.mcId());MCDocumentStore.MCComplement mcLink=mcExisting.stream().filter(mcX->mcX.mcTargetDefId()==mcTarget.mcId()).findFirst().orElse(null);
-        if(mcLink!=null){for(var mcOriginal:mcStore.mcComplements())if(mcOriginal.mcId()==mcLink.mcId()){if(mcOriginal.mcSourceDefId()!=mcSelectedDefinition.mcId()&&!mcComplementBoth.isSelected()){mcStore.mcDeleteComplement(mcOriginal.mcId());mcStore.mcSaveComplement(mcSelectedDefinition.mcId(),mcTarget.mcId(),false);}else mcStore.mcSaveComplement(mcOriginal.mcSourceDefId(),mcOriginal.mcTargetDefId(),mcComplementBoth.isSelected());break;}}
-        else mcStore.mcSaveComplement(mcSelectedDefinition.mcId(),mcTarget.mcId(),mcComplementBoth.isSelected());mcRefreshComplements();mcSaved("Complemento vinculado");
-    }catch(Exception mcE){mcError(mcE);}}
-    /** @author MC */
-    private record MCContactExtra(@com.fasterxml.jackson.annotation.JsonProperty("key") String mcKey,@com.fasterxml.jackson.annotation.JsonProperty("value") String mcValue){}
-    private Node mcContactVariables(){
-        mcDefinitionChoice(mcContactExtraChoice);mcContactVariableTable.setEditable(true);mcContactVariableTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);mcContactVariableTable.setPrefHeight(180);mcContactVariableTable.setMinHeight(110);
-        TableColumn<MCContactExtra,String> mcVariable=new TableColumn<>("Variable");mcVariable.setCellValueFactory(mcC->new javafx.beans.property.ReadOnlyStringWrapper(mcExtraLabel(mcC.getValue().mcKey())));
-        TableColumn<MCContactExtra,String> mcValue=new TableColumn<>("Valor");mcValue.setCellValueFactory(mcC->new javafx.beans.property.ReadOnlyStringWrapper(mcC.getValue().mcValue()));mcValue.setCellFactory(javafx.scene.control.cell.TextFieldTableCell.forTableColumn());mcValue.setOnEditCommit(mcE->mcSafe(()->mcWriteContactExtra(mcE.getRowValue().mcKey(),mcE.getNewValue(),false)));mcContactVariableTable.getColumns().setAll(mcVariable,mcValue);
-        mcContactVariableTable.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->{if(mcB==null)return;mcContactExtraChoice.getSelectionModel().select(mcContactExtraChoice.getItems().stream().filter(mcD->MCStudioData.mcVariableKey(mcD.mcKey()).equals(MCStudioData.mcVariableKey(mcB.mcKey()))).findFirst().orElse(null));mcContactExtraValue.setText(mcB.mcValue());});
-        mcContactExtraChoice.setPromptText("Variable del sistema");mcContactExtraChoice.setMinWidth(0);mcContactExtraChoice.setMaxWidth(Double.MAX_VALUE);mcContactExtraValue.setPromptText("Valor asociado");HBox mcFields=new HBox(6,mcContactExtraChoice,mcContactExtraValue);HBox.setHgrow(mcContactExtraChoice,Priority.ALWAYS);HBox.setHgrow(mcContactExtraValue,Priority.ALWAYS);mcContactExtraValue.setMinWidth(0);
-        Button mcAssign=mcButton("Asignar / Actualizar",()->{MCDefinition mcDefinition=mcContactExtraChoice.getValue();MCContactExtra mcSelected=mcContactVariableTable.getSelectionModel().getSelectedItem();if(mcDefinition==null&&mcSelected==null)throw new IllegalArgumentException("Seleccione una variable.");mcWriteContactExtra(mcDefinition==null?mcSelected.mcKey():mcDefinition.mcKey(),mcContactExtraValue.getText(),false);});
-        Button mcRemove=mcButton("Quitar",()->{MCContactExtra mcSelected=mcContactVariableTable.getSelectionModel().getSelectedItem();if(mcSelected!=null)mcWriteContactExtra(mcSelected.mcKey(),"",true);});
-        mcContactExtras.textProperty().addListener((mcO,mcA,mcB)->mcRefreshContactExtras());VBox mcBox=new VBox(8,new Label("Variables asociadas a este cliente"),mcContactVariableTable,mcFields,new HBox(6,mcAssign,mcRemove));mcBox.getStyleClass().add("binding-card");return mcBox;
+    private void MCrefreshComplements(){try{
+        List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();MCcomplementChoice.getItems().setAll(MCdefinitions.stream().filter(MCd->MCselectedDefinition==null||MCd.MCid()!=MCselectedDefinition.MCid()).toList());MCcomplementLinks.getChildren().clear();
+        if(MCselectedDefinition==null){MCcomplementLinks.getChildren().add(MCdescription("Guarde la variable para vincular complementos."));return;}
+        Map<Long,MCDefinition> MCbyId=new HashMap<>();MCdefinitions.forEach(MCd->MCbyId.put(MCd.MCid(),MCd));
+        for(MCDocumentStore.MCComplement MClink:MCstore.MCcomplements(MCselectedDefinition.MCid())){MCDefinition MCtarget=MCbyId.get(MClink.MCtargetDefId());if(MCtarget==null)continue;Label MClabel=new Label(MCtarget.MClabel()+(MClink.MCbidirectional()?" ↔":" →"));MClabel.setWrapText(true);MClabel.setMaxWidth(Double.MAX_VALUE);HBox.setHgrow(MClabel,Priority.ALWAYS);Button MCremove=MCbutton("Quitar",()->{try{MCstore.MCdeleteComplement(MClink.MCid());MCrefreshComplements();}catch(Exception MCe){MCerror(MCe);}});MCremove.setTooltip(new Tooltip("Quitar el vínculo con "+MCtarget.MClabel()));HBox MCrow=new HBox(5,MClabel,MCremove);MCrow.setAlignment(Pos.CENTER_LEFT);MCcomplementLinks.getChildren().add(MCrow);}
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MClinkComplement(){if(MCselectedDefinition==null)throw new IllegalArgumentException("Guarde primero la variable.");MCDefinition MCtarget=MCcomplementChoice.getValue();if(MCtarget==null)throw new IllegalArgumentException("Seleccione la variable complemento.");try{
+        List<MCDocumentStore.MCComplement> MCexisting=MCstore.MCcomplements(MCselectedDefinition.MCid());MCDocumentStore.MCComplement MClink=MCexisting.stream().filter(MCx->MCx.MCtargetDefId()==MCtarget.MCid()).findFirst().orElse(null);
+        if(MClink!=null){for(var MCoriginal:MCstore.MCcomplements())if(MCoriginal.MCid()==MClink.MCid()){if(MCoriginal.MCsourceDefId()!=MCselectedDefinition.MCid()&&!MCcomplementBoth.isSelected()){MCstore.MCdeleteComplement(MCoriginal.MCid());MCstore.MCsaveComplement(MCselectedDefinition.MCid(),MCtarget.MCid(),false);}else MCstore.MCsaveComplement(MCoriginal.MCsourceDefId(),MCoriginal.MCtargetDefId(),MCcomplementBoth.isSelected());break;}}
+        else MCstore.MCsaveComplement(MCselectedDefinition.MCid(),MCtarget.MCid(),MCcomplementBoth.isSelected());MCrefreshComplements();MCsaved("Complemento vinculado");
+    }catch(Exception MCe){MCerror(MCe);}}
+    private record MCContactExtra(@com.fasterxml.jackson.annotation.JsonProperty("key") String MCkey,@com.fasterxml.jackson.annotation.JsonProperty("value") String MCvalue){}
+    private Node MCcontactVariables(){
+        MCdefinitionChoice(MCcontactExtraChoice);MCcontactVariableTable.setEditable(true);MCcontactVariableTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);MCcontactVariableTable.setPrefHeight(180);MCcontactVariableTable.setMinHeight(110);
+        TableColumn<MCContactExtra,String> MCvariable=new TableColumn<>("Variable");MCvariable.setCellValueFactory(MCc->new javafx.beans.property.ReadOnlyStringWrapper(MCextraLabel(MCc.getValue().MCkey())));
+        TableColumn<MCContactExtra,String> MCvalue=new TableColumn<>("Valor");MCvalue.setCellValueFactory(MCc->new javafx.beans.property.ReadOnlyStringWrapper(MCc.getValue().MCvalue()));MCvalue.setCellFactory(javafx.scene.control.cell.TextFieldTableCell.forTableColumn());MCvalue.setOnEditCommit(MCe->MCsafe(()->MCwriteContactExtra(MCe.getRowValue().MCkey(),MCe.getNewValue(),false)));MCcontactVariableTable.getColumns().setAll(MCvariable,MCvalue);
+        MCcontactVariableTable.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->{if(MCb==null)return;MCcontactExtraChoice.getSelectionModel().select(MCcontactExtraChoice.getItems().stream().filter(MCd->MCStudioData.MCvariableKey(MCd.MCkey()).equals(MCStudioData.MCvariableKey(MCb.MCkey()))).findFirst().orElse(null));MCcontactExtraValue.setText(MCb.MCvalue());});
+        MCcontactExtraChoice.setPromptText("Variable del sistema");MCcontactExtraChoice.setMinWidth(0);MCcontactExtraChoice.setMaxWidth(Double.MAX_VALUE);MCcontactExtraValue.setPromptText("Valor asociado");HBox MCfields=new HBox(6,MCcontactExtraChoice,MCcontactExtraValue);HBox.setHgrow(MCcontactExtraChoice,Priority.ALWAYS);HBox.setHgrow(MCcontactExtraValue,Priority.ALWAYS);MCcontactExtraValue.setMinWidth(0);
+        Button MCassign=MCbutton("Asignar / Actualizar",()->{MCDefinition MCdefinition=MCcontactExtraChoice.getValue();MCContactExtra MCselected=MCcontactVariableTable.getSelectionModel().getSelectedItem();if(MCdefinition==null&&MCselected==null)throw new IllegalArgumentException("Seleccione una variable.");MCwriteContactExtra(MCdefinition==null?MCselected.MCkey():MCdefinition.MCkey(),MCcontactExtraValue.getText(),false);});
+        Button MCremove=MCbutton("Quitar",()->{MCContactExtra MCselected=MCcontactVariableTable.getSelectionModel().getSelectedItem();if(MCselected!=null)MCwriteContactExtra(MCselected.MCkey(),"",true);});
+        MCcontactExtras.textProperty().addListener((MCo,MCa,MCb)->MCrefreshContactExtras());VBox MCbox=new VBox(8,new Label("Variables asociadas a este cliente"),MCcontactVariableTable,MCfields,new HBox(6,MCassign,MCremove));MCbox.getStyleClass().add("binding-card");return MCbox;
     }
-    private String mcExtraLabel(String mcKey){return mcContactExtraChoice.getItems().stream().filter(mcD->MCStudioData.mcVariableKey(mcD.mcKey()).equals(MCStudioData.mcVariableKey(mcKey))).map(MCDefinition::mcLabel).findFirst().orElse(mcKey);}
-    private void mcRefreshContactExtras(){try{var mcExtras=mcJson.readTree(mcContactExtras.getText());if(mcExtras==null||!mcExtras.isObject())return;List<MCContactExtra> mcRows=new ArrayList<>();mcExtras.fields().forEachRemaining(mcE->mcRows.add(new MCContactExtra(mcE.getKey(),mcE.getValue().isValueNode()?mcE.getValue().asText(""):mcE.getValue().toString())));mcContactVariableTable.getItems().setAll(mcRows);}catch(Exception mcIgnored){}}
-    private void mcWriteContactExtra(String mcKey,String mcValue,boolean mcRemove){try{
-        if(!mcRemove&&!MCContactReuse.mcClientKey(mcKey,mcStore.mcDefinitions()))throw new IllegalArgumentException("Las variables independientes se configuran desde Variables.");
-        var mcParsed=mcJson.readTree(mcContactExtras.getText());if(mcParsed==null||!mcParsed.isObject())throw new IllegalArgumentException("Los datos adicionales deben ser un objeto JSON.");var mcExtras=(com.fasterxml.jackson.databind.node.ObjectNode)mcParsed;
-        String mcActual=mcKey;var mcNames=mcExtras.fieldNames();while(mcNames.hasNext()){String mcName=mcNames.next();if(MCStudioData.mcVariableKey(mcName).equals(MCStudioData.mcVariableKey(mcKey))){mcActual=mcName;break;}}
-        if(mcRemove)mcExtras.remove(mcActual);else mcExtras.put(mcActual,mcValue);mcContactExtras.setText(mcExtras.toString());if(mcSelectedContact!=null)mcSaveContact();
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcConfigureComplements(List<MCVariable> mcVariables)throws Exception{
-        mcComplementTargets.clear();mcActiveComplementDefinitions.clear();mcActiveComplementLinks.clear();List<MCDefinition> mcDefinitions=mcStore.mcDefinitions();
-        Map<String,Map<Long,String>> mcScopes=new LinkedHashMap<>();Set<Long> mcIds=new HashSet<>();for(MCVariable mcVariable:mcVariables){MCDefinition mcDefinition=mcDefinitionFor(mcVariable,mcDefinitions);if(mcDefinition!=null&&!mcDefinition.mcBindToClient())continue;long mcId=mcSafeDefinitionId(mcVariable);mcIds.add(mcId);mcScopes.computeIfAbsent(MCDocumentEngine.mcPersonaKey(mcVariable.mcKey()),mcK->new LinkedHashMap<>()).put(mcId,mcVariable.mcKey());}
-        mcDefinitions.stream().filter(mcD->mcIds.contains(mcD.mcId())).forEach(mcActiveComplementDefinitions::add);
-        for(var mcLink:mcStore.mcComplements()){
-            boolean mcUsed=false;for(var mcKeys:mcScopes.values())if(mcKeys.containsKey(mcLink.mcSourceDefId())&&mcKeys.containsKey(mcLink.mcTargetDefId())){mcUsed=true;mcComplementTargets.computeIfAbsent(mcKeys.get(mcLink.mcSourceDefId()),mcK->new LinkedHashSet<>()).add(mcKeys.get(mcLink.mcTargetDefId()));if(mcLink.mcBidirectional())mcComplementTargets.computeIfAbsent(mcKeys.get(mcLink.mcTargetDefId()),mcK->new LinkedHashSet<>()).add(mcKeys.get(mcLink.mcSourceDefId()));}if(mcUsed)mcActiveComplementLinks.add(mcLink);
+    private String MCextraLabel(String MCkey){return MCcontactExtraChoice.getItems().stream().filter(MCd->MCStudioData.MCvariableKey(MCd.MCkey()).equals(MCStudioData.MCvariableKey(MCkey))).map(MCDefinition::MClabel).findFirst().orElse(MCkey);}
+    private void MCrefreshContactExtras(){try{var MCextras=MCjson.readTree(MCcontactExtras.getText());if(MCextras==null||!MCextras.isObject())return;List<MCContactExtra> MCrows=new ArrayList<>();MCextras.fields().forEachRemaining(MCe->MCrows.add(new MCContactExtra(MCe.getKey(),MCe.getValue().isValueNode()?MCe.getValue().asText(""):MCe.getValue().toString())));MCcontactVariableTable.getItems().setAll(MCrows);}catch(Exception MCignored){}}
+    private void MCwriteContactExtra(String MCkey,String MCvalue,boolean MCremove){try{
+        if(!MCremove&&!MCContactReuse.MCclientKey(MCkey,MCstore.MCdefinitions()))throw new IllegalArgumentException("Las variables independientes se configuran desde Variables.");
+        var MCparsed=MCjson.readTree(MCcontactExtras.getText());if(MCparsed==null||!MCparsed.isObject())throw new IllegalArgumentException("Los datos adicionales deben ser un objeto JSON.");var MCextras=(com.fasterxml.jackson.databind.node.ObjectNode)MCparsed;
+        String MCactual=MCkey;var MCnames=MCextras.fieldNames();while(MCnames.hasNext()){String MCname=MCnames.next();if(MCStudioData.MCvariableKey(MCname).equals(MCStudioData.MCvariableKey(MCkey))){MCactual=MCname;break;}}
+        if(MCremove)MCextras.remove(MCactual);else MCextras.put(MCactual,MCvalue);MCcontactExtras.setText(MCextras.toString());if(MCselectedContact!=null)MCsaveContact();
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCconfigureComplements(List<MCVariable> MCvariables)throws Exception{
+        MCcomplementTargets.clear();MCactiveComplementDefinitions.clear();MCactiveComplementLinks.clear();List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();
+        Map<String,Map<Long,String>> MCscopes=new LinkedHashMap<>();Set<Long> MCids=new HashSet<>();for(MCVariable MCvariable:MCvariables){MCDefinition MCdefinition=MCdefinitionFor(MCvariable,MCdefinitions);if(MCdefinition!=null&&!MCdefinition.MCbindToClient())continue;long MCid=MCsafeDefinitionId(MCvariable);MCids.add(MCid);MCscopes.computeIfAbsent(MCDocumentEngine.MCpersonaKey(MCvariable.MCkey()),MCk->new LinkedHashMap<>()).put(MCid,MCvariable.MCkey());}
+        MCdefinitions.stream().filter(MCd->MCids.contains(MCd.MCid())).forEach(MCactiveComplementDefinitions::add);
+        for(var MClink:MCstore.MCcomplements()){
+            boolean MCused=false;for(var MCkeys:MCscopes.values())if(MCkeys.containsKey(MClink.MCsourceDefId())&&MCkeys.containsKey(MClink.MCtargetDefId())){MCused=true;MCcomplementTargets.computeIfAbsent(MCkeys.get(MClink.MCsourceDefId()),MCk->new LinkedHashSet<>()).add(MCkeys.get(MClink.MCtargetDefId()));if(MClink.MCbidirectional())MCcomplementTargets.computeIfAbsent(MCkeys.get(MClink.MCtargetDefId()),MCk->new LinkedHashSet<>()).add(MCkeys.get(MClink.MCsourceDefId()));}if(MCused)MCactiveComplementLinks.add(MClink);
         }
-        for(var mcEntry:mcComplementTargets.entrySet()){
-            String mcKey=mcEntry.getKey();Control mcInput=mcInputs.get(mcKey);if(!(mcInput instanceof TextInputControl mcField))continue;ContextMenu mcPopup=new ContextMenu();mcPopup.setAutoHide(true);mcComplementMenus.put(mcKey,mcPopup);PauseTransition mcDelay=new PauseTransition(Duration.millis(120));mcComplementDelays.put(mcKey,mcDelay);
-            mcDelay.setOnFinished(mcE->mcSafe(()->mcShowComplementSuggestions(mcKey,mcField,mcPopup)));
-            mcField.textProperty().addListener((mcO,mcA,mcB)->{mcDelay.stop();if(mcApplyingApi||mcApplyingComplements)return;mcPopup.hide();if(!mcB.isBlank())mcDelay.playFromStart();});
-            if(mcField instanceof TextField mcText)mcText.addEventHandler(javafx.event.ActionEvent.ACTION,mcE->{mcDelay.stop();mcPopup.hide();mcSafe(()->mcCompleteExactComplement(mcKey));});
-            mcField.focusedProperty().addListener((mcO,mcA,mcFocused)->{if(!mcFocused){mcDelay.stop();Platform.runLater(()->{if(mcInputs.get(mcKey)==mcField&&!mcPopup.isShowing())mcSafe(()->mcCompleteExactComplement(mcKey));});}});
+        for(var MCentry:MCcomplementTargets.entrySet()){
+            String MCkey=MCentry.getKey();Control MCinput=MCinputs.get(MCkey);if(!(MCinput instanceof TextInputControl MCfield))continue;ContextMenu MCpopup=new ContextMenu();MCpopup.setAutoHide(true);MCcomplementMenus.put(MCkey,MCpopup);PauseTransition MCdelay=new PauseTransition(Duration.millis(120));MCcomplementDelays.put(MCkey,MCdelay);
+            MCdelay.setOnFinished(MCe->MCsafe(()->MCshowComplementSuggestions(MCkey,MCfield,MCpopup)));
+            MCfield.textProperty().addListener((MCo,MCa,MCb)->{MCdelay.stop();if(MCapplyingApi||MCapplyingComplements)return;MCpopup.hide();if(!MCb.isBlank())MCdelay.playFromStart();});
+            if(MCfield instanceof TextField MCtext)MCtext.addEventHandler(javafx.event.ActionEvent.ACTION,MCe->{MCdelay.stop();MCpopup.hide();MCsafe(()->MCcompleteExactComplement(MCkey));});
+            MCfield.focusedProperty().addListener((MCo,MCa,MCfocused)->{if(!MCfocused){MCdelay.stop();Platform.runLater(()->{if(MCinputs.get(MCkey)==MCfield&&!MCpopup.isShowing())MCsafe(()->MCcompleteExactComplement(MCkey));});}});
         }
     }
-    private void mcShowComplementSuggestions(String mcKey,TextInputControl mcField,ContextMenu mcPopup){try{
-        if(mcInputs.get(mcKey)!=mcField||!mcField.isFocused()||mcField.getScene()==null||!mcField.getScene().getWindow().isShowing())return;
-        mcPopup.getItems().clear();for(MCStudioData.MCSuggestion mcSuggestion:mcData.mcSuggestions(MCDocumentEngine.mcBaseKey(mcKey),mcComplementTargets.getOrDefault(mcKey,Set.of()).stream().map(MCDocumentEngine::mcBaseKey).toList(),mcField.getText(),false)){
-            List<String> mcDetails=new ArrayList<>();for(var mcTarget:mcSuggestion.mcComplements().entrySet()){String mcActual=mcActualInputKey(mcKey,mcTarget.getKey());if(mcActual!=null)mcDetails.add(mcFormVariables.get(mcActual).mcLabel()+": "+mcTarget.getValue());}
-            MenuItem mcItem=new MenuItem(mcSuggestion.mcValue()+" — "+String.join("; ",mcDetails));mcItem.setOnAction(mcE->{mcPopup.hide();mcApplyComplementSuggestion(mcKey,mcSuggestion,true);});mcPopup.getItems().add(mcItem);
+    private void MCshowComplementSuggestions(String MCkey,TextInputControl MCfield,ContextMenu MCpopup){try{
+        if(MCinputs.get(MCkey)!=MCfield||!MCfield.isFocused()||MCfield.getScene()==null||!MCfield.getScene().getWindow().isShowing())return;
+        MCpopup.getItems().clear();for(MCStudioData.MCSuggestion MCsuggestion:MCdata.MCsuggestions(MCDocumentEngine.MCbaseKey(MCkey),MCcomplementTargets.getOrDefault(MCkey,Set.of()).stream().map(MCDocumentEngine::MCbaseKey).toList(),MCfield.getText(),false)){
+            List<String> MCdetails=new ArrayList<>();for(var MCtarget:MCsuggestion.MCcomplements().entrySet()){String MCactual=MCactualInputKey(MCkey,MCtarget.getKey());if(MCactual!=null)MCdetails.add(MCformVariables.get(MCactual).MClabel()+": "+MCtarget.getValue());}
+            MenuItem MCitem=new MenuItem(MCsuggestion.MCvalue()+" — "+String.join("; ",MCdetails));MCitem.setOnAction(MCe->{MCpopup.hide();MCapplyComplementSuggestion(MCkey,MCsuggestion,true);});MCpopup.getItems().add(MCitem);
         }
-        if(!mcPopup.getItems().isEmpty())mcPopup.show(mcField,Side.BOTTOM,0,0);
-    }catch(Exception mcE){mcError(mcE);}}
-    private String mcActualInputKey(String mcSource,String mcNormalized){return mcInputs.keySet().stream().filter(mcK->MCDocumentEngine.mcPersonaKey(mcK).equals(MCDocumentEngine.mcPersonaKey(mcSource))&&MCStudioData.mcVariableKey(MCDocumentEngine.mcBaseKey(mcK)).equals(MCStudioData.mcVariableKey(mcNormalized))).findFirst().orElse(null);}
-    private void mcCompleteExactComplement(String mcKey){try{
-        Control mcInput=mcInputs.get(mcKey);if(mcInput==null||mcApplyingApi||mcApplyingComplements)return;Set<String> mcTargets=mcComplementTargets.get(mcKey);if(mcTargets==null)return;List<MCStudioData.MCSuggestion> mcMatches=mcData.mcSuggestions(MCDocumentEngine.mcBaseKey(mcKey),mcTargets.stream().map(MCDocumentEngine::mcBaseKey).toList(),mcReadInput(mcInput),true);if(!mcMatches.isEmpty())mcApplyComplementSuggestion(mcKey,mcMatches.get(0),false);
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcApplyComplementSuggestion(String mcSourceKey,MCStudioData.MCSuggestion mcSuggestion,boolean mcSelected){
-        boolean mcPriorApi=mcApplyingApi;mcApplyingApi=true;mcApplyingComplements=true;try{
-            if(mcSelected)mcSetInput(mcInputs.get(mcSourceKey),mcSuggestion.mcValue());
-            for(var mcEntry:mcSuggestion.mcComplements().entrySet()){
-                String mcTarget=mcActualInputKey(mcSourceKey,mcEntry.getKey());if(mcTarget==null||!mcComplementTargets.getOrDefault(mcSourceKey,Set.of()).contains(mcTarget))continue;
-                if((mcCompletingMissingComplements||mcManuallyEdited.contains(mcTarget))&&!mcReadInput(mcInputs.get(mcTarget)).isBlank())continue;mcSetInput(mcInputs.get(mcTarget),mcEntry.getValue());
+        if(!MCpopup.getItems().isEmpty())MCpopup.show(MCfield,Side.BOTTOM,0,0);
+    }catch(Exception MCe){MCerror(MCe);}}
+    private String MCactualInputKey(String MCsource,String MCnormalized){return MCinputs.keySet().stream().filter(MCk->MCDocumentEngine.MCpersonaKey(MCk).equals(MCDocumentEngine.MCpersonaKey(MCsource))&&MCStudioData.MCvariableKey(MCDocumentEngine.MCbaseKey(MCk)).equals(MCStudioData.MCvariableKey(MCnormalized))).findFirst().orElse(null);}
+    private void MCcompleteExactComplement(String MCkey){try{
+        Control MCinput=MCinputs.get(MCkey);if(MCinput==null||MCapplyingApi||MCapplyingComplements)return;Set<String> MCtargets=MCcomplementTargets.get(MCkey);if(MCtargets==null)return;List<MCStudioData.MCSuggestion> MCmatches=MCdata.MCsuggestions(MCDocumentEngine.MCbaseKey(MCkey),MCtargets.stream().map(MCDocumentEngine::MCbaseKey).toList(),MCreadInput(MCinput),true);if(!MCmatches.isEmpty())MCapplyComplementSuggestion(MCkey,MCmatches.get(0),false);
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCapplyComplementSuggestion(String MCsourceKey,MCStudioData.MCSuggestion MCsuggestion,boolean MCselected){
+        boolean MCpriorApi=MCapplyingApi;MCapplyingApi=true;MCapplyingComplements=true;try{
+            if(MCselected)MCsetInput(MCinputs.get(MCsourceKey),MCsuggestion.MCvalue());
+            for(var MCentry:MCsuggestion.MCcomplements().entrySet()){
+                String MCtarget=MCactualInputKey(MCsourceKey,MCentry.getKey());if(MCtarget==null||!MCcomplementTargets.getOrDefault(MCsourceKey,Set.of()).contains(MCtarget))continue;
+                if((MCcompletingMissingComplements||MCmanuallyEdited.contains(MCtarget))&&!MCreadInput(MCinputs.get(MCtarget)).isBlank())continue;MCsetInput(MCinputs.get(MCtarget),MCentry.getValue());
             }
-        }finally{mcApplyingComplements=false;mcApplyingApi=mcPriorApi;}
+        }finally{MCapplyingComplements=false;MCapplyingApi=MCpriorApi;}
     }
-    private String mcEditorTokenKey(MCDefinition mcDefinition){MCDocumentStore.MCPersona mcPerson=mcEditorPersona.getValue();return mcDefinition.mcEditorKey(mcPerson==null?"":mcPerson.mcPersonaKey());}
-    private void mcRefreshEditorPersonas()throws Exception{
-        String mcSelected=mcEditorPersona.getValue()==null?"":mcEditorPersona.getValue().mcPersonaKey();if(mcCurrentTemplate==null||mcPersonaTemplateId!=mcCurrentTemplate.mcId())mcSelected="";
-        List<MCDocumentStore.MCPersona> mcPeople=new ArrayList<>();mcPeople.add(new MCDocumentStore.MCPersona(0,mcCurrentTemplate==null?0:mcCurrentTemplate.mcId(),"","General (sin persona)",-1));mcEditorPersonaNames.clear();
-        if(mcCurrentTemplate!=null){mcPeople.addAll(mcStore.mcPersonas(mcCurrentTemplate.mcId()));Set<String> mcKeys=new HashSet<>();mcPeople.forEach(mcP->mcKeys.add(mcP.mcPersonaKey()));if(mcDocument!=null)for(String mcMarker:MCDocumentEngine.mcMarkers(mcDocument)){String mcKey=MCDocumentEngine.mcPersonaKey(mcMarker);if(!mcKey.isEmpty()&&mcKeys.add(mcKey))mcPeople.add(new MCDocumentStore.MCPersona(0,mcCurrentTemplate.mcId(),mcKey,mcKey.replace('_',' '),mcPeople.size()));}}
-        mcPeople.forEach(mcP->{if(!mcP.mcPersonaKey().isEmpty())mcEditorPersonaNames.put(mcP.mcPersonaKey(),mcP.mcDisplayName());});mcEditorPersona.getItems().setAll(mcPeople);String mcChoice=mcSelected;mcEditorPersona.getSelectionModel().select(mcPeople.stream().filter(mcP->mcP.mcPersonaKey().equals(mcChoice)).findFirst().orElse(mcPeople.get(0)));mcPersonaTemplateId=mcCurrentTemplate==null?0:mcCurrentTemplate.mcId();
+    private String MCeditorTokenKey(MCDefinition MCdefinition){MCDocumentStore.MCPersona MCperson=MCeditorPersona.getValue();return MCdefinition.MCeditorKey(MCperson==null?"":MCperson.MCpersonaKey());}
+    private void MCrefreshEditorPersonas()throws Exception{
+        String MCselected=MCeditorPersona.getValue()==null?"":MCeditorPersona.getValue().MCpersonaKey();if(MCcurrentTemplate==null||MCpersonaTemplateId!=MCcurrentTemplate.MCid())MCselected="";
+        List<MCDocumentStore.MCPersona> MCpeople=new ArrayList<>();MCpeople.add(new MCDocumentStore.MCPersona(0,MCcurrentTemplate==null?0:MCcurrentTemplate.MCid(),"","General (sin persona)",-1));MCeditorPersonaNames.clear();
+        if(MCcurrentTemplate!=null){MCpeople.addAll(MCstore.MCpersonas(MCcurrentTemplate.MCid()));Set<String> MCkeys=new HashSet<>();MCpeople.forEach(MCp->MCkeys.add(MCp.MCpersonaKey()));if(MCdocument!=null)for(String MCmarker:MCDocumentEngine.MCmarkers(MCdocument)){String MCkey=MCDocumentEngine.MCpersonaKey(MCmarker);if(!MCkey.isEmpty()&&MCkeys.add(MCkey))MCpeople.add(new MCDocumentStore.MCPersona(0,MCcurrentTemplate.MCid(),MCkey,MCkey.replace('_',' '),MCpeople.size()));}}
+        MCpeople.forEach(MCp->{if(!MCp.MCpersonaKey().isEmpty())MCeditorPersonaNames.put(MCp.MCpersonaKey(),MCp.MCdisplayName());});MCeditorPersona.getItems().setAll(MCpeople);String MCchoice=MCselected;MCeditorPersona.getSelectionModel().select(MCpeople.stream().filter(MCp->MCp.MCpersonaKey().equals(MCchoice)).findFirst().orElse(MCpeople.get(0)));MCpersonaTemplateId=MCcurrentTemplate==null?0:MCcurrentTemplate.MCid();
     }
-    private void mcAddEditorPersona(){if(mcCurrentTemplate==null)throw new IllegalArgumentException("Abra una plantilla primero.");try{
-        int mcN=1;while(mcEditorPersonaNames.containsKey("Persona_"+mcN))mcN++;String mcKey="Persona_"+mcN;TextInputDialog mcDialog=new TextInputDialog("Persona "+mcN);mcDialog.setTitle("Agregar persona");mcDialog.setHeaderText("Nombre o rol de la persona");String mcName=mcDialog.showAndWait().orElse(null);if(mcName==null)return;
-        MCDocumentStore.MCPersona mcPerson=mcStore.mcAddPersona(mcCurrentTemplate.mcId(),mcKey,mcName,mcEditorPersonaNames.size());mcRefreshEditorPersonas();mcEditorPersona.getSelectionModel().select(mcPerson);mcEditorScript("mcPersonas("+mcJsonString(mcEditorPersonaNames)+")");
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcRenameEditorPersona(){MCDocumentStore.MCPersona mcPerson=mcEditorPersona.getValue();if(mcPerson==null||mcPerson.mcPersonaKey().isEmpty())return;try{
-        TextInputDialog mcDialog=new TextInputDialog(mcPerson.mcDisplayName());mcDialog.setTitle("Renombrar persona");mcDialog.setHeaderText("Nombre o rol de la persona");String mcName=mcDialog.showAndWait().orElse(null);if(mcName==null)return;mcSyncEditor();if(mcPerson.mcId()==0)mcStore.mcAddPersona(mcCurrentTemplate.mcId(),mcPerson.mcPersonaKey(),mcName,mcPerson.mcSortOrder());else mcStore.mcRenamePersona(mcPerson.mcId(),mcName);mcRefreshEditorPersonas();mcRenderDocument();
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcRemoveEditorPersona(){MCDocumentStore.MCPersona mcPerson=mcEditorPersona.getValue();if(mcPerson==null||mcPerson.mcPersonaKey().isEmpty())return;try{
-        if(new Alert(Alert.AlertType.CONFIRMATION,"¿Quitar a '"+mcPerson.mcDisplayName()+"'? Se quitarán sus variables del documento y se guardará la plantilla.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;
-        mcEditorScript("mcRemovePersona("+mcJsonString(mcPerson.mcPersonaKey())+")");if(mcPerson.mcId()!=0)mcStore.mcDeletePersona(mcPerson.mcId());mcEditorPersona.getSelectionModel().selectFirst();mcEditorPersonaNames.remove(mcPerson.mcPersonaKey());mcDirty=true;mcSaveTemplate();mcRefreshEditorPersonas();
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcUpdateAutomaticDatePreview(){String mcFormat=mcCurrentDateFormat.getValue();if(mcFormat==null)return;mcCurrentDatePreview.setText("Hoy: "+LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(mcFormat,Locale.forLanguageTag("es-PE"))));}
-    private Map<String,Map<String,String>> mcScopedValues(Map<String,String> mcValues){Map<String,Map<String,String>> mcScopes=new LinkedHashMap<>();mcValues.forEach((mcKey,mcValue)->mcScopes.computeIfAbsent(MCDocumentEngine.mcPersonaKey(mcKey),mcK->new LinkedHashMap<>()).put(MCDocumentEngine.mcBaseKey(mcKey),mcValue));return mcScopes;}
-    private void mcLearnScopedComplements(Map<String,String> mcValues)throws Exception{
-        Map<Long,MCDefinition> mcDefinitions=new HashMap<>();mcActiveComplementDefinitions.forEach(mcD->mcDefinitions.put(mcD.mcId(),mcD));
-        for(var mcEntry:mcScopedValues(MCContactReuse.mcClientValues(mcValues,mcStore.mcDefinitions())).entrySet()){Map<String,String> mcScope=mcEntry.getValue();if(mcEntry.getKey().isEmpty()){mcData.mcLearnComplements(mcActiveComplementDefinitions,mcActiveComplementLinks,mcScope);continue;}
-            for(var mcLink:mcActiveComplementLinks){MCDefinition mcSource=mcDefinitions.get(mcLink.mcSourceDefId()),mcTarget=mcDefinitions.get(mcLink.mcTargetDefId());if(mcSource!=null&&mcTarget!=null)mcData.mcRememberPair(mcSource.mcKey(),mcScope.get(mcSource.mcKey()),mcTarget.mcKey(),mcScope.get(mcTarget.mcKey()),mcLink.mcBidirectional());}
+    private void MCaddEditorPersona(){if(MCcurrentTemplate==null)throw new IllegalArgumentException("Abra una plantilla primero.");try{
+        int MCn=1;while(MCeditorPersonaNames.containsKey("Persona_"+MCn))MCn++;String MCkey="Persona_"+MCn;TextInputDialog MCdialog=new TextInputDialog("Persona "+MCn);MCdialog.setTitle("Agregar persona");MCdialog.setHeaderText("Nombre o rol de la persona");String MCname=MCdialog.showAndWait().orElse(null);if(MCname==null)return;
+        MCDocumentStore.MCPersona MCperson=MCstore.MCaddPersona(MCcurrentTemplate.MCid(),MCkey,MCname,MCeditorPersonaNames.size());MCrefreshEditorPersonas();MCeditorPersona.getSelectionModel().select(MCperson);MCeditorScript("MCpersonas("+MCjsonString(MCeditorPersonaNames)+")");
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCrenameEditorPersona(){MCDocumentStore.MCPersona MCperson=MCeditorPersona.getValue();if(MCperson==null||MCperson.MCpersonaKey().isEmpty())return;try{
+        TextInputDialog MCdialog=new TextInputDialog(MCperson.MCdisplayName());MCdialog.setTitle("Renombrar persona");MCdialog.setHeaderText("Nombre o rol de la persona");String MCname=MCdialog.showAndWait().orElse(null);if(MCname==null)return;MCsyncEditor();if(MCperson.MCid()==0)MCstore.MCaddPersona(MCcurrentTemplate.MCid(),MCperson.MCpersonaKey(),MCname,MCperson.MCsortOrder());else MCstore.MCrenamePersona(MCperson.MCid(),MCname);MCrefreshEditorPersonas();MCrenderDocument();
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCremoveEditorPersona(){MCDocumentStore.MCPersona MCperson=MCeditorPersona.getValue();if(MCperson==null||MCperson.MCpersonaKey().isEmpty())return;try{
+        if(new Alert(Alert.AlertType.CONFIRMATION,"¿Quitar a '"+MCperson.MCdisplayName()+"'? Se quitarán sus variables del documento y se guardará la plantilla.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;
+        MCeditorScript("MCremovePersona("+MCjsonString(MCperson.MCpersonaKey())+")");if(MCperson.MCid()!=0)MCstore.MCdeletePersona(MCperson.MCid());MCeditorPersona.getSelectionModel().selectFirst();MCeditorPersonaNames.remove(MCperson.MCpersonaKey());MCdirty=true;MCsaveTemplate();MCrefreshEditorPersonas();
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCupdateAutomaticDatePreview(){String MCformat=MCcurrentDateFormat.getValue();if(MCformat==null)return;MCcurrentDatePreview.setText("Hoy: "+LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(MCformat,Locale.forLanguageTag("es-PE"))));}
+    private Map<String,Map<String,String>> MCscopedValues(Map<String,String> MCvalues){Map<String,Map<String,String>> MCscopes=new LinkedHashMap<>();MCvalues.forEach((MCkey,MCvalue)->MCscopes.computeIfAbsent(MCDocumentEngine.MCpersonaKey(MCkey),MCk->new LinkedHashMap<>()).put(MCDocumentEngine.MCbaseKey(MCkey),MCvalue));return MCscopes;}
+    private void MClearnScopedComplements(Map<String,String> MCvalues)throws Exception{
+        Map<Long,MCDefinition> MCdefinitions=new HashMap<>();MCactiveComplementDefinitions.forEach(MCd->MCdefinitions.put(MCd.MCid(),MCd));
+        for(var MCentry:MCscopedValues(MCContactReuse.MCclientValues(MCvalues,MCstore.MCdefinitions())).entrySet()){Map<String,String> MCscope=MCentry.getValue();if(MCentry.getKey().isEmpty()){MCdata.MClearnComplements(MCactiveComplementDefinitions,MCactiveComplementLinks,MCscope);continue;}
+            for(var MClink:MCactiveComplementLinks){MCDefinition MCsource=MCdefinitions.get(MClink.MCsourceDefId()),MCtarget=MCdefinitions.get(MClink.MCtargetDefId());if(MCsource!=null&&MCtarget!=null)MCdata.MCrememberPair(MCsource.MCkey(),MCscope.get(MCsource.MCkey()),MCtarget.MCkey(),MCscope.get(MCtarget.MCkey()),MClink.MCbidirectional());}
         }
     }
-    private void mcBuildApi(){
-        mcApiPage=new BorderPane();mcApiPage.getStyleClass().add("page");mcApiToken.setPromptText("Clave nueva o de reemplazo");mcApiType.getItems().setAll("DNI","RUC");mcApiType.setValue("DNI");mcApiNumber.setPromptText("Número a consultar");mcCredentialProvider.getItems().setAll("Factiliza","APIsPERU");mcCredentialProvider.setValue("Factiliza");mcCredentialName.setPromptText("Nombre de la credencial");mcCredentialList.setPrefHeight(150);mcCredentialList.setMinHeight(110);mcTwoLineCells(mcCredentialList,MCApiCredentialStore.MCCredential::mcName,mcC->mcC.mcProvider()+" · "+mcC.mcStatus());mcCredentialList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcB)->mcLoadCredential(mcB));mcCredentialStats.setWrapText(true);
-        VBox mcManager=new VBox(10,new Label("CREDENCIALES LOCALES"),mcCredentialList,mcButton("+ Nueva credencial",this::mcNewCredential),mcLabelled("Nombre",mcCredentialName),mcLabelled("Proveedor",mcCredentialProvider),mcLabelled("Clave API",mcApiToken),mcCredentialEnabled,mcButton("Guardar credencial",this::mcSaveCredential),mcButton("Eliminar credencial",this::mcDeleteCredential),mcCredentialStats);mcManager.getStyleClass().add("side-panel");mcUniformButtons(mcManager);ScrollPane mcManagerScroll=mcScrolling(mcManager);mcFixedWidth(mcManagerScroll,380);mcApiPage.setLeft(mcManagerScroll);BorderPane.setMargin(mcManagerScroll,new Insets(0,14,0,0));
-        GridPane mcQuery=mcTwoColumns();mcQuery.add(mcLabelled("Documento",mcApiType),0,0);mcQuery.add(mcLabelled("Número",mcApiNumber),1,0);
-        FlowPane mcActions=new FlowPane(8,6,mcButton("Consultar",()->mcRunApiQuery(mcApiType.getValue(),mcApiNumber.getText(),null,this::mcShowApiResult)),mcButton("Probar seleccionada",()->{MCApiCredentialStore.MCCredential mcC=mcCredentialList.getSelectionModel().getSelectedItem();if(mcC==null)throw new IllegalArgumentException("Seleccione una credencial.");mcRunApiQuery(mcApiType.getValue(),mcApiNumber.getText(),mcC.mcId(),this::mcShowApiResult);}));
-        mcApiState.setWrapText(true);mcApiSaved.setWrapText(true);mcApiSaved.getStyleClass().add("automatic-save");VBox mcContent=new VBox(14,new Label("CONSULTA DNI / RUC"),mcQuery,mcActions,mcApiState,mcApiSaved,mcApiResultBox);mcContent.getStyleClass().add("catalog-form");mcApiPage.setCenter(mcScrolling(mcContent));mcRefreshCredentialList();mcNewCredential();
+    private void MCbuildApi(){
+        MCapiPage=new BorderPane();MCapiPage.getStyleClass().add("page");MCapiToken.setPromptText("Clave nueva o de reemplazo");MCapiType.getItems().setAll("DNI","RUC");MCapiType.setValue("DNI");MCapiNumber.setPromptText("Número a consultar");MCcredentialProvider.getItems().setAll("Factiliza","APIsPERU");MCcredentialProvider.setValue("Factiliza");MCcredentialName.setPromptText("Nombre de la credencial");MCcredentialList.setPrefHeight(150);MCcredentialList.setMinHeight(110);MCtwoLineCells(MCcredentialList,MCApiCredentialStore.MCCredential::MCname,MCc->MCc.MCprovider()+" · "+MCc.MCstatus());MCcredentialList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCb)->MCloadCredential(MCb));MCcredentialStats.setWrapText(true);
+        VBox MCmanager=new VBox(10,new Label("CREDENCIALES LOCALES"),MCcredentialList,MCbutton("+ Nueva credencial",this::MCnewCredential),MClabelled("Nombre",MCcredentialName),MClabelled("Proveedor",MCcredentialProvider),MClabelled("Clave API",MCapiToken),MCcredentialEnabled,MCbutton("Guardar credencial",this::MCsaveCredential),MCbutton("Eliminar credencial",this::MCdeleteCredential),MCcredentialStats);MCmanager.getStyleClass().add("side-panel");MCuniformButtons(MCmanager);ScrollPane MCmanagerScroll=MCscrolling(MCmanager);MCfixedWidth(MCmanagerScroll,380);MCapiPage.setLeft(MCmanagerScroll);BorderPane.setMargin(MCmanagerScroll,new Insets(0,14,0,0));
+        GridPane MCquery=MCtwoColumns();MCquery.add(MClabelled("Documento",MCapiType),0,0);MCquery.add(MClabelled("Número",MCapiNumber),1,0);
+        FlowPane MCactions=new FlowPane(8,6,MCbutton("Consultar",()->MCrunApiQuery(MCapiType.getValue(),MCapiNumber.getText(),null,this::MCshowApiResult)),MCbutton("Probar seleccionada",()->{MCApiCredentialStore.MCCredential MCc=MCcredentialList.getSelectionModel().getSelectedItem();if(MCc==null)throw new IllegalArgumentException("Seleccione una credencial.");MCrunApiQuery(MCapiType.getValue(),MCapiNumber.getText(),MCc.MCid(),this::MCshowApiResult);}));
+        MCapiState.setWrapText(true);MCapiSaved.setWrapText(true);MCapiSaved.getStyleClass().add("automatic-save");VBox MCcontent=new VBox(14,new Label("CONSULTA DNI / RUC"),MCquery,MCactions,MCapiState,MCapiSaved,MCapiResultBox);MCcontent.getStyleClass().add("catalog-form");MCapiPage.setCenter(MCscrolling(MCcontent));MCrefreshCredentialList();MCnewCredential();
     }
-    private void mcShowApi(){mcRefreshCredentialList();mcPage("Conexiones API",mcApiPage);mcApiState.setText(mcCredentialList.getItems().isEmpty()?"Sin credenciales · El sistema funciona sin conexión":"Consultas opcionales · Selección automática de proveedor");}
-    private void mcRefreshCredentialList(){try{long mcId=mcCredentialList.getSelectionModel().getSelectedItem()==null?0:mcCredentialList.getSelectionModel().getSelectedItem().mcId();mcCredentialList.getItems().setAll(mcCredentials.mcCredentials());if(mcId>0)mcCredentialList.getSelectionModel().select(mcCredentialList.getItems().stream().filter(mcC->mcC.mcId()==mcId).findFirst().orElse(null));}catch(Exception mcE){mcError(mcE);}}
-    private void mcNewCredential(){mcCredentialList.getSelectionModel().clearSelection();mcCredentialName.clear();mcCredentialProvider.setDisable(false);mcCredentialProvider.setValue("Factiliza");mcApiToken.clear();mcCredentialEnabled.setSelected(true);mcCredentialStats.setText("Sin credencial seleccionada");}
-    private void mcLoadCredential(MCApiCredentialStore.MCCredential mcC){if(mcC==null)return;mcCredentialName.setText(mcC.mcName());mcCredentialProvider.setValue(mcC.mcProvider());mcCredentialProvider.setDisable(true);mcApiToken.clear();mcCredentialEnabled.setSelected(mcC.mcEnabled());mcCredentialStats.setText("Registrada: "+mcC.mcCreatedAt()+"\nMes actual: "+mcC.mcRequests()+" solicitudes · "+mcC.mcSuccesses()+" correctas · "+mcC.mcFailures()+" fallidas\nÚltimo uso: "+(mcC.mcLastUsed()==null?"ninguno":mcC.mcLastUsed())+"\nEstado: "+mcC.mcStatus());}
-    private void mcSaveCredential(){try{MCApiCredentialStore.MCCredential mcCurrent=mcCredentialList.getSelectionModel().getSelectedItem();if(mcCurrent==null){MCApiCredentialStore.MCCredential mcAdded=mcCredentials.mcAdd(mcCredentialName.getText(),mcCredentialProvider.getValue(),mcApiToken.getText());mcCredentials.mcEnabled(mcAdded.mcId(),mcCredentialEnabled.isSelected());mcRefreshCredentialList();mcCredentialList.getSelectionModel().select(mcCredentialList.getItems().stream().filter(mcC->mcC.mcId()==mcAdded.mcId()).findFirst().orElse(null));}else{mcCredentials.mcRename(mcCurrent.mcId(),mcCredentialName.getText());mcCredentials.mcEnabled(mcCurrent.mcId(),mcCredentialEnabled.isSelected());if(!mcApiToken.getText().isBlank())mcCredentials.mcReplace(mcCurrent.mcId(),mcApiToken.getText());mcRefreshCredentialList();}mcApiToken.clear();mcSaved("Credencial guardada localmente");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteCredential(){MCApiCredentialStore.MCCredential mcC=mcCredentialList.getSelectionModel().getSelectedItem();if(mcC==null)return;if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la credencial '"+mcC.mcName()+"'? Los documentos y datos locales permanecerán intactos.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;try{mcCredentials.mcDelete(mcC.mcId());mcRefreshCredentialList();mcNewCredential();mcSaved("Credencial eliminada; evidencia no sensible conservada");}catch(Exception mcE){mcError(mcE);}}
-    private void mcRunApiQuery(String mcType,String mcNumber,Long mcCredentialId,java.util.function.Consumer<MCLookupRouter.MCResult> mcOnSuccess){
-        if(mcApiQueryRunning){mcSaved("Ya hay una consulta en curso.");return;}mcApiQueryRunning=true;mcApiSaved.setText("");mcApiState.setText("Consultando…");
-        Task<MCLookupRouter.MCResult> mcTask=new Task<>(){@Override protected MCLookupRouter.MCResult call()throws Exception{
-            MCLookupRouter.MCResult mcResult=mcCredentialId==null?mcLookupRouter.mcQuery(mcType,mcNumber.trim()):mcLookupRouter.mcQuerySpecific(mcType,mcNumber.trim(),mcCredentialId);
-            if(mcResult.mcUsable())mcData.mcUpsertContact(MCContactReuse.mcFromApi(mcResult));return mcResult;
+    private void MCshowApi(){MCrefreshCredentialList();MCpage("Conexiones API",MCapiPage);MCapiState.setText(MCcredentialList.getItems().isEmpty()?"Sin credenciales · El sistema funciona sin conexión":"Consultas opcionales · Selección automática de proveedor");}
+    private void MCrefreshCredentialList(){try{long MCid=MCcredentialList.getSelectionModel().getSelectedItem()==null?0:MCcredentialList.getSelectionModel().getSelectedItem().MCid();MCcredentialList.getItems().setAll(MCcredentials.MCcredentials());if(MCid>0)MCcredentialList.getSelectionModel().select(MCcredentialList.getItems().stream().filter(MCc->MCc.MCid()==MCid).findFirst().orElse(null));}catch(Exception MCe){MCerror(MCe);}}
+    private void MCnewCredential(){MCcredentialList.getSelectionModel().clearSelection();MCcredentialName.clear();MCcredentialProvider.setDisable(false);MCcredentialProvider.setValue("Factiliza");MCapiToken.clear();MCcredentialEnabled.setSelected(true);MCcredentialStats.setText("Sin credencial seleccionada");}
+    private void MCloadCredential(MCApiCredentialStore.MCCredential MCc){if(MCc==null)return;MCcredentialName.setText(MCc.MCname());MCcredentialProvider.setValue(MCc.MCprovider());MCcredentialProvider.setDisable(true);MCapiToken.clear();MCcredentialEnabled.setSelected(MCc.MCenabled());MCcredentialStats.setText("Registrada: "+MCc.MCcreatedAt()+"\nMes actual: "+MCc.MCrequests()+" solicitudes · "+MCc.MCsuccesses()+" correctas · "+MCc.MCfailures()+" fallidas\nÚltimo uso: "+(MCc.MClastUsed()==null?"ninguno":MCc.MClastUsed())+"\nEstado: "+MCc.MCstatus());}
+    private void MCsaveCredential(){try{MCApiCredentialStore.MCCredential MCcurrent=MCcredentialList.getSelectionModel().getSelectedItem();if(MCcurrent==null){MCApiCredentialStore.MCCredential MCadded=MCcredentials.MCadd(MCcredentialName.getText(),MCcredentialProvider.getValue(),MCapiToken.getText());MCcredentials.MCenabled(MCadded.MCid(),MCcredentialEnabled.isSelected());MCrefreshCredentialList();MCcredentialList.getSelectionModel().select(MCcredentialList.getItems().stream().filter(MCc->MCc.MCid()==MCadded.MCid()).findFirst().orElse(null));}else{MCcredentials.MCrename(MCcurrent.MCid(),MCcredentialName.getText());MCcredentials.MCenabled(MCcurrent.MCid(),MCcredentialEnabled.isSelected());if(!MCapiToken.getText().isBlank())MCcredentials.MCreplace(MCcurrent.MCid(),MCapiToken.getText());MCrefreshCredentialList();}MCapiToken.clear();MCsaved("Credencial guardada localmente");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteCredential(){MCApiCredentialStore.MCCredential MCc=MCcredentialList.getSelectionModel().getSelectedItem();if(MCc==null)return;if(new Alert(Alert.AlertType.CONFIRMATION,"¿Eliminar la credencial '"+MCc.MCname()+"'? Los documentos y datos locales permanecerán intactos.",ButtonType.YES,ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL)!=ButtonType.YES)return;try{MCcredentials.MCdelete(MCc.MCid());MCrefreshCredentialList();MCnewCredential();MCsaved("Credencial eliminada; evidencia no sensible conservada");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCrunApiQuery(String MCtype,String MCnumber,Long MCcredentialId,java.util.function.Consumer<MCLookupRouter.MCResult> MConSuccess){
+        if(MCapiQueryRunning){MCsaved("Ya hay una consulta en curso.");return;}MCapiQueryRunning=true;MCapiSaved.setText("");MCapiState.setText("Consultando…");
+        Task<MCLookupRouter.MCResult> MCtask=new Task<>(){@Override protected MCLookupRouter.MCResult call()throws Exception{
+            MCLookupRouter.MCResult MCresult=MCcredentialId==null?MClookupRouter.MCquery(MCtype,MCnumber.trim()):MClookupRouter.MCquerySpecific(MCtype,MCnumber.trim(),MCcredentialId);
+            if(MCresult.MCusable())MCdata.MCupsertContact(MCContactReuse.MCfromApi(MCresult));return MCresult;
         }};
-        mcTask.setOnSucceeded(mcE->{mcApiQueryRunning=false;MCLookupRouter.MCResult mcResult=mcTask.getValue();mcApiState.setText(mcResult.mcUsable()?"Respondió "+mcResult.mcProvider()+" · "+(mcResult.mcStatus()==MCLookupRouter.MCStatus.PARTIAL?"datos parciales":"consulta correcta"):mcResult.mcError());mcRefreshCredentialList();if(mcResult.mcUsable()){mcApiSaved.setText("✓ Guardado automáticamente en Clientes");mcRefreshContacts();mcOnSuccess.accept(mcResult);}});
-        mcTask.setOnFailed(mcE->{mcApiQueryRunning=false;mcApiState.setText("Consulta no completada: "+mcTask.getException().getMessage());mcRefreshCredentialList();});Thread mcThread=new Thread(mcTask,"consulta-documental");mcThread.setDaemon(true);mcThread.start();
+        MCtask.setOnSucceeded(MCe->{MCapiQueryRunning=false;MCLookupRouter.MCResult MCresult=MCtask.getValue();MCapiState.setText(MCresult.MCusable()?"Respondió "+MCresult.MCprovider()+" · "+(MCresult.MCstatus()==MCLookupRouter.MCStatus.PARTIAL?"datos parciales":"consulta correcta"):MCresult.MCerror());MCrefreshCredentialList();if(MCresult.MCusable()){MCapiSaved.setText("✓ Guardado automáticamente en Clientes");MCrefreshContacts();MConSuccess.accept(MCresult);}});
+        MCtask.setOnFailed(MCe->{MCapiQueryRunning=false;MCapiState.setText("Consulta no completada: "+MCtask.getException().getMessage());MCrefreshCredentialList();});Thread MCthread=new Thread(MCtask,"consulta-documental");MCthread.setDaemon(true);MCthread.start();
     }
-    private static Map<String,String> mcNormalizedApiValues(MCLookupRouter.MCResult mcResult){Map<String,String> mcValues=new LinkedHashMap<>(mcResult.mcValues());if("DNI".equals(mcResult.mcService()))MCApiFieldCatalog.mcNormalizePersonName(mcValues);return mcValues;}
-    private void mcShowApiResult(MCLookupRouter.MCResult mcResult){
-        mcApiResultBox.getChildren().clear();GridPane mcGrid=mcTwoColumns();int mcIndex=0;
-        for(MCApiFieldCatalog.MCField mcItem:MCApiFieldCatalog.mcFields(mcResult.mcService())){
-            String mcValue=mcNormalizedApiValues(mcResult).getOrDefault(mcItem.mcKey(),"");Label mcDataLabel=new Label(mcValue.isBlank()?"No disponible":mcValue);mcDataLabel.setWrapText(true);mcDataLabel.setMinWidth(0);VBox mcCell=mcLabelled(mcItem.mcLabel(),mcDataLabel);mcCell.getStyleClass().add("result-field");mcGrid.add(mcCell,mcIndex%2,mcIndex/2);mcIndex++;
+    private static Map<String,String> MCnormalizedApiValues(MCLookupRouter.MCResult MCresult){Map<String,String> MCvalues=new LinkedHashMap<>(MCresult.MCvalues());if("DNI".equals(MCresult.MCservice()))MCApiFieldCatalog.MCnormalizePersonName(MCvalues);return MCvalues;}
+    private void MCshowApiResult(MCLookupRouter.MCResult MCresult){
+        MCapiResultBox.getChildren().clear();GridPane MCgrid=MCtwoColumns();int MCindex=0;
+        for(MCApiFieldCatalog.MCField MCitem:MCApiFieldCatalog.MCfields(MCresult.MCservice())){
+            String MCvalue=MCnormalizedApiValues(MCresult).getOrDefault(MCitem.MCkey(),"");Label MCdataLabel=new Label(MCvalue.isBlank()?"No disponible":MCvalue);MCdataLabel.setWrapText(true);MCdataLabel.setMinWidth(0);VBox MCcell=MClabelled(MCitem.MClabel(),MCdataLabel);MCcell.getStyleClass().add("result-field");MCgrid.add(MCcell,MCindex%2,MCindex/2);MCindex++;
         }
-        mcApiResultBox.getChildren().addAll(mcDescription("Proveedor: "+mcResult.mcProvider()),mcGrid);mcApiSaved.setText("✓ Guardado automáticamente en Clientes");mcSaved("Consulta completada · Cliente guardado automáticamente");
+        MCapiResultBox.getChildren().addAll(MCdescription("Proveedor: "+MCresult.MCprovider()),MCgrid);MCapiSaved.setText("✓ Guardado automáticamente en Clientes");MCsaved("Consulta completada · Cliente guardado automáticamente");
     }
 
-    private void mcRefreshMappings(){MCTemplate mcT=mcMapTemplate.getValue();try{if(mcT==null){mcMapSource.getItems().clear();mcMapTarget.getItems().clear();mcMappingList.getItems().clear();return;}List<MCVariable> mcVars=mcStore.mcVariables(mcT.mcId());mcMapSource.getItems().setAll(mcVars.stream().filter(mcV->mcV.mcType().equals("DNI")||mcV.mcType().equals("RUC")).toList());mcMapTarget.getItems().setAll(mcVars);mcMappingList.getItems().setAll(mcData.mcMappings(mcT.mcId()));}catch(Exception mcE){mcError(mcE);}}
-    private void mcRefreshApiFieldChoices(){MCVariable mcSource=mcMapSource.getValue();if(mcSource==null)return;if(mcSource.mcType().equals("DNI"))mcMapApiField.getItems().setAll("numero","nombres","apellido_paterno","apellido_materno","nombre_completo","direccion","direccion_completa","departamento","provincia","distrito");else mcMapApiField.getItems().setAll("numero","nombre_o_razon_social","direccion","direccion_completa","tipo_contribuyente","estado","condicion","departamento","provincia","distrito");}
-    private void mcSaveMapping(){MCTemplate mcT=mcMapTemplate.getValue();MCVariable mcSource=mcMapSource.getValue(),mcTarget=mcMapTarget.getValue();String mcField=mcMapApiField.getValue();if(mcT==null||mcSource==null||mcTarget==null||mcField==null||mcField.isBlank())throw new IllegalArgumentException("Seleccione plantilla, origen, dato y destino.");try{mcData.mcSaveMapping(new MCMapping(0,mcT.mcId(),mcSource.mcKey(),mcField.trim(),mcTarget.mcKey()));mcRefreshMappings();mcSaved("Correspondencia guardada");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteMapping(){MCMapping mcM=mcMappingList.getSelectionModel().getSelectedItem();if(mcM==null)return;try{mcData.mcDeleteMapping(mcM.mcId());mcRefreshMappings();mcSaved("Correspondencia eliminada");}catch(Exception mcE){mcError(mcE);}}
-    private long mcSafeDefinitionId(MCVariable mcVariable){try{return mcDefinitionId(mcVariable);}catch(Exception mcE){throw new IllegalStateException(mcE);}}
-    private long mcDefinitionId(MCVariable mcVariable)throws Exception{return mcVariable.mcId()<0?-mcVariable.mcId():mcStore.mcDefinitionId(mcVariable.mcId());}
-    private String mcQueryService(long mcTemplateId,MCVariable mcVariable)throws Exception{
-        MCDefinition mcDefinition=mcDefinitionFor(mcVariable,mcStore.mcDefinitions());if(mcDefinition!=null&&!mcDefinition.mcBindToClient())return null;
-        for(MCApiContext mcContext:mcData.mcApiContexts(mcTemplateId))if(mcContext.mcVariableKey().equals(mcVariable.mcKey()))return mcContext.mcSource()?mcContext.mcService():null;
-        for(MCContactBinding mcBinding:mcData.mcContactBindings(mcTemplateId))if(mcBinding.mcVariableKey().equals(mcVariable.mcKey()))return "number".equals(mcBinding.mcField())?("Empresa".equals(mcBinding.mcKind())?"RUC":"DNI"):null;
-        if(List.of("DNI","RUC").contains(mcVariable.mcType()))return mcVariable.mcType();
-        long mcId=mcDefinitionId(mcVariable);MCApiBinding mcBinding=mcId>0?mcData.mcApiBinding(mcId):null;
-        if(mcBinding!=null)return "numero".equals(MCApiFieldCatalog.mcCanonical(mcBinding.mcService(),mcBinding.mcPath()))?mcBinding.mcService():null;
-        return MCContactReuse.mcIdentifierService(mcVariable);
+    private void MCrefreshMappings(){MCTemplate MCt=MCmapTemplate.getValue();try{if(MCt==null){MCmapSource.getItems().clear();MCmapTarget.getItems().clear();MCmappingList.getItems().clear();return;}List<MCVariable> MCvars=MCstore.MCvariables(MCt.MCid());MCmapSource.getItems().setAll(MCvars.stream().filter(MCv->MCv.MCtype().equals("DNI")||MCv.MCtype().equals("RUC")).toList());MCmapTarget.getItems().setAll(MCvars);MCmappingList.getItems().setAll(MCdata.MCmappings(MCt.MCid()));}catch(Exception MCe){MCerror(MCe);}}
+    private void MCrefreshApiFieldChoices(){MCVariable MCsource=MCmapSource.getValue();if(MCsource==null)return;if(MCsource.MCtype().equals("DNI"))MCmapApiField.getItems().setAll("numero","nombres","apellido_paterno","apellido_materno","nombre_completo","direccion","direccion_completa","departamento","provincia","distrito");else MCmapApiField.getItems().setAll("numero","nombre_o_razon_social","direccion","direccion_completa","tipo_contribuyente","estado","condicion","departamento","provincia","distrito");}
+    private void MCsaveMapping(){MCTemplate MCt=MCmapTemplate.getValue();MCVariable MCsource=MCmapSource.getValue(),MCtarget=MCmapTarget.getValue();String MCfield=MCmapApiField.getValue();if(MCt==null||MCsource==null||MCtarget==null||MCfield==null||MCfield.isBlank())throw new IllegalArgumentException("Seleccione plantilla, origen, dato y destino.");try{MCdata.MCsaveMapping(new MCMapping(0,MCt.MCid(),MCsource.MCkey(),MCfield.trim(),MCtarget.MCkey()));MCrefreshMappings();MCsaved("Correspondencia guardada");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteMapping(){MCMapping MCm=MCmappingList.getSelectionModel().getSelectedItem();if(MCm==null)return;try{MCdata.MCdeleteMapping(MCm.MCid());MCrefreshMappings();MCsaved("Correspondencia eliminada");}catch(Exception MCe){MCerror(MCe);}}
+    private long MCsafeDefinitionId(MCVariable MCvariable){try{return MCdefinitionId(MCvariable);}catch(Exception MCe){throw new IllegalStateException(MCe);}}
+    private long MCdefinitionId(MCVariable MCvariable)throws Exception{return MCvariable.MCid()<0?-MCvariable.MCid():MCstore.MCdefinitionId(MCvariable.MCid());}
+    private String MCqueryService(long MCtemplateId,MCVariable MCvariable)throws Exception{
+        MCDefinition MCdefinition=MCdefinitionFor(MCvariable,MCstore.MCdefinitions());if(MCdefinition!=null&&!MCdefinition.MCbindToClient())return null;
+        for(MCApiContext MCcontext:MCdata.MCapiContexts(MCtemplateId))if(MCcontext.MCvariableKey().equals(MCvariable.MCkey()))return MCcontext.MCsource()?MCcontext.MCservice():null;
+        for(MCContactBinding MCbinding:MCdata.MCcontactBindings(MCtemplateId))if(MCbinding.MCvariableKey().equals(MCvariable.MCkey()))return "number".equals(MCbinding.MCfield())?("Empresa".equals(MCbinding.MCkind())?"RUC":"DNI"):null;
+        if(List.of("DNI","RUC").contains(MCvariable.MCtype()))return MCvariable.MCtype();
+        long MCid=MCdefinitionId(MCvariable);MCApiBinding MCbinding=MCid>0?MCdata.MCapiBinding(MCid):null;
+        if(MCbinding!=null)return "numero".equals(MCApiFieldCatalog.MCcanonical(MCbinding.MCservice(),MCbinding.MCpath()))?MCbinding.MCservice():null;
+        return MCContactReuse.MCidentifierService(MCvariable);
     }
-    private void mcLookupForField(MCTemplate mcTemplate,MCVariable mcVariable,TextField mcField,String mcService){
-        PauseTransition mcDelay=mcLookupDelays.get(mcVariable.mcKey());if(mcDelay!=null)mcDelay.stop();
-        String mcNumber=mcField.getText().trim();if(!mcValidQueryNumber(mcService,mcNumber))throw new IllegalArgumentException("Número de documento inválido.");
-        try{if(mcLoadLocalForField(mcTemplate,mcVariable,mcField,mcService))return;}catch(Exception mcE){mcError(mcE);return;}
-        mcRunApiQuery(mcService,mcNumber,null,mcResult->{
-            if(mcGenerateTemplate.getValue()==null||mcGenerateTemplate.getValue().mcId()!=mcTemplate.mcId()||mcInputs.get(mcVariable.mcKey())!=mcField||!mcField.getText().trim().equals(mcNumber))return;
-            int mcCount=mcApplyApiBindings(mcTemplate.mcId(),mcVariable.mcKey(),mcResult);
-            try{mcCount+=mcApplyContactFields(mcTemplate.mcId(),mcVariable.mcKey(),mcData.mcMatchingContact("RUC".equals(mcService)?"Empresa":"Persona",mcService,mcNumber),mcService);}catch(Exception mcE){mcError(mcE);}
-            mcSaved("Respondió "+mcResult.mcProvider()+" · "+mcCount+" campos completados · Cliente guardado automáticamente");
+    private void MClookupForField(MCTemplate MCtemplate,MCVariable MCvariable,TextField MCfield,String MCservice){
+        PauseTransition MCdelay=MClookupDelays.get(MCvariable.MCkey());if(MCdelay!=null)MCdelay.stop();
+        String MCnumber=MCfield.getText().trim();if(!MCvalidQueryNumber(MCservice,MCnumber))throw new IllegalArgumentException("Número de documento inválido.");
+        try{if(MCloadLocalForField(MCtemplate,MCvariable,MCfield,MCservice))return;}catch(Exception MCe){MCerror(MCe);return;}
+        MCrunApiQuery(MCservice,MCnumber,null,MCresult->{
+            if(MCgenerateTemplate.getValue()==null||MCgenerateTemplate.getValue().MCid()!=MCtemplate.MCid()||MCinputs.get(MCvariable.MCkey())!=MCfield||!MCfield.getText().trim().equals(MCnumber))return;
+            int MCcount=MCapplyApiBindings(MCtemplate.MCid(),MCvariable.MCkey(),MCresult);
+            try{MCcount+=MCapplyContactFields(MCtemplate.MCid(),MCvariable.MCkey(),MCdata.MCmatchingContact("RUC".equals(MCservice)?"Empresa":"Persona",MCservice,MCnumber),MCservice);}catch(Exception MCe){MCerror(MCe);}
+            MCsaved("Respondió "+MCresult.MCprovider()+" · "+MCcount+" campos completados · Cliente guardado automáticamente");
         });
     }
-    private static boolean mcValidQueryNumber(String mcService,String mcNumber){return mcNumber!=null&&mcNumber.trim().matches("RUC".equals(mcService)?"\\d{11}":"\\d{8}");}
-    private boolean mcLoadLocalForField(MCTemplate mcTemplate,MCVariable mcVariable,TextField mcField,String mcService)throws Exception{
-        MCContact mcLocal=mcData.mcMatchingContact("RUC".equals(mcService)?"Empresa":"Persona",mcService,mcField.getText());if(mcLocal==null)return false;
-        mcResetContactEdits(mcTemplate,mcVariable,mcService);
-        Map<String,String> mcValues=MCContactReuse.mcApiValues(mcLocal);MCLookupRouter.MCResult mcResult=new MCLookupRouter.MCResult(mcService,mcField.getText().trim(),"Clientes locales",mcValues,mcValues.keySet(),Set.of(),MCLookupRouter.MCStatus.SUCCESS,"",mcValues);
-        mcApplyApiBindings(mcTemplate.mcId(),mcVariable.mcKey(),mcResult);mcApplyContactFields(mcTemplate.mcId(),mcVariable.mcKey(),mcLocal,mcService);mcSaved("Datos cargados desde Clientes locales");return true;
+    private static boolean MCvalidQueryNumber(String MCservice,String MCnumber){return MCnumber!=null&&MCnumber.trim().matches("RUC".equals(MCservice)?"\\d{11}":"\\d{8}");}
+    private boolean MCloadLocalForField(MCTemplate MCtemplate,MCVariable MCvariable,TextField MCfield,String MCservice)throws Exception{
+        MCContact MClocal=MCdata.MCmatchingContact("RUC".equals(MCservice)?"Empresa":"Persona",MCservice,MCfield.getText());if(MClocal==null)return false;
+        MCresetContactEdits(MCtemplate,MCvariable,MCservice);
+        Map<String,String> MCvalues=MCContactReuse.MCapiValues(MClocal);MCLookupRouter.MCResult MCresult=new MCLookupRouter.MCResult(MCservice,MCfield.getText().trim(),"Clientes locales",MCvalues,MCvalues.keySet(),Set.of(),MCLookupRouter.MCStatus.SUCCESS,"",MCvalues);
+        MCapplyApiBindings(MCtemplate.MCid(),MCvariable.MCkey(),MCresult);MCapplyContactFields(MCtemplate.MCid(),MCvariable.MCkey(),MClocal,MCservice);MCsaved("Datos cargados desde Clientes locales");return true;
     }
-    private void mcResetContactEdits(MCTemplate mcTemplate,MCVariable mcSource,String mcService)throws Exception{
-        List<MCContactBinding> mcBindings=mcContactFormBindings(mcTemplate.mcId(),new ArrayList<>(mcFormVariables.values()));String mcGroup=mcContextGroup(mcData.mcApiContexts(mcTemplate.mcId()),mcBindings,mcSource.mcKey(),mcService);String mcKind="RUC".equals(mcService)?"Empresa":"Persona";
-        long mcSources=mcBindings.stream().filter(mcB->"number".equals(mcB.mcField())&&mcB.mcKind().equals(mcKind)).count();
-        for(MCContactBinding mcBinding:mcBindings)if(!mcBinding.mcVariableKey().equals(mcSource.mcKey())&&mcBinding.mcKind().equals(mcKind)&&mcSameQueryGroup(mcGroup,mcBinding.mcGroupKey(),mcSources,mcSource.mcKey(),mcBinding.mcVariableKey()))mcManuallyEdited.remove(mcBinding.mcVariableKey());
+    private void MCresetContactEdits(MCTemplate MCtemplate,MCVariable MCsource,String MCservice)throws Exception{
+        List<MCContactBinding> MCbindings=MCcontactFormBindings(MCtemplate.MCid(),new ArrayList<>(MCformVariables.values()));String MCgroup=MCcontextGroup(MCdata.MCapiContexts(MCtemplate.MCid()),MCbindings,MCsource.MCkey(),MCservice);String MCkind="RUC".equals(MCservice)?"Empresa":"Persona";
+        long MCsources=MCbindings.stream().filter(MCb->"number".equals(MCb.MCfield())&&MCb.MCkind().equals(MCkind)).count();
+        for(MCContactBinding MCbinding:MCbindings)if(!MCbinding.MCvariableKey().equals(MCsource.MCkey())&&MCbinding.MCkind().equals(MCkind)&&MCsameQueryGroup(MCgroup,MCbinding.MCgroupKey(),MCsources,MCsource.MCkey(),MCbinding.MCvariableKey()))MCmanuallyEdited.remove(MCbinding.MCvariableKey());
     }
-    private int mcApplyContactFields(long mcTemplateId,String mcSourceKey,MCContact mcContact,String mcService)throws Exception{
-        if(mcContact==null)return 0;List<MCContactBinding> mcBindings=mcContactFormBindings(mcTemplateId,new ArrayList<>(mcFormVariables.values()));List<MCApiContext> mcContexts=mcData.mcApiContexts(mcTemplateId);
-        String mcSourceGroup=mcContextGroup(mcContexts,mcBindings,mcSourceKey,mcService);long mcCount=mcBindings.stream().filter(mcB->"number".equals(mcB.mcField())&&mcB.mcKind().equals(mcContact.mcKind())).count();int mcCompleted=0;
-        for(MCContactBinding mcBinding:mcBindings){if(!mcBinding.mcKind().equals(mcContact.mcKind())||!mcSameQueryGroup(mcSourceGroup,mcBinding.mcGroupKey(),mcCount,mcSourceKey,mcBinding.mcVariableKey())||mcManuallyEdited.contains(mcBinding.mcVariableKey()))continue;
-            String mcValue=MCContactReuse.mcValuesFor(mcContact,List.of(mcBinding)).get(mcBinding.mcVariableKey());Control mcTarget=mcInputs.get(mcBinding.mcVariableKey());if(mcTarget!=null&&mcValue!=null&&!mcValue.isBlank()){mcApplyingApi=true;try{mcSetInput(mcTarget,mcValue);mcCompleted++;}finally{mcApplyingApi=false;}}
-        }return mcCompleted;
+    private int MCapplyContactFields(long MCtemplateId,String MCsourceKey,MCContact MCcontact,String MCservice)throws Exception{
+        if(MCcontact==null)return 0;List<MCContactBinding> MCbindings=MCcontactFormBindings(MCtemplateId,new ArrayList<>(MCformVariables.values()));List<MCApiContext> MCcontexts=MCdata.MCapiContexts(MCtemplateId);
+        String MCsourceGroup=MCcontextGroup(MCcontexts,MCbindings,MCsourceKey,MCservice);long MCcount=MCbindings.stream().filter(MCb->"number".equals(MCb.MCfield())&&MCb.MCkind().equals(MCcontact.MCkind())).count();int MCcompleted=0;
+        for(MCContactBinding MCbinding:MCbindings){if(!MCbinding.MCkind().equals(MCcontact.MCkind())||!MCsameQueryGroup(MCsourceGroup,MCbinding.MCgroupKey(),MCcount,MCsourceKey,MCbinding.MCvariableKey())||MCmanuallyEdited.contains(MCbinding.MCvariableKey()))continue;
+            String MCvalue=MCContactReuse.MCvaluesFor(MCcontact,List.of(MCbinding)).get(MCbinding.MCvariableKey());Control MCtarget=MCinputs.get(MCbinding.MCvariableKey());if(MCtarget!=null&&MCvalue!=null&&!MCvalue.isBlank()){MCapplyingApi=true;try{MCsetInput(MCtarget,MCvalue);MCcompleted++;}finally{MCapplyingApi=false;}}
+        }return MCcompleted;
     }
-    private int mcApplyApiBindings(long mcTemplateId,String mcSourceKey,MCLookupRouter.MCResult mcResult){int mcCompleted=0;try{
-        List<MCContactBinding> mcContacts=mcData.mcContactBindings(mcTemplateId);List<MCApiContext> mcContexts=mcData.mcApiContexts(mcTemplateId);String mcSourceGroup=mcContextGroup(mcContexts,mcContacts,mcSourceKey,mcResult.mcService());
-        long mcSources=mcFormVariables.values().stream().filter(mcV->{try{return mcResult.mcService().equals(mcQueryService(mcTemplateId,mcV));}catch(Exception mcE){return false;}}).count();
-        for(var mcEntry:mcFormVariables.entrySet()){
-            MCVariable mcVariable=mcEntry.getValue();long mcId=mcDefinitionId(mcVariable);MCDefinition mcDefinition=mcDefinitionFor(mcVariable,mcStore.mcDefinitions());if(mcDefinition!=null&&!mcDefinition.mcBindToClient())continue;MCApiBinding mcBinding=mcId>0?mcData.mcApiBinding(mcId):null;
-            if(mcBinding==null||!mcBinding.mcService().equals(mcResult.mcService()))continue;
-            String mcTargetGroup=mcContextGroup(mcContexts,mcContacts,mcVariable.mcKey(),mcResult.mcService());
-            if(!mcSameQueryGroup(mcSourceGroup,mcTargetGroup,mcSources,mcSourceKey,mcVariable.mcKey()))continue;
-            String mcNormalized=MCApiFieldCatalog.mcCanonical(mcBinding.mcService(),mcBinding.mcPath());String mcValue=mcNormalized.startsWith("legacy:")?("Clientes locales".equals(mcResult.mcProvider())?mcResult.mcRaw().get(mcBinding.mcPath()):MCApiFieldCatalog.mcLegacyValue(mcResult.mcProvider(),mcBinding.mcPath(),mcResult.mcRaw())):mcNormalizedApiValues(mcResult).get(mcNormalized);
-            if(mcValue!=null&&!mcValue.isBlank()&&!mcManuallyEdited.contains(mcVariable.mcKey())){Control mcTarget=mcInputs.get(mcVariable.mcKey());if(mcTarget!=null){mcApplyingApi=true;try{mcSetInput(mcTarget,mcValue);mcCompleted++;}finally{mcApplyingApi=false;}}}
+    private int MCapplyApiBindings(long MCtemplateId,String MCsourceKey,MCLookupRouter.MCResult MCresult){int MCcompleted=0;try{
+        List<MCContactBinding> MCcontacts=MCdata.MCcontactBindings(MCtemplateId);List<MCApiContext> MCcontexts=MCdata.MCapiContexts(MCtemplateId);String MCsourceGroup=MCcontextGroup(MCcontexts,MCcontacts,MCsourceKey,MCresult.MCservice());
+        long MCsources=MCformVariables.values().stream().filter(MCv->{try{return MCresult.MCservice().equals(MCqueryService(MCtemplateId,MCv));}catch(Exception MCe){return false;}}).count();
+        for(var MCentry:MCformVariables.entrySet()){
+            MCVariable MCvariable=MCentry.getValue();long MCid=MCdefinitionId(MCvariable);MCDefinition MCdefinition=MCdefinitionFor(MCvariable,MCstore.MCdefinitions());if(MCdefinition!=null&&!MCdefinition.MCbindToClient())continue;MCApiBinding MCbinding=MCid>0?MCdata.MCapiBinding(MCid):null;
+            if(MCbinding==null||!MCbinding.MCservice().equals(MCresult.MCservice()))continue;
+            String MCtargetGroup=MCcontextGroup(MCcontexts,MCcontacts,MCvariable.MCkey(),MCresult.MCservice());
+            if(!MCsameQueryGroup(MCsourceGroup,MCtargetGroup,MCsources,MCsourceKey,MCvariable.MCkey()))continue;
+            String MCnormalized=MCApiFieldCatalog.MCcanonical(MCbinding.MCservice(),MCbinding.MCpath());String MCvalue=MCnormalized.startsWith("legacy:")?("Clientes locales".equals(MCresult.MCprovider())?MCresult.MCraw().get(MCbinding.MCpath()):MCApiFieldCatalog.MClegacyValue(MCresult.MCprovider(),MCbinding.MCpath(),MCresult.MCraw())):MCnormalizedApiValues(MCresult).get(MCnormalized);
+            if(MCvalue!=null&&!MCvalue.isBlank()&&!MCmanuallyEdited.contains(MCvariable.MCkey())){Control MCtarget=MCinputs.get(MCvariable.MCkey());if(MCtarget!=null){MCapplyingApi=true;try{MCsetInput(MCtarget,MCvalue);MCcompleted++;}finally{MCapplyingApi=false;}}}
         }
-        for(MCMapping mcMapping:mcData.mcMappings(mcTemplateId))if(MCContactReuse.mcClientKey(mcMapping.mcTargetKey(),mcStore.mcDefinitions())&&mcMapping.mcSourceKey().equals(mcSourceKey)&&!mcManuallyEdited.contains(mcMapping.mcTargetKey())&&mcSameQueryGroup(mcSourceGroup,mcContextGroup(mcContexts,mcContacts,mcMapping.mcTargetKey(),mcResult.mcService()),mcSources,mcSourceKey,mcMapping.mcTargetKey())){String mcCanonical=MCApiFieldCatalog.mcCanonical(mcResult.mcService(),mcMapping.mcApiField());String mcValue="nombre_completo".equals(mcCanonical)?mcNormalizedApiValues(mcResult).get(mcCanonical):mcResult.mcRaw().getOrDefault(mcMapping.mcApiField(),mcResult.mcRaw().getOrDefault("data."+mcMapping.mcApiField(),mcNormalizedApiValues(mcResult).get(mcCanonical)));Control mcTarget=mcInputs.get(mcMapping.mcTargetKey());if(mcValue!=null&&!mcValue.isBlank()&&mcTarget!=null){mcApplyingApi=true;try{mcSetInput(mcTarget,mcValue);mcCompleted++;}finally{mcApplyingApi=false;}}}
-    }catch(Exception mcE){mcError(mcE);}return mcCompleted;}
-    static String mcContextGroup(List<MCApiContext> mcContexts,List<MCContactBinding> mcContacts,String mcKey,String mcService){if(!MCDocumentEngine.mcPersonaKey(mcKey).isEmpty())return "persona:"+MCDocumentEngine.mcPersonaKey(mcKey);for(MCApiContext mcC:mcContexts)if(mcC.mcVariableKey().equals(mcKey)&&mcC.mcService().equals(mcService))return mcC.mcGroupKey();for(MCContactBinding mcB:mcContacts)if(mcB.mcVariableKey().equals(mcKey))return mcB.mcGroupKey();return null;}
-    static boolean mcSameQueryGroup(String mcSource,String mcTarget,long mcSourceCount,String mcSourceKey,String mcTargetKey){if(!MCDocumentEngine.mcPersonaKey(mcSourceKey).equals(MCDocumentEngine.mcPersonaKey(mcTargetKey)))return false;if(mcSource!=null)return mcSource.equals(mcTarget)||mcSourceKey.equals(mcTargetKey);return mcSourceCount<=1||mcSourceKey.equals(mcTargetKey);}
-    private static String mcReadInput(Control mcInput){if(mcInput instanceof DatePicker mcPicker)return mcPicker.getValue()==null?"":mcPicker.getValue().toString();if(mcInput instanceof TextArea mcArea)return mcArea.getText();return ((TextField)mcInput).getText();}
-    private static void mcSetInput(Control mcInput,String mcValue){if(mcInput instanceof DatePicker mcPicker){try{mcPicker.setValue(LocalDate.parse(mcValue));}catch(Exception mcFirst){try{mcPicker.setValue(LocalDate.parse(mcValue,java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")));}catch(Exception mcIgnored){}}}else if(mcInput instanceof TextArea mcArea)mcArea.setText(mcValue);else ((TextField)mcInput).setText(mcValue);}
+        for(MCMapping MCmapping:MCdata.MCmappings(MCtemplateId))if(MCContactReuse.MCclientKey(MCmapping.MCtargetKey(),MCstore.MCdefinitions())&&MCmapping.MCsourceKey().equals(MCsourceKey)&&!MCmanuallyEdited.contains(MCmapping.MCtargetKey())&&MCsameQueryGroup(MCsourceGroup,MCcontextGroup(MCcontexts,MCcontacts,MCmapping.MCtargetKey(),MCresult.MCservice()),MCsources,MCsourceKey,MCmapping.MCtargetKey())){String MCcanonical=MCApiFieldCatalog.MCcanonical(MCresult.MCservice(),MCmapping.MCapiField());String MCvalue="nombre_completo".equals(MCcanonical)?MCnormalizedApiValues(MCresult).get(MCcanonical):MCresult.MCraw().getOrDefault(MCmapping.MCapiField(),MCresult.MCraw().getOrDefault("data."+MCmapping.MCapiField(),MCnormalizedApiValues(MCresult).get(MCcanonical)));Control MCtarget=MCinputs.get(MCmapping.MCtargetKey());if(MCvalue!=null&&!MCvalue.isBlank()&&MCtarget!=null){MCapplyingApi=true;try{MCsetInput(MCtarget,MCvalue);MCcompleted++;}finally{MCapplyingApi=false;}}}
+    }catch(Exception MCe){MCerror(MCe);}return MCcompleted;}
+    static String MCcontextGroup(List<MCApiContext> MCcontexts,List<MCContactBinding> MCcontacts,String MCkey,String MCservice){if(!MCDocumentEngine.MCpersonaKey(MCkey).isEmpty())return "persona:"+MCDocumentEngine.MCpersonaKey(MCkey);for(MCApiContext MCc:MCcontexts)if(MCc.MCvariableKey().equals(MCkey)&&MCc.MCservice().equals(MCservice))return MCc.MCgroupKey();for(MCContactBinding MCb:MCcontacts)if(MCb.MCvariableKey().equals(MCkey))return MCb.MCgroupKey();return null;}
+    static boolean MCsameQueryGroup(String MCsource,String MCtarget,long MCsourceCount,String MCsourceKey,String MCtargetKey){if(!MCDocumentEngine.MCpersonaKey(MCsourceKey).equals(MCDocumentEngine.MCpersonaKey(MCtargetKey)))return false;if(MCsource!=null)return MCsource.equals(MCtarget)||MCsourceKey.equals(MCtargetKey);return MCsourceCount<=1||MCsourceKey.equals(MCtargetKey);}
+    private static String MCreadInput(Control MCinput){if(MCinput instanceof DatePicker MCpicker)return MCpicker.getValue()==null?"":MCpicker.getValue().toString();if(MCinput instanceof TextArea MCarea)return MCarea.getText();return ((TextField)MCinput).getText();}
+    private static void MCsetInput(Control MCinput,String MCvalue){if(MCinput instanceof DatePicker MCpicker){try{MCpicker.setValue(LocalDate.parse(MCvalue));}catch(Exception MCfirst){try{MCpicker.setValue(LocalDate.parse(MCvalue,java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")));}catch(Exception MCignored){}}}else if(MCinput instanceof TextArea MCarea)MCarea.setText(MCvalue);else ((TextField)MCinput).setText(MCvalue);}
 
-    private void mcBuildHistory(){
-        mcHistoryPage=new BorderPane();mcHistoryPage.getStyleClass().add("page");mcHistorySearch.setPromptText("Buscar título o fecha");mcHistorySearch.setMinWidth(0);mcHistorySearch.textProperty().addListener((mcO,mcA,mcB)->mcRefreshHistory());mcHistoryDate.setPromptText("Fecha");mcHistoryDate.setMinWidth(0);mcHistoryDate.setPrefWidth(120);mcHistoryDate.valueProperty().addListener((mcO,mcA,mcB)->mcRefreshHistory());
-        Button mcClear=mcButton("×",()->{mcHistorySearch.clear();mcHistoryDate.setValue(null);});mcClear.setTooltip(new Tooltip("Quitar filtros"));HBox mcFilter=new HBox(6,mcHistorySearch,mcHistoryDate,mcClear);HBox.setHgrow(mcHistorySearch,Priority.ALWAYS);
-        mcTwoLineCells(mcHistoryList,MCHistory::mcTitle,mcH->mcH.mcGeneratedAt()+" · Versión "+mcH.mcTemplateVersion());VBox mcList=new VBox(10,mcFilter,mcHistoryList);mcList.getStyleClass().add("side-panel");mcFixedWidth(mcList,380);VBox.setVgrow(mcHistoryList,Priority.ALWAYS);mcHistoryPage.setLeft(mcList);BorderPane.setMargin(mcList,new Insets(0,14,0,0));
-        Label mcSummary=mcDescription("Seleccione un registro para ver sus detalles y recuperar sus archivos.");mcHistoryList.getSelectionModel().selectedItemProperty().addListener((mcO,mcA,mcH)->mcSummary.setText(mcH==null?"Seleccione un registro.":mcH.mcTitle()+"\nGenerado: "+mcH.mcGeneratedAt()+"\nVersión de plantilla: "+mcH.mcTemplateVersion()+"\nDOCX: "+(mcH.mcDocxPath()==null?"Conservado en el historial":mcH.mcDocxPath())+"\nPDF: "+(mcH.mcPdfPath()==null?"Disponible para exportar":mcH.mcPdfPath())));
-        GridPane mcActions=mcTwoColumns();List<Button> mcButtons=List.of(mcButton("Abrir DOCX",this::mcOpenHistory),mcButton("Duplicar registro",this::mcDuplicateHistory),mcButton("Editar y regenerar",this::mcEditHistory),mcButton("Exportar DOCX",()->mcExportHistory(false)),mcButton("Exportar PDF",()->mcExportHistory(true)),mcButton("Eliminar registro",this::mcDeleteHistory));int mcI=0;for(Button mcB:mcButtons){mcB.setWrapText(true);mcB.setMaxWidth(Double.MAX_VALUE);mcActions.add(mcB,mcI%2,mcI/2);mcI++;}
-        VBox mcDetail=new VBox(18,new Label("DOCUMENTO SELECCIONADO"),mcSummary,mcActions);mcDetail.getStyleClass().add("catalog-form");mcHistoryPage.setCenter(mcScrolling(mcDetail));
+    private void MCbuildHistory(){
+        MChistoryPage=new BorderPane();MChistoryPage.getStyleClass().add("page");MChistorySearch.setPromptText("Buscar título o fecha");MChistorySearch.setMinWidth(0);MChistorySearch.textProperty().addListener((MCo,MCa,MCb)->MCrefreshHistory());MChistoryDate.setPromptText("Fecha");MChistoryDate.setMinWidth(0);MChistoryDate.setPrefWidth(120);MChistoryDate.valueProperty().addListener((MCo,MCa,MCb)->MCrefreshHistory());
+        Button MCclear=MCbutton("×",()->{MChistorySearch.clear();MChistoryDate.setValue(null);});MCclear.setTooltip(new Tooltip("Quitar filtros"));HBox MCfilter=new HBox(6,MChistorySearch,MChistoryDate,MCclear);HBox.setHgrow(MChistorySearch,Priority.ALWAYS);
+        MCtwoLineCells(MChistoryList,MCHistory::MCtitle,MCh->MCh.MCgeneratedAt()+" · Versión "+MCh.MCtemplateVersion());VBox MClist=new VBox(10,MCfilter,MChistoryList);MClist.getStyleClass().add("side-panel");MCfixedWidth(MClist,380);VBox.setVgrow(MChistoryList,Priority.ALWAYS);MChistoryPage.setLeft(MClist);BorderPane.setMargin(MClist,new Insets(0,14,0,0));
+        Label MCsummary=MCdescription("Seleccione un registro para ver sus detalles y recuperar sus archivos.");MChistoryList.getSelectionModel().selectedItemProperty().addListener((MCo,MCa,MCh)->MCsummary.setText(MCh==null?"Seleccione un registro.":MCh.MCtitle()+"\nGenerado: "+MCh.MCgeneratedAt()+"\nVersión de plantilla: "+MCh.MCtemplateVersion()+"\nDOCX: "+(MCh.MCdocxPath()==null?"Conservado en el historial":MCh.MCdocxPath())+"\nPDF: "+(MCh.MCpdfPath()==null?"Disponible para exportar":MCh.MCpdfPath())));
+        GridPane MCactions=MCtwoColumns();List<Button> MCbuttons=List.of(MCbutton("Abrir DOCX",this::MCopenHistory),MCbutton("Duplicar registro",this::MCduplicateHistory),MCbutton("Editar y regenerar",this::MCeditHistory),MCbutton("Exportar DOCX",()->MCexportHistory(false)),MCbutton("Exportar PDF",()->MCexportHistory(true)),MCbutton("Eliminar registro",this::MCdeleteHistory));int MCi=0;for(Button MCb:MCbuttons){MCb.setWrapText(true);MCb.setMaxWidth(Double.MAX_VALUE);MCactions.add(MCb,MCi%2,MCi/2);MCi++;}
+        VBox MCdetail=new VBox(18,new Label("DOCUMENTO SELECCIONADO"),MCsummary,MCactions);MCdetail.getStyleClass().add("catalog-form");MChistoryPage.setCenter(MCscrolling(MCdetail));
     }
-    private void mcShowHistory(){mcRefreshHistory();mcPage("Historial",mcHistoryPage);}
-    private void mcRefreshHistory(){try{String mcQ=mcHistorySearch.getText().toLowerCase();String mcDate=mcHistoryDate.getValue()==null?null:mcHistoryDate.getValue().toString();mcHistoryList.getItems().setAll(mcData.mcHistory().stream().filter(mcH->(mcH.mcTitle()+" "+mcH.mcGeneratedAt()).toLowerCase().contains(mcQ)).filter(mcH->mcDate==null||mcH.mcGeneratedAt().startsWith(mcDate)).toList());}catch(Exception mcE){mcError(mcE);}}
-    private MCHistory mcSelectedHistory(){MCHistory mcH=mcHistoryList.getSelectionModel().getSelectedItem();if(mcH==null)throw new IllegalArgumentException("Seleccione un documento del historial.");return mcH;}
-    private void mcOpenHistory(){try{MCHistory mcH=mcSelectedHistory();Path mcDir=mcStore.mcDirectory().resolve("history-files");Files.createDirectories(mcDir);Path mcPath=mcDir.resolve("documento-"+mcH.mcId()+".docx");Files.write(mcPath,mcH.mcDocx());if(!Desktop.isDesktopSupported())throw new IllegalStateException("No hay aplicación asociada a DOCX en este equipo.");Desktop.getDesktop().open(mcPath.toFile());mcSaved("Abriendo DOCX conservado en el historial");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDuplicateHistory(){try{MCHistory mcH=mcSelectedHistory();mcData.mcSaveHistory(new MCHistory(0,mcH.mcTitle()+" (copia)",mcH.mcTemplateId(),mcH.mcTemplateVersion(),null,mcH.mcValuesJson(),null,null,mcH.mcDocx(),mcH.mcPdf()));mcRefreshHistory();mcSaved("Registro duplicado");}catch(Exception mcE){mcError(mcE);}}
-    private void mcEditHistory(){try{
-        MCHistory mcHistory=mcSelectedHistory();if(mcHistory.mcTemplateId()==null)throw new IllegalStateException("La plantilla original ya no existe. Puede abrir o exportar el documento conservado.");MCTemplate mcTemplate=mcStore.mcTemplates().stream().filter(mcT->mcT.mcId()==mcHistory.mcTemplateId()).findFirst().orElseThrow(()->new IllegalStateException("La plantilla original ya no existe."));
-        mcShowGenerator();MCTemplateGroup mcGroup=null;for(MCTemplateGroup mcCandidate:mcGenerateGroup.getItems())if(mcStore.mcInGroup(mcTemplate.mcId(),mcCandidate.mcId())){mcGroup=mcCandidate;break;}
-        if(mcGroup==null)throw new IllegalStateException("Asocie la plantilla a un grupo para generar documentos.");
-        mcGenerateSearch.clear();mcGenerateGroup.getSelectionModel().select(mcGroup);mcRefreshKinds();mcGenerateTemplate.getSelectionModel().select(mcGenerateTemplate.getItems().stream().filter(mcT->mcT.mcId()==mcTemplate.mcId()).findFirst().orElseThrow());mcBuildDynamicForm();
-        mcHistoricalTemplate=mcData.mcRevision(mcHistory.mcTemplateId(),mcHistory.mcTemplateVersion());if(mcHistoricalTemplate==null)throw new IllegalStateException("No se conserva la versión de la plantilla.");
-        var mcValues=mcJson.readTree(mcHistory.mcValuesJson());mcApplyingApi=true;try{for(var mcEntry:mcInputs.entrySet())mcSetInput(mcEntry.getValue(),mcValues.path(mcEntry.getKey()).asText(""));}finally{mcApplyingApi=false;}
-        mcSaved("Valores recuperados; edite y genere un nuevo documento");
-    }catch(Exception mcE){mcError(mcE);}}
+    private void MCshowHistory(){MCrefreshHistory();MCpage("Historial",MChistoryPage);}
+    private void MCrefreshHistory(){try{String MCq=MChistorySearch.getText().toLowerCase();String MCdate=MChistoryDate.getValue()==null?null:MChistoryDate.getValue().toString();MChistoryList.getItems().setAll(MCdata.MChistory().stream().filter(MCh->(MCh.MCtitle()+" "+MCh.MCgeneratedAt()).toLowerCase().contains(MCq)).filter(MCh->MCdate==null||MCh.MCgeneratedAt().startsWith(MCdate)).toList());}catch(Exception MCe){MCerror(MCe);}}
+    private MCHistory MCselectedHistory(){MCHistory MCh=MChistoryList.getSelectionModel().getSelectedItem();if(MCh==null)throw new IllegalArgumentException("Seleccione un documento del historial.");return MCh;}
+    private void MCopenHistory(){try{MCHistory MCh=MCselectedHistory();Path MCdir=MCstore.MCdirectory().resolve("history-files");Files.createDirectories(MCdir);Path MCpath=MCdir.resolve("documento-"+MCh.MCid()+".docx");Files.write(MCpath,MCh.MCdocx());if(!Desktop.isDesktopSupported())throw new IllegalStateException("No hay aplicación asociada a DOCX en este equipo.");Desktop.getDesktop().open(MCpath.toFile());MCsaved("Abriendo DOCX conservado en el historial");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCduplicateHistory(){try{MCHistory MCh=MCselectedHistory();MCdata.MCsaveHistory(new MCHistory(0,MCh.MCtitle()+" (copia)",MCh.MCtemplateId(),MCh.MCtemplateVersion(),null,MCh.MCvaluesJson(),null,null,MCh.MCdocx(),MCh.MCpdf()));MCrefreshHistory();MCsaved("Registro duplicado");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCeditHistory(){try{
+        MCHistory MChistory=MCselectedHistory();if(MChistory.MCtemplateId()==null)throw new IllegalStateException("La plantilla original ya no existe. Puede abrir o exportar el documento conservado.");MCTemplate MCtemplate=MCstore.MCtemplates().stream().filter(MCt->MCt.MCid()==MChistory.MCtemplateId()).findFirst().orElseThrow(()->new IllegalStateException("La plantilla original ya no existe."));
+        MCshowGenerator();MCTemplateGroup MCgroup=null;for(MCTemplateGroup MCcandidate:MCgenerateGroup.getItems())if(MCstore.MCinGroup(MCtemplate.MCid(),MCcandidate.MCid())){MCgroup=MCcandidate;break;}
+        if(MCgroup==null)throw new IllegalStateException("Asocie la plantilla a un grupo para generar documentos.");
+        MCgenerateSearch.clear();MCgenerateGroup.getSelectionModel().select(MCgroup);MCrefreshKinds();MCgenerateTemplate.getSelectionModel().select(MCgenerateTemplate.getItems().stream().filter(MCt->MCt.MCid()==MCtemplate.MCid()).findFirst().orElseThrow());MCbuildDynamicForm();
+        MChistoricalTemplate=MCdata.MCrevision(MChistory.MCtemplateId(),MChistory.MCtemplateVersion());if(MChistoricalTemplate==null)throw new IllegalStateException("No se conserva la versión de la plantilla.");
+        var MCvalues=MCjson.readTree(MChistory.MCvaluesJson());MCapplyingApi=true;try{for(var MCentry:MCinputs.entrySet())MCsetInput(MCentry.getValue(),MCvalues.path(MCentry.getKey()).asText(""));}finally{MCapplyingApi=false;}
+        MCsaved("Valores recuperados; edite y genere un nuevo documento");
+    }catch(Exception MCe){MCerror(MCe);}}
 
-    private void mcExportHistory(boolean mcPdf){try{MCHistory mcH=mcSelectedHistory();byte[] mcContent=mcPdf?(mcH.mcPdf()==null?MCDocxPdfExporter.mcRender(mcH.mcDocx()):mcH.mcPdf()):mcH.mcDocx();FileChooser mcFc=new FileChooser();mcFc.setInitialFileName(mcH.mcTitle().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚ _-]","")+(mcPdf?".pdf":".docx"));mcFc.getExtensionFilters().add(new FileChooser.ExtensionFilter(mcPdf?"PDF":"Word DOCX",mcPdf?"*.pdf":"*.docx"));File mcFile=mcFc.showSaveDialog(mcStage);if(mcFile==null)return;Files.write(mcFile.toPath(),mcContent);mcData.mcUpdateHistoryFiles(mcH.mcId(),mcPdf?null:mcFile.toString(),mcPdf?mcFile.toString():null,mcPdf?mcContent:null);mcRefreshHistory();mcSaved("Archivo exportado nuevamente");}catch(Exception mcE){mcError(mcE);}}
-    private void mcDeleteHistory(){try{MCHistory mcH=mcSelectedHistory();mcData.mcDeleteHistory(mcH.mcId());mcRefreshHistory();mcSaved("Registro eliminado; los archivos exportados permanecen en su ubicación");}catch(Exception mcE){mcError(mcE);}}
+    private void MCexportHistory(boolean MCpdf){try{MCHistory MCh=MCselectedHistory();byte[] MCcontent=MCpdf?(MCh.MCpdf()==null?MCDocxPdfExporter.MCrender(MCh.MCdocx()):MCh.MCpdf()):MCh.MCdocx();FileChooser MCfc=new FileChooser();MCfc.setInitialFileName(MCh.MCtitle().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚ _-]","")+(MCpdf?".pdf":".docx"));MCfc.getExtensionFilters().add(new FileChooser.ExtensionFilter(MCpdf?"PDF":"Word DOCX",MCpdf?"*.pdf":"*.docx"));File MCfile=MCfc.showSaveDialog(MCstage);if(MCfile==null)return;Files.write(MCfile.toPath(),MCcontent);MCdata.MCupdateHistoryFiles(MCh.MCid(),MCpdf?null:MCfile.toString(),MCpdf?MCfile.toString():null,MCpdf?MCcontent:null);MCrefreshHistory();MCsaved("Archivo exportado nuevamente");}catch(Exception MCe){MCerror(MCe);}}
+    private void MCdeleteHistory(){try{MCHistory MCh=MCselectedHistory();MCdata.MCdeleteHistory(MCh.MCid());MCrefreshHistory();MCsaved("Registro eliminado; los archivos exportados permanecen en su ubicación");}catch(Exception MCe){MCerror(MCe);}}
 
-    private void mcBuildSettings(){
-        mcSettingsPage=new BorderPane();mcSettingsPage.getStyleClass().add("page");
-        mcImportConflict.getItems().setAll("Conservar existentes","Reemplazar existentes");mcImportConflict.getSelectionModel().selectFirst();
-        GridPane mcImportRow=mcTwoColumns();Button mcImportButton=mcButton("Importar archivo (.zip)",this::mcImportConfig);GridPane.setValignment(mcImportButton,VPos.BOTTOM);mcImportRow.add(mcImportButton,0,0);mcImportRow.add(mcLabelled("Resolución de duplicados",mcImportConflict),1,0);
-        VBox mcImporting=new VBox(12,new Label("Importar"),mcDescription("El archivo puede contener plantillas, clientes o ambos."),mcImportRow);mcImporting.getStyleClass().add("transfer-card");
-        mcExportScope.getItems().setAll("Solo una plantilla","Todas las plantillas de un grupo","Todas las plantillas");mcExportScope.getSelectionModel().selectFirst();
-        mcExportTemplate.setPromptText("Seleccione una plantilla");mcExportGroup.setPromptText("Seleccione un grupo");
-        mcExportTemplate.disableProperty().bind(mcExportScope.valueProperty().isNotEqualTo("Solo una plantilla"));mcExportGroup.disableProperty().bind(mcExportScope.valueProperty().isNotEqualTo("Todas las plantillas de un grupo"));
-        GridPane mcScopeFields=mcTwoColumns();mcScopeFields.add(mcLabelled("Plantilla",mcExportTemplate),0,0);mcScopeFields.add(mcLabelled("Grupo",mcExportGroup),1,0);
-        VBox mcTemplates=new VBox(12,new Label("Exportar Plantillas"),mcDescription("Incluye los documentos y sus variables, grupos y asociaciones. Las credenciales permanecen en este equipo."),mcLabelled("Alcance de exportación",mcExportScope),mcScopeFields,mcButton("Exportar plantillas (.zip)",this::mcExportConfig));mcTemplates.getStyleClass().add("transfer-card");
-        VBox mcClients=new VBox(12,new Label("Exportar Clientes"),mcDescription("Exporta todas las personas y empresas, incluidos sus datos adicionales."),mcButton("Exportar clientes (.zip)",this::mcExportClients));mcClients.getStyleClass().add("transfer-card");
-        VBox mcContent=new VBox(14,mcImporting,mcTemplates,mcClients);mcContent.setFillWidth(true);mcSettingsPage.setCenter(mcScrolling(mcContent));
+    private void MCbuildSettings(){
+        MCsettingsPage=new BorderPane();MCsettingsPage.getStyleClass().add("page");
+        MCimportConflict.getItems().setAll("Conservar existentes","Reemplazar existentes");MCimportConflict.getSelectionModel().selectFirst();
+        GridPane MCimportRow=MCtwoColumns();Button MCimportButton=MCbutton("Importar archivo (.zip)",this::MCimportConfig);GridPane.setValignment(MCimportButton,VPos.BOTTOM);MCimportRow.add(MCimportButton,0,0);MCimportRow.add(MClabelled("Resolución de duplicados",MCimportConflict),1,0);
+        VBox MCimporting=new VBox(12,new Label("Importar"),MCdescription("El archivo puede contener plantillas, clientes o ambos."),MCimportRow);MCimporting.getStyleClass().add("transfer-card");
+        MCexportScope.getItems().setAll("Solo una plantilla","Todas las plantillas de un grupo","Todas las plantillas");MCexportScope.getSelectionModel().selectFirst();
+        MCexportTemplate.setPromptText("Seleccione una plantilla");MCexportGroup.setPromptText("Seleccione un grupo");
+        MCexportTemplate.disableProperty().bind(MCexportScope.valueProperty().isNotEqualTo("Solo una plantilla"));MCexportGroup.disableProperty().bind(MCexportScope.valueProperty().isNotEqualTo("Todas las plantillas de un grupo"));
+        GridPane MCscopeFields=MCtwoColumns();MCscopeFields.add(MClabelled("Plantilla",MCexportTemplate),0,0);MCscopeFields.add(MClabelled("Grupo",MCexportGroup),1,0);
+        VBox MCtemplates=new VBox(12,new Label("Exportar Plantillas"),MCdescription("Incluye los documentos y sus variables, grupos y asociaciones. Las credenciales permanecen en este equipo."),MClabelled("Alcance de exportación",MCexportScope),MCscopeFields,MCbutton("Exportar plantillas (.zip)",this::MCexportConfig));MCtemplates.getStyleClass().add("transfer-card");
+        VBox MCclients=new VBox(12,new Label("Exportar Clientes"),MCdescription("Exporta todas las personas y empresas, incluidos sus datos adicionales."),MCbutton("Exportar clientes (.zip)",this::MCexportClients));MCclients.getStyleClass().add("transfer-card");
+        VBox MCcontent=new VBox(14,MCimporting,MCtemplates,MCclients);MCcontent.setFillWidth(true);MCsettingsPage.setCenter(MCscrolling(MCcontent));
     }
-    private void mcShowSettings(){try{
-        MCTemplate mcSelected=mcExportTemplate.getValue();MCTemplateGroup mcGroup=mcExportGroup.getValue();mcExportTemplate.getItems().setAll(mcStore.mcTemplates());mcExportGroup.getItems().setAll(mcStore.mcGroups());
-        mcExportTemplate.getSelectionModel().select(mcExportTemplate.getItems().stream().filter(mcT->mcSelected!=null&&mcT.mcId()==mcSelected.mcId()).findFirst().orElse(null));
-        mcExportGroup.getSelectionModel().select(mcExportGroup.getItems().stream().filter(mcG->mcGroup!=null&&mcG.mcId()==mcGroup.mcId()).findFirst().orElse(null));
-        if(mcExportTemplate.getValue()==null)mcExportTemplate.getSelectionModel().selectFirst();if(mcExportGroup.getValue()==null)mcExportGroup.getSelectionModel().selectFirst();
-    }catch(Exception mcE){mcError(mcE);}mcPage("Configuración y respaldos",mcSettingsPage);}
-    private void mcExportConfig(){try{
-        Collection<Long> mcIds=null;
-        if("Solo una plantilla".equals(mcExportScope.getValue())){if(mcExportTemplate.getValue()==null)throw new IllegalArgumentException("Seleccione una plantilla.");mcIds=List.of(mcExportTemplate.getValue().mcId());}
-        else if("Todas las plantillas de un grupo".equals(mcExportScope.getValue())){if(mcExportGroup.getValue()==null)throw new IllegalArgumentException("Seleccione un grupo.");List<Long> mcSelected=new ArrayList<>();for(MCTemplate mcT:mcStore.mcTemplates())if(mcStore.mcInGroup(mcT.mcId(),mcExportGroup.getValue().mcId()))mcSelected.add(mcT.mcId());if(mcSelected.isEmpty())throw new IllegalArgumentException("El grupo no contiene plantillas.");mcIds=mcSelected;}
-        File mcFile=mcZipChooser("plantillas-documentales.zip").showSaveDialog(mcStage);if(mcFile==null)return;mcTransfer.mcExportConfiguration(mcFile.toPath(),mcIds);mcSaved("Plantillas exportadas con todos sus datos relacionados");
-    }catch(Exception mcE){mcError(mcE);}}
-    private void mcImportConfig(){File mcFile=mcZipChooser(null).showOpenDialog(mcStage);if(mcFile==null)return;try{
-        MCStudioTransfer.MCImportResult mcResult=mcTransfer.mcImportConfiguration(mcFile.toPath(),"Reemplazar existentes".equals(mcImportConflict.getValue())?MCStudioTransfer.MCConflict.REPLACE:MCStudioTransfer.MCConflict.KEEP);
-        mcRefreshTemplates();mcRefreshLibrary();mcRefreshKinds();mcRefreshDefinitions();mcRefreshContacts();mcShowSettings();
-        mcSaved("Importadas "+mcResult.mcTemplates()+" plantillas, "+mcResult.mcKinds()+" tipos y "+mcResult.mcClients()+" clientes · Coincidencias: "+mcResult.mcConflicts());
-    }catch(Exception mcE){mcError(mcE);}}
-    private static FileChooser mcZipChooser(String mcName){FileChooser mcChooser=new FileChooser();mcChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo ZIP","*.zip"));if(mcName!=null)mcChooser.setInitialFileName(mcName);return mcChooser;}
-    private void mcExportClients(){File mcFile=mcZipChooser("clientes.zip").showSaveDialog(mcStage);if(mcFile==null)return;try{mcTransfer.mcExportClients(mcFile.toPath());mcSaved("Clientes exportados con sus datos adicionales");}catch(Exception mcE){mcError(mcE);}}
+    private void MCshowSettings(){try{
+        MCTemplate MCselected=MCexportTemplate.getValue();MCTemplateGroup MCgroup=MCexportGroup.getValue();MCexportTemplate.getItems().setAll(MCstore.MCtemplates());MCexportGroup.getItems().setAll(MCstore.MCgroups());
+        MCexportTemplate.getSelectionModel().select(MCexportTemplate.getItems().stream().filter(MCt->MCselected!=null&&MCt.MCid()==MCselected.MCid()).findFirst().orElse(null));
+        MCexportGroup.getSelectionModel().select(MCexportGroup.getItems().stream().filter(MCg->MCgroup!=null&&MCg.MCid()==MCgroup.MCid()).findFirst().orElse(null));
+        if(MCexportTemplate.getValue()==null)MCexportTemplate.getSelectionModel().selectFirst();if(MCexportGroup.getValue()==null)MCexportGroup.getSelectionModel().selectFirst();
+    }catch(Exception MCe){MCerror(MCe);}MCpage("Configuración y respaldos",MCsettingsPage);}
+    private void MCexportConfig(){try{
+        Collection<Long> MCids=null;
+        if("Solo una plantilla".equals(MCexportScope.getValue())){if(MCexportTemplate.getValue()==null)throw new IllegalArgumentException("Seleccione una plantilla.");MCids=List.of(MCexportTemplate.getValue().MCid());}
+        else if("Todas las plantillas de un grupo".equals(MCexportScope.getValue())){if(MCexportGroup.getValue()==null)throw new IllegalArgumentException("Seleccione un grupo.");List<Long> MCselected=new ArrayList<>();for(MCTemplate MCt:MCstore.MCtemplates())if(MCstore.MCinGroup(MCt.MCid(),MCexportGroup.getValue().MCid()))MCselected.add(MCt.MCid());if(MCselected.isEmpty())throw new IllegalArgumentException("El grupo no contiene plantillas.");MCids=MCselected;}
+        File MCfile=MCzipChooser("plantillas-documentales.zip").showSaveDialog(MCstage);if(MCfile==null)return;MCtransfer.MCexportConfiguration(MCfile.toPath(),MCids);MCsaved("Plantillas exportadas con todos sus datos relacionados");
+    }catch(Exception MCe){MCerror(MCe);}}
+    private void MCimportConfig(){File MCfile=MCzipChooser(null).showOpenDialog(MCstage);if(MCfile==null)return;try{
+        MCStudioTransfer.MCImportResult MCresult=MCtransfer.MCimportConfiguration(MCfile.toPath(),"Reemplazar existentes".equals(MCimportConflict.getValue())?MCStudioTransfer.MCConflict.REPLACE:MCStudioTransfer.MCConflict.KEEP);
+        MCrefreshTemplates();MCrefreshLibrary();MCrefreshKinds();MCrefreshDefinitions();MCrefreshContacts();MCshowSettings();
+        MCsaved("Importadas "+MCresult.MCtemplates()+" plantillas, "+MCresult.MCkinds()+" tipos y "+MCresult.MCclients()+" clientes · Coincidencias: "+MCresult.MCconflicts());
+    }catch(Exception MCe){MCerror(MCe);}}
+    private static FileChooser MCzipChooser(String MCname){FileChooser MCchooser=new FileChooser();MCchooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo ZIP","*.zip"));if(MCname!=null)MCchooser.setInitialFileName(MCname);return MCchooser;}
+    private void MCexportClients(){File MCfile=MCzipChooser("clientes.zip").showSaveDialog(MCstage);if(MCfile==null)return;try{MCtransfer.MCexportClients(MCfile.toPath());MCsaved("Clientes exportados con sus datos adicionales");}catch(Exception MCe){MCerror(MCe);}}
 }

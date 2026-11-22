@@ -11,43 +11,42 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
-/** @author MC */
 public final class MCLocalSecret {
-    private final Path mcSecret, mcKeyFile;
-    private final boolean mcWindows=System.getProperty("os.name","").toLowerCase().contains("win");
-    public MCLocalSecret(Path mcDirectory){this(mcDirectory,"factiliza.secret");}
-    public MCLocalSecret(Path mcDirectory,String mcFileName){if(!mcFileName.matches("[a-zA-Z0-9._-]+"))throw new IllegalArgumentException("Nombre de credencial inválido.");mcSecret=mcDirectory.resolve(mcFileName);mcKeyFile=mcDirectory.resolve(".local-secret.key");}
-    public boolean mcConfigured(){return Files.exists(mcSecret);}
-    public void mcSave(String mcToken)throws Exception{
-        if(mcToken==null||mcToken.isBlank())throw new IllegalArgumentException("Escriba el token.");
-        byte[] mcValue=mcToken.trim().getBytes(StandardCharsets.UTF_8);
-        byte[] mcProtectedData=mcWindows?mcDpapi(mcValue,true):mcAes(mcValue,true);
-        Files.write(mcSecret,mcProtectedData,StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
-        mcRestrict(mcSecret);
+    private final Path MCsecret, MCkeyFile;
+    private final boolean MCwindows=System.getProperty("os.name","").toLowerCase().contains("win");
+    public MCLocalSecret(Path MCdirectory){this(MCdirectory,"factiliza.secret");}
+    public MCLocalSecret(Path MCdirectory,String MCfileName){if(!MCfileName.matches("[a-zA-Z0-9._-]+"))throw new IllegalArgumentException("Nombre de credencial inválido.");MCsecret=MCdirectory.resolve(MCfileName);MCkeyFile=MCdirectory.resolve(".local-secret.key");}
+    public boolean MCconfigured(){return Files.exists(MCsecret);}
+    public void MCsave(String MCtoken)throws Exception{
+        if(MCtoken==null||MCtoken.isBlank())throw new IllegalArgumentException("Escriba el token.");
+        byte[] MCvalue=MCtoken.trim().getBytes(StandardCharsets.UTF_8);
+        byte[] MCprotectedData=MCwindows?MCdpapi(MCvalue,true):MCaes(MCvalue,true);
+        Files.write(MCsecret,MCprotectedData,StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
+        MCrestrict(MCsecret);
     }
-    public String mcLoad()throws Exception{
-        if(!mcConfigured())return null;
-        byte[] mcData=Files.readAllBytes(mcSecret);
-        return new String(mcWindows?mcDpapi(mcData,false):mcAes(mcData,false),StandardCharsets.UTF_8);
+    public String MCload()throws Exception{
+        if(!MCconfigured())return null;
+        byte[] MCdata=Files.readAllBytes(MCsecret);
+        return new String(MCwindows?MCdpapi(MCdata,false):MCaes(MCdata,false),StandardCharsets.UTF_8);
     }
-    public void mcDelete()throws Exception{Files.deleteIfExists(mcSecret);}
-    private static void mcRestrict(Path mcFile){try{Files.setPosixFilePermissions(mcFile,java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));}catch(Exception mcIgnored){}}
-    private byte[] mcAes(byte[] mcInput,boolean mcEncrypt)throws Exception{
-        byte[] mcKey;
-        if(Files.exists(mcKeyFile))mcKey=Files.readAllBytes(mcKeyFile);
-        else if(mcEncrypt){KeyGenerator mcG=KeyGenerator.getInstance("AES");mcG.init(256);mcKey=mcG.generateKey().getEncoded();Files.write(mcKeyFile,mcKey,StandardOpenOption.CREATE_NEW);mcRestrict(mcKeyFile);}
+    public void MCdelete()throws Exception{Files.deleteIfExists(MCsecret);}
+    private static void MCrestrict(Path MCfile){try{Files.setPosixFilePermissions(MCfile,java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));}catch(Exception MCignored){}}
+    private byte[] MCaes(byte[] MCinput,boolean MCencrypt)throws Exception{
+        byte[] MCkey;
+        if(Files.exists(MCkeyFile))MCkey=Files.readAllBytes(MCkeyFile);
+        else if(MCencrypt){KeyGenerator MCg=KeyGenerator.getInstance("AES");MCg.init(256);MCkey=MCg.generateKey().getEncoded();Files.write(MCkeyFile,MCkey,StandardOpenOption.CREATE_NEW);MCrestrict(MCkeyFile);}
         else throw new IllegalStateException("No se encuentra la clave local del token.");
-        SecretKey mcK=new SecretKeySpec(mcKey,"AES");Cipher mcCipher=Cipher.getInstance("AES/GCM/NoPadding");
-        if(mcEncrypt){byte[] mcIv=new byte[12];new SecureRandom().nextBytes(mcIv);mcCipher.init(Cipher.ENCRYPT_MODE,mcK,new GCMParameterSpec(128,mcIv));byte[] mcEncrypted=mcCipher.doFinal(mcInput);byte[] mcOut=new byte[mcIv.length+mcEncrypted.length];System.arraycopy(mcIv,0,mcOut,0,mcIv.length);System.arraycopy(mcEncrypted,0,mcOut,mcIv.length,mcEncrypted.length);return mcOut;}
-        if(mcInput.length<29)throw new IllegalArgumentException("Token local dañado.");byte[] mcIv=java.util.Arrays.copyOfRange(mcInput,0,12);mcCipher.init(Cipher.DECRYPT_MODE,mcK,new GCMParameterSpec(128,mcIv));return mcCipher.doFinal(mcInput,12,mcInput.length-12);
+        SecretKey MCk=new SecretKeySpec(MCkey,"AES");Cipher MCcipher=Cipher.getInstance("AES/GCM/NoPadding");
+        if(MCencrypt){byte[] MCiv=new byte[12];new SecureRandom().nextBytes(MCiv);MCcipher.init(Cipher.ENCRYPT_MODE,MCk,new GCMParameterSpec(128,MCiv));byte[] MCencrypted=MCcipher.doFinal(MCinput);byte[] MCout=new byte[MCiv.length+MCencrypted.length];System.arraycopy(MCiv,0,MCout,0,MCiv.length);System.arraycopy(MCencrypted,0,MCout,MCiv.length,MCencrypted.length);return MCout;}
+        if(MCinput.length<29)throw new IllegalArgumentException("Token local dañado.");byte[] MCiv=java.util.Arrays.copyOfRange(MCinput,0,12);MCcipher.init(Cipher.DECRYPT_MODE,MCk,new GCMParameterSpec(128,MCiv));return MCcipher.doFinal(MCinput,12,MCinput.length-12);
     }
-    private static byte[] mcDpapi(byte[] mcInput,boolean mcEncrypt)throws Exception{
-        String mcOperation=mcEncrypt?"Protect":"Unprotect";
-        String mcScript="Add-Type -AssemblyName System.Security;$b=[Convert]::FromBase64String([Console]::In.ReadToEnd());$o=[Security.Cryptography.ProtectedData]::"+mcOperation+"($b,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser);[Console]::Out.Write([Convert]::ToBase64String($o))";
-        Process mcProcess=new ProcessBuilder("powershell.exe","-NoProfile","-NonInteractive","-Command",mcScript).start();
-        try(var mcOut=mcProcess.getOutputStream()){mcOut.write(Base64.getEncoder().encode(mcInput));}
-        if(!mcProcess.waitFor(15,TimeUnit.SECONDS)){mcProcess.destroyForcibly();throw new IllegalStateException("DPAPI no respondió.");}
-        if(mcProcess.exitValue()!=0)throw new IllegalStateException("No se pudo proteger el token con DPAPI.");
-        return Base64.getDecoder().decode(mcProcess.getInputStream().readAllBytes());
+    private static byte[] MCdpapi(byte[] MCinput,boolean MCencrypt)throws Exception{
+        String MCoperation=MCencrypt?"Protect":"Unprotect";
+        String MCscript="Add-Type -AssemblyName System.Security;$b=[Convert]::FromBase64String([Console]::In.ReadToEnd());$o=[Security.Cryptography.ProtectedData]::"+MCoperation+"($b,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser);[Console]::Out.Write([Convert]::ToBase64String($o))";
+        Process MCprocess=new ProcessBuilder("powershell.exe","-NoProfile","-NonInteractive","-Command",MCscript).start();
+        try(var MCout=MCprocess.getOutputStream()){MCout.write(Base64.getEncoder().encode(MCinput));}
+        if(!MCprocess.waitFor(15,TimeUnit.SECONDS)){MCprocess.destroyForcibly();throw new IllegalStateException("DPAPI no respondió.");}
+        if(MCprocess.exitValue()!=0)throw new IllegalStateException("No se pudo proteger el token con DPAPI.");
+        return Base64.getDecoder().decode(MCprocess.getInputStream().readAllBytes());
     }
 }

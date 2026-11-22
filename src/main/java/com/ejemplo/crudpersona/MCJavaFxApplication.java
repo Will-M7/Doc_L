@@ -8,22 +8,21 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-/** @author MC */
 public class MCJavaFxApplication extends Application {
-    @Override public void start(Stage mcStage) throws Exception {
+    @Override public void start(Stage MCstage) throws Exception {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-        MCDocumentStore mcStore = new MCDocumentStore();
-        MCStudioWindow mcWindow = new MCStudioWindow(mcStage, mcStore);
-        Scene mcScene = new Scene(mcWindow.mcRoot(), 1280, 800);
-        mcScene.getStylesheets().add(getClass().getResource("/css/app.css").toExternalForm());
-        mcScene.getStylesheets().add(getClass().getResource("/css/studio.css").toExternalForm());
-        mcStage.setTitle("Estudio Documental");
-        for (int mcSize : new int[]{16, 32, 48, 64, 128, 256}) {
-            mcStage.getIcons().add(new Image(getClass().getResourceAsStream("/img/icon-" + mcSize + ".png")));
+        MCDocumentStore MCstore = new MCDocumentStore();
+        MCStudioWindow MCwindow = new MCStudioWindow(MCstage, MCstore);
+        Scene MCscene = new Scene(MCwindow.MCroot(), 1280, 800);
+        MCscene.getStylesheets().add(getClass().getResource("/css/app.css").toExternalForm());
+        MCscene.getStylesheets().add(getClass().getResource("/css/studio.css").toExternalForm());
+        MCstage.setTitle("Estudio Documental");
+        for (int MCsize : new int[]{16, 32, 48, 64, 128, 256}) {
+            MCstage.getIcons().add(new Image(getClass().getResourceAsStream("/img/icon-" + MCsize + ".png")));
         }
-        mcStage.setScene(mcScene);
-        mcStage.setMinWidth(1100);
-        mcStage.setMinHeight(700);
-        mcStage.show();
+        MCstage.setScene(MCscene);
+        MCstage.setMinWidth(1100);
+        MCstage.setMinHeight(700);
+        MCstage.show();
     }
 }

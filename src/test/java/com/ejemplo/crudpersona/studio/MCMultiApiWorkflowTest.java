@@ -11,120 +11,119 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.*;
 
-/** @author MC */
 class MCMultiApiWorkflowTest {
-    @TempDir Path mcTemp;
-    private static Clock mcClock(String mcDate){return Clock.fixed(LocalDate.parse(mcDate).atStartOfDay(ZoneId.systemDefault()).toInstant(),ZoneId.systemDefault());}
+    @TempDir Path MCtemp;
+    private static Clock MCclock(String MCdate){return Clock.fixed(LocalDate.parse(MCdate).atStartOfDay(ZoneId.systemDefault()).toInstant(),ZoneId.systemDefault());}
 
-    @Test void mcNormalizesDocumentedExamplesWithoutInventingAbsentFields()throws Exception{
-        String mcFactiliza="{\"status\":200,\"success\":true,\"data\":{\"numero\":\"12345678\",\"nombres\":\"ANA\",\"apellido_paterno\":\"PEREZ\",\"nombre_completo\":\"PEREZ, ANA\",\"ubigeo\":[\"15\",\"1501\",\"150101\"],\"fecha_nacimiento\":null}}";
-        Map<String,String> mcRaw=MCFactilizaClient.mcParse("DNI","12345678",200,mcFactiliza).mcData();
-        assertThat(MCApiFieldCatalog.mcNormalize("Factiliza","DNI",mcRaw)).containsEntry("nombre_completo","ANA PEREZ").containsEntry("ubigeo","150101").doesNotContainKey("fecha_nacimiento");
-        String mcPeru="{\"dni\":\"12345678\",\"nombres\":\"ANA\",\"apellidoPaterno\":\"PEREZ\",\"apellidoMaterno\":\"RUIZ\",\"codVerifica\":\"1\"}";
-        assertThat(MCApiFieldCatalog.mcNormalize("APIsPERU","DNI",MCApisPeruProvider.mcParse("DNI",200,mcPeru,0))).containsEntry("apellido_paterno","PEREZ").doesNotContainKey("direccion").containsEntry("nombre_completo","ANA PEREZ RUIZ");
-        assertThat(MCApiFieldCatalog.mcCanonical("DNI","data.apellido_paterno")).isEqualTo("apellido_paterno");
-        assertThat(MCApiFieldCatalog.mcCanonical("DNI","data.campo_desconocido")).startsWith("legacy:");
+    @Test void MCnormalizesDocumentedExamplesWithoutInventingAbsentFields()throws Exception{
+        String MCfactiliza="{\"status\":200,\"success\":true,\"data\":{\"numero\":\"12345678\",\"nombres\":\"ANA\",\"apellido_paterno\":\"PEREZ\",\"nombre_completo\":\"PEREZ, ANA\",\"ubigeo\":[\"15\",\"1501\",\"150101\"],\"fecha_nacimiento\":null}}";
+        Map<String,String> MCraw=MCFactilizaClient.MCparse("DNI","12345678",200,MCfactiliza).MCdata();
+        assertThat(MCApiFieldCatalog.MCnormalize("Factiliza","DNI",MCraw)).containsEntry("nombre_completo","ANA PEREZ").containsEntry("ubigeo","150101").doesNotContainKey("fecha_nacimiento");
+        String MCperu="{\"dni\":\"12345678\",\"nombres\":\"ANA\",\"apellidoPaterno\":\"PEREZ\",\"apellidoMaterno\":\"RUIZ\",\"codVerifica\":\"1\"}";
+        assertThat(MCApiFieldCatalog.MCnormalize("APIsPERU","DNI",MCApisPeruProvider.MCparse("DNI",200,MCperu,0))).containsEntry("apellido_paterno","PEREZ").doesNotContainKey("direccion").containsEntry("nombre_completo","ANA PEREZ RUIZ");
+        assertThat(MCApiFieldCatalog.MCcanonical("DNI","data.apellido_paterno")).isEqualTo("apellido_paterno");
+        assertThat(MCApiFieldCatalog.MCcanonical("DNI","data.campo_desconocido")).startsWith("legacy:");
     }
 
-    @Test void mcFullNamesUseGivenThenFamilyForBothProvidersAndCommaOnlyResponses()throws Exception{
-        for(String mcProvider:List.of("Factiliza","APIsPERU")){
-            String mcPrefix="Factiliza".equals(mcProvider)?"data.":"";
-            Map<String,String> mcSeparate=new LinkedHashMap<>();mcSeparate.put(mcPrefix+"nombres","  JUAN   CARLOS ");mcSeparate.put(mcPrefix+("Factiliza".equals(mcProvider)?"apellido_paterno":"apellidoPaterno"),"QUISPE");mcSeparate.put(mcPrefix+("Factiliza".equals(mcProvider)?"apellido_materno":"apellidoMaterno"),"MAMANI");mcSeparate.put(mcPrefix+"nombre_completo","QUISPE MAMANI, JUAN CARLOS");
-            Map<String,String> mcValues=MCApiFieldCatalog.mcNormalize(mcProvider,"DNI",mcSeparate);assertThat(mcValues).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI").containsEntry("nombres","JUAN CARLOS").containsEntry("apellido_paterno","QUISPE").containsEntry("apellido_materno","MAMANI");
-            Map<String,String> mcFallback=MCApiFieldCatalog.mcNormalize(mcProvider,"DNI",Map.of(mcPrefix+"nombre_completo","  QUISPE  MAMANI,  JUAN   CARLOS  "));assertThat(mcFallback).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
-            MCLookupRouter.MCResult mcResult=new MCLookupRouter.MCResult("DNI","12345678",mcProvider,mcFallback,mcFallback.keySet(),Set.of(),MCLookupRouter.MCStatus.SUCCESS,"",Map.of(mcPrefix+"nombre_completo","QUISPE MAMANI, JUAN CARLOS"));
-            new MCDocumentStore(mcTemp.resolve(mcProvider));MCStudioData mcData=new MCStudioData(mcTemp.resolve(mcProvider));mcData.mcUpsertContact(MCContactReuse.mcFromApi(mcResult));var mcContact=mcData.mcContacts().get(0);assertThat(mcContact.mcGiven()).isEqualTo("JUAN CARLOS");assertThat(mcContact.mcFamily()).isEqualTo("QUISPE MAMANI");assertThat(MCContactReuse.mcApiValues(mcContact)).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
+    @Test void MCfullNamesUseGivenThenFamilyForBothProvidersAndCommaOnlyResponses()throws Exception{
+        for(String MCprovider:List.of("Factiliza","APIsPERU")){
+            String MCprefix="Factiliza".equals(MCprovider)?"data.":"";
+            Map<String,String> MCseparate=new LinkedHashMap<>();MCseparate.put(MCprefix+"nombres","  JUAN   CARLOS ");MCseparate.put(MCprefix+("Factiliza".equals(MCprovider)?"apellido_paterno":"apellidoPaterno"),"QUISPE");MCseparate.put(MCprefix+("Factiliza".equals(MCprovider)?"apellido_materno":"apellidoMaterno"),"MAMANI");MCseparate.put(MCprefix+"nombre_completo","QUISPE MAMANI, JUAN CARLOS");
+            Map<String,String> MCvalues=MCApiFieldCatalog.MCnormalize(MCprovider,"DNI",MCseparate);assertThat(MCvalues).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI").containsEntry("nombres","JUAN CARLOS").containsEntry("apellido_paterno","QUISPE").containsEntry("apellido_materno","MAMANI");
+            Map<String,String> MCfallback=MCApiFieldCatalog.MCnormalize(MCprovider,"DNI",Map.of(MCprefix+"nombre_completo","  QUISPE  MAMANI,  JUAN   CARLOS  "));assertThat(MCfallback).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
+            MCLookupRouter.MCResult MCresult=new MCLookupRouter.MCResult("DNI","12345678",MCprovider,MCfallback,MCfallback.keySet(),Set.of(),MCLookupRouter.MCStatus.SUCCESS,"",Map.of(MCprefix+"nombre_completo","QUISPE MAMANI, JUAN CARLOS"));
+            new MCDocumentStore(MCtemp.resolve(MCprovider));MCStudioData MCdata=new MCStudioData(MCtemp.resolve(MCprovider));MCdata.MCupsertContact(MCContactReuse.MCfromApi(MCresult));var MCcontact=MCdata.MCcontacts().get(0);assertThat(MCcontact.MCgiven()).isEqualTo("JUAN CARLOS");assertThat(MCcontact.MCfamily()).isEqualTo("QUISPE MAMANI");assertThat(MCContactReuse.MCapiValues(MCcontact)).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
         }
-        Map<String,String> mcParsed=MCApisPeruProvider.mcParse("DNI",200,"{\"dni\":\"12345678\",\"nombre_completo\":\"QUISPE MAMANI, JUAN CARLOS\"}",0);assertThat(mcParsed).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
+        Map<String,String> MCparsed=MCApisPeruProvider.MCparse("DNI",200,"{\"dni\":\"12345678\",\"nombre_completo\":\"QUISPE MAMANI, JUAN CARLOS\"}",0);assertThat(MCparsed).containsEntry("nombre_completo","JUAN CARLOS QUISPE MAMANI");
     }
 
-    @Test void mcFallsBackAfterTimeoutTracksMonthlyUsageAndKeepsInvalidCredentials()throws Exception{
-        Path mcDir=mcTemp.resolve("router");new MCDocumentStore(mcDir);MCApiCredentialStore mcStore=new MCApiCredentialStore(mcDir,mcClock("2026-11-12"));
-        MCApiCredentialStore.MCCredential mcFirst=mcStore.mcAdd("Principal","Factiliza","private-factiliza-token");
-        MCApiCredentialStore.MCCredential mcSecond=mcStore.mcAdd("Respaldo","APIsPERU","private-apisperu-token");
-        AtomicInteger mcFirstCalls=new AtomicInteger(),mcSecondCalls=new AtomicInteger();
-        MCLookupProvider mcFactiliza=new MCLookupProvider(){public String mcName(){return "Factiliza";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcService,String mcNumber,String mcToken)throws Exception{mcFirstCalls.incrementAndGet();throw new HttpTimeoutException("timeout");}};
-        MCLookupProvider mcPeru=new MCLookupProvider(){public String mcName(){return "APIsPERU";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcService,String mcNumber,String mcToken){mcSecondCalls.incrementAndGet();return Map.of("dni",mcNumber,"nombres","ANA");}};
-        MCLookupRouter mcRouter=new MCLookupRouter(mcStore,List.of(mcFactiliza,mcPeru));MCLookupRouter.MCResult mcResult=mcRouter.mcQuery("DNI","12345678");
-        assertThat(mcResult.mcProvider()).isEqualTo("APIsPERU");assertThat(mcResult.mcValues()).containsEntry("nombres","ANA");assertThat(mcFirstCalls).hasValue(1);assertThat(mcSecondCalls).hasValue(1);
-        assertThat(mcStore.mcCredentials().stream().filter(mcC->mcC.mcId()==mcFirst.mcId()).findFirst().orElseThrow().mcRequests()).isEqualTo(1);
-        assertThat(mcStore.mcCredentials().stream().filter(mcC->mcC.mcId()==mcSecond.mcId()).findFirst().orElseThrow().mcSuccesses()).isEqualTo(1);
-        mcStore.mcRecord(mcFirst.mcId(),MCLookupRouter.MCStatus.INVALID,0);assertThat(mcStore.mcCredentials()).hasSize(2);
-        MCApiCredentialStore mcNextMonth=new MCApiCredentialStore(mcDir,mcClock("2026-12-01"));assertThat(mcNextMonth.mcCredentials().stream().filter(mcC->mcC.mcId()==mcFirst.mcId()).findFirst().orElseThrow().mcRequests()).isZero();
-        mcNextMonth.mcRecord(mcFirst.mcId(),MCLookupRouter.MCStatus.INVALID,0);assertThat(mcNextMonth.mcCredentials().stream().filter(mcC->mcC.mcId()==mcFirst.mcId()).findFirst().orElseThrow().mcInvalidStreak()).isEqualTo(2);
-        assertThat(mcNextMonth.mcCredentials()).hasSize(2);
-        mcNextMonth.mcRecord(mcFirst.mcId(),MCLookupRouter.MCStatus.SUCCESS,0);assertThat(mcNextMonth.mcCredentials().stream().filter(mcC->mcC.mcId()==mcFirst.mcId()).findFirst().orElseThrow().mcInvalidStreak()).isZero();
-        assertThat(java.nio.file.Files.readString(mcDir.resolve("studio.db"),java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("private-factiliza-token","private-apisperu-token");
+    @Test void MCfallsBackAfterTimeoutTracksMonthlyUsageAndKeepsInvalidCredentials()throws Exception{
+        Path MCdir=MCtemp.resolve("router");new MCDocumentStore(MCdir);MCApiCredentialStore MCstore=new MCApiCredentialStore(MCdir,MCclock("2026-11-12"));
+        MCApiCredentialStore.MCCredential MCfirst=MCstore.MCadd("Principal","Factiliza","private-factiliza-token");
+        MCApiCredentialStore.MCCredential MCsecond=MCstore.MCadd("Respaldo","APIsPERU","private-apisperu-token");
+        AtomicInteger MCfirstCalls=new AtomicInteger(),MCsecondCalls=new AtomicInteger();
+        MCLookupProvider MCfactiliza=new MCLookupProvider(){public String MCname(){return "Factiliza";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCservice,String MCnumber,String MCtoken)throws Exception{MCfirstCalls.incrementAndGet();throw new HttpTimeoutException("timeout");}};
+        MCLookupProvider MCperu=new MCLookupProvider(){public String MCname(){return "APIsPERU";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCservice,String MCnumber,String MCtoken){MCsecondCalls.incrementAndGet();return Map.of("dni",MCnumber,"nombres","ANA");}};
+        MCLookupRouter MCrouter=new MCLookupRouter(MCstore,List.of(MCfactiliza,MCperu));MCLookupRouter.MCResult MCresult=MCrouter.MCquery("DNI","12345678");
+        assertThat(MCresult.MCprovider()).isEqualTo("APIsPERU");assertThat(MCresult.MCvalues()).containsEntry("nombres","ANA");assertThat(MCfirstCalls).hasValue(1);assertThat(MCsecondCalls).hasValue(1);
+        assertThat(MCstore.MCcredentials().stream().filter(MCc->MCc.MCid()==MCfirst.MCid()).findFirst().orElseThrow().MCrequests()).isEqualTo(1);
+        assertThat(MCstore.MCcredentials().stream().filter(MCc->MCc.MCid()==MCsecond.MCid()).findFirst().orElseThrow().MCsuccesses()).isEqualTo(1);
+        MCstore.MCrecord(MCfirst.MCid(),MCLookupRouter.MCStatus.INVALID,0);assertThat(MCstore.MCcredentials()).hasSize(2);
+        MCApiCredentialStore MCnextMonth=new MCApiCredentialStore(MCdir,MCclock("2026-12-01"));assertThat(MCnextMonth.MCcredentials().stream().filter(MCc->MCc.MCid()==MCfirst.MCid()).findFirst().orElseThrow().MCrequests()).isZero();
+        MCnextMonth.MCrecord(MCfirst.MCid(),MCLookupRouter.MCStatus.INVALID,0);assertThat(MCnextMonth.MCcredentials().stream().filter(MCc->MCc.MCid()==MCfirst.MCid()).findFirst().orElseThrow().MCinvalidStreak()).isEqualTo(2);
+        assertThat(MCnextMonth.MCcredentials()).hasSize(2);
+        MCnextMonth.MCrecord(MCfirst.MCid(),MCLookupRouter.MCStatus.SUCCESS,0);assertThat(MCnextMonth.MCcredentials().stream().filter(MCc->MCc.MCid()==MCfirst.MCid()).findFirst().orElseThrow().MCinvalidStreak()).isZero();
+        assertThat(java.nio.file.Files.readString(MCdir.resolve("studio.db"),java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("private-factiliza-token","private-apisperu-token");
     }
 
-    @Test void mcRateLimitSkipsOtherKeyOfSameProviderAndOfflineStaysManual()throws Exception{
-        Path mcDir=mcTemp.resolve("rate");new MCDocumentStore(mcDir);MCApiCredentialStore mcStore=new MCApiCredentialStore(mcDir);
-        mcStore.mcAdd("F1","Factiliza","token-one");mcStore.mcAdd("F2","Factiliza","token-two");mcStore.mcAdd("P1","APIsPERU","token-three");
-        AtomicInteger mcFactCalls=new AtomicInteger();
-        MCLookupProvider mcLimited=new MCLookupProvider(){public String mcName(){return "Factiliza";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcS,String mcN,String mcT)throws Exception{mcFactCalls.incrementAndGet();throw new MCFactilizaClient.MCHttpStatusException(429,120,"limit");}};
-        MCLookupProvider mcAlternative=new MCLookupProvider(){public String mcName(){return "APIsPERU";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcS,String mcN,String mcT){return Map.of("ruc",mcN,"razonSocial","EMPRESA");}};
-        MCLookupRouter mcRouter=new MCLookupRouter(mcStore,List.of(mcLimited,mcAlternative));assertThat(mcRouter.mcQuery("RUC","20123456789").mcProvider()).isEqualTo("APIsPERU");assertThat(mcFactCalls).hasValue(1);
-        for(MCApiCredentialStore.MCCredential mcC:mcStore.mcCredentials())mcStore.mcEnabled(mcC.mcId(),false);
-        MCLookupRouter.MCResult mcOffline=mcRouter.mcQuery("RUC","20123456789");assertThat(mcOffline.mcStatus()).isEqualTo(MCLookupRouter.MCStatus.NO_CREDENTIAL);assertThat(mcOffline.mcValues()).isEmpty();
+    @Test void MCrateLimitSkipsOtherKeyOfSameProviderAndOfflineStaysManual()throws Exception{
+        Path MCdir=MCtemp.resolve("rate");new MCDocumentStore(MCdir);MCApiCredentialStore MCstore=new MCApiCredentialStore(MCdir);
+        MCstore.MCadd("F1","Factiliza","token-one");MCstore.MCadd("F2","Factiliza","token-two");MCstore.MCadd("P1","APIsPERU","token-three");
+        AtomicInteger MCfactCalls=new AtomicInteger();
+        MCLookupProvider MClimited=new MCLookupProvider(){public String MCname(){return "Factiliza";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCs,String MCn,String MCt)throws Exception{MCfactCalls.incrementAndGet();throw new MCFactilizaClient.MCHttpStatusException(429,120,"limit");}};
+        MCLookupProvider MCalternative=new MCLookupProvider(){public String MCname(){return "APIsPERU";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCs,String MCn,String MCt){return Map.of("ruc",MCn,"razonSocial","EMPRESA");}};
+        MCLookupRouter MCrouter=new MCLookupRouter(MCstore,List.of(MClimited,MCalternative));assertThat(MCrouter.MCquery("RUC","20123456789").MCprovider()).isEqualTo("APIsPERU");assertThat(MCfactCalls).hasValue(1);
+        for(MCApiCredentialStore.MCCredential MCc:MCstore.MCcredentials())MCstore.MCenabled(MCc.MCid(),false);
+        MCLookupRouter.MCResult MCoffline=MCrouter.MCquery("RUC","20123456789");assertThat(MCoffline.MCstatus()).isEqualTo(MCLookupRouter.MCStatus.NO_CREDENTIAL);assertThat(MCoffline.MCvalues()).isEmpty();
     }
 
-    @Test void mcDocumentedFactilizaResponseAndPartialApisPeruStayEditable()throws Exception{
-        Path mcDir=mcTemp.resolve("responses");new MCDocumentStore(mcDir);MCApiCredentialStore mcVault=new MCApiCredentialStore(mcDir);
-        MCApiCredentialStore.MCCredential mcFirst=mcVault.mcAdd("F","Factiliza","test-only");mcVault.mcAdd("P","APIsPERU","test-only");
-        MCLookupProvider mcFactiliza=new MCLookupProvider(){public String mcName(){return "Factiliza";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcS,String mcN,String mcT){return Map.of("data.numero",mcN,"data.nombres","ANA","data.apellido_paterno","PEREZ");}};
-        MCLookupProvider mcPeru=new MCLookupProvider(){public String mcName(){return "APIsPERU";}public Set<String> mcServices(){return Set.of("DNI","RUC");}public Map<String,String> mcQuery(String mcS,String mcN,String mcT){return Map.of("dni",mcN,"nombres","ANA");}};
-        MCLookupRouter.MCResult mcResult=new MCLookupRouter(mcVault,List.of(mcFactiliza,mcPeru)).mcQuery("DNI","12345678");
-        assertThat(mcResult.mcProvider()).isEqualTo("Factiliza");assertThat(mcResult.mcValues()).containsEntry("apellido_paterno","PEREZ");assertThat(mcResult.mcUnavailable()).contains("sexo");
-        mcVault.mcEnabled(mcFirst.mcId(),false);MCLookupRouter.MCResult mcPartial=new MCLookupRouter(mcVault,List.of(mcFactiliza,mcPeru)).mcQuery("DNI","12345678");
-        assertThat(mcPartial.mcStatus()).isEqualTo(MCLookupRouter.MCStatus.PARTIAL);assertThat(mcPartial.mcValues()).doesNotContainKey("apellido_paterno");assertThat(mcPartial.mcUnavailable()).contains("apellido_paterno");
+    @Test void MCdocumentedFactilizaResponseAndPartialApisPeruStayEditable()throws Exception{
+        Path MCdir=MCtemp.resolve("responses");new MCDocumentStore(MCdir);MCApiCredentialStore MCvault=new MCApiCredentialStore(MCdir);
+        MCApiCredentialStore.MCCredential MCfirst=MCvault.MCadd("F","Factiliza","test-only");MCvault.MCadd("P","APIsPERU","test-only");
+        MCLookupProvider MCfactiliza=new MCLookupProvider(){public String MCname(){return "Factiliza";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCs,String MCn,String MCt){return Map.of("data.numero",MCn,"data.nombres","ANA","data.apellido_paterno","PEREZ");}};
+        MCLookupProvider MCperu=new MCLookupProvider(){public String MCname(){return "APIsPERU";}public Set<String> MCservices(){return Set.of("DNI","RUC");}public Map<String,String> MCquery(String MCs,String MCn,String MCt){return Map.of("dni",MCn,"nombres","ANA");}};
+        MCLookupRouter.MCResult MCresult=new MCLookupRouter(MCvault,List.of(MCfactiliza,MCperu)).MCquery("DNI","12345678");
+        assertThat(MCresult.MCprovider()).isEqualTo("Factiliza");assertThat(MCresult.MCvalues()).containsEntry("apellido_paterno","PEREZ");assertThat(MCresult.MCunavailable()).contains("sexo");
+        MCvault.MCenabled(MCfirst.MCid(),false);MCLookupRouter.MCResult MCpartial=new MCLookupRouter(MCvault,List.of(MCfactiliza,MCperu)).MCquery("DNI","12345678");
+        assertThat(MCpartial.MCstatus()).isEqualTo(MCLookupRouter.MCStatus.PARTIAL);assertThat(MCpartial.MCvalues()).doesNotContainKey("apellido_paterno");assertThat(MCpartial.MCunavailable()).contains("apellido_paterno");
     }
 
-    @Test void mcMultipleGroupsPersistTransferAndDoNotDuplicateTemplate()throws Exception{
-        Path mcSource=mcTemp.resolve("groups-source");MCDocumentStore mcStore=new MCDocumentStore(mcSource);MCStudioData mcData=new MCStudioData(mcSource);
-        byte[] mcBytes;try(XWPFDocument mcDoc=new XWPFDocument()){mcDoc.createParagraph().createRun().setText("{{nombre}} {{nombre}}");mcBytes=MCDocumentEngine.mcBytes(mcDoc);}
-        MCTemplate mcTemplate=mcStore.mcSaveTemplate(new MCTemplate(0,"Carta",mcBytes,mcBytes));MCTemplateGroup mcA=mcStore.mcSaveGroup(0,"Solicitudes"),mcB=mcStore.mcSaveGroup(0,"Frecuentes");
-        mcStore.mcSetTemplateGroups(mcTemplate.mcId(),List.of(mcA.mcId(),mcB.mcId()));assertThat(mcStore.mcGroupIds(mcTemplate.mcId())).containsExactlyInAnyOrder(mcA.mcId(),mcB.mcId());
-        assertThat(mcStore.mcTemplates()).hasSize(1);mcStore.mcSetTemplateGroups(mcTemplate.mcId(),List.of(mcB.mcId()));assertThat(mcStore.mcGroupIds(mcTemplate.mcId())).containsExactly(mcB.mcId());
-        mcStore.mcSetTemplateGroups(mcTemplate.mcId(),List.of(mcA.mcId(),mcB.mcId()));
-        Path mcZip=mcTemp.resolve("groups.zip");new MCStudioTransfer(mcStore,mcData).mcExportConfiguration(mcZip);
-        Path mcDestination=mcTemp.resolve("groups-destination");MCDocumentStore mcImported=new MCDocumentStore(mcDestination);MCStudioData mcImportedData=new MCStudioData(mcDestination);new MCStudioTransfer(mcImported,mcImportedData).mcImportConfiguration(mcZip,MCStudioTransfer.MCConflict.KEEP);
-        assertThat(mcImported.mcTemplates()).hasSize(1);assertThat(mcImported.mcGroupIds(mcImported.mcTemplates().get(0).mcId())).hasSize(2);assertThat(new MCDocumentStore(mcDestination).mcGroupIds(mcImported.mcTemplates().get(0).mcId())).hasSize(2);
-        mcImported.mcDeleteGroup(mcImported.mcGroups().get(0).mcId(),null);assertThat(mcImported.mcTemplates()).hasSize(1);
-        assertThat(MCDocumentEngine.mcGenerate(mcBytes,Map.of("nombre","Ana"))).isNotEmpty();
+    @Test void MCmultipleGroupsPersistTransferAndDoNotDuplicateTemplate()throws Exception{
+        Path MCsource=MCtemp.resolve("groups-source");MCDocumentStore MCstore=new MCDocumentStore(MCsource);MCStudioData MCdata=new MCStudioData(MCsource);
+        byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{nombre}} {{nombre}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}
+        MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Carta",MCbytes,MCbytes));MCTemplateGroup MCa=MCstore.MCsaveGroup(0,"Solicitudes"),MCb=MCstore.MCsaveGroup(0,"Frecuentes");
+        MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCa.MCid(),MCb.MCid()));assertThat(MCstore.MCgroupIds(MCtemplate.MCid())).containsExactlyInAnyOrder(MCa.MCid(),MCb.MCid());
+        assertThat(MCstore.MCtemplates()).hasSize(1);MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCb.MCid()));assertThat(MCstore.MCgroupIds(MCtemplate.MCid())).containsExactly(MCb.MCid());
+        MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCa.MCid(),MCb.MCid()));
+        Path MCzip=MCtemp.resolve("groups.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);
+        Path MCdestination=MCtemp.resolve("groups-destination");MCDocumentStore MCimported=new MCDocumentStore(MCdestination);MCStudioData MCimportedData=new MCStudioData(MCdestination);new MCStudioTransfer(MCimported,MCimportedData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);
+        assertThat(MCimported.MCtemplates()).hasSize(1);assertThat(MCimported.MCgroupIds(MCimported.MCtemplates().get(0).MCid())).hasSize(2);assertThat(new MCDocumentStore(MCdestination).MCgroupIds(MCimported.MCtemplates().get(0).MCid())).hasSize(2);
+        MCimported.MCdeleteGroup(MCimported.MCgroups().get(0).MCid(),null);assertThat(MCimported.MCtemplates()).hasSize(1);
+        assertThat(MCDocumentEngine.MCgenerate(MCbytes,Map.of("nombre","Ana"))).isNotEmpty();
     }
 
-    @Test void mcEncryptedBackupAndOrdinaryTransferExcludeCredentialTokens()throws Exception{
-        Path mcSource=mcTemp.resolve("backup-source"),mcDestination=mcTemp.resolve("backup-destination");MCDocumentStore mcStore=new MCDocumentStore(mcSource);MCStudioData mcData=new MCStudioData(mcSource);MCApiCredentialStore mcVault=new MCApiCredentialStore(mcSource);
-        MCApiCredentialStore.MCCredential mcCredential=mcVault.mcAdd("Cuenta privada","APIsPERU","token-super-privado");
-        Path mcConfig=mcTemp.resolve("ordinary.zip");new MCStudioTransfer(mcStore,mcData).mcExportConfiguration(mcConfig);
-        assertThat(java.nio.file.Files.readString(mcConfig,java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("token-super-privado");
-        Path mcBackup=mcTemp.resolve("full.dsbk");new MCStudioTransfer(mcStore,mcData).mcBackup(mcBackup,"password-safe".toCharArray());
-        assertThat(java.nio.file.Files.readString(mcBackup,java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("token-super-privado");
-        new MCDocumentStore(mcDestination);MCStudioData mcDestinationData=new MCStudioData(mcDestination);new MCStudioTransfer(new MCDocumentStore(mcDestination),mcDestinationData).mcRestore(mcBackup,"password-safe".toCharArray());
-        MCApiCredentialStore mcRestored=new MCApiCredentialStore(mcDestination);assertThat(mcRestored.mcToken(mcCredential.mcId())).isNull();assertThat(mcVault.mcToken(mcCredential.mcId())).isEqualTo("token-super-privado");
+    @Test void MCencryptedBackupAndOrdinaryTransferExcludeCredentialTokens()throws Exception{
+        Path MCsource=MCtemp.resolve("backup-source"),MCdestination=MCtemp.resolve("backup-destination");MCDocumentStore MCstore=new MCDocumentStore(MCsource);MCStudioData MCdata=new MCStudioData(MCsource);MCApiCredentialStore MCvault=new MCApiCredentialStore(MCsource);
+        MCApiCredentialStore.MCCredential MCcredential=MCvault.MCadd("Cuenta privada","APIsPERU","token-super-privado");
+        Path MCconfig=MCtemp.resolve("ordinary.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCconfig);
+        assertThat(java.nio.file.Files.readString(MCconfig,java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("token-super-privado");
+        Path MCbackup=MCtemp.resolve("full.dsbk");new MCStudioTransfer(MCstore,MCdata).MCbackup(MCbackup,"password-safe".toCharArray());
+        assertThat(java.nio.file.Files.readString(MCbackup,java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("token-super-privado");
+        new MCDocumentStore(MCdestination);MCStudioData MCdestinationData=new MCStudioData(MCdestination);new MCStudioTransfer(new MCDocumentStore(MCdestination),MCdestinationData).MCrestore(MCbackup,"password-safe".toCharArray());
+        MCApiCredentialStore MCrestored=new MCApiCredentialStore(MCdestination);assertThat(MCrestored.MCtoken(MCcredential.MCid())).isNull();assertThat(MCvault.MCtoken(MCcredential.MCid())).isEqualTo("token-super-privado");
     }
 
-    @Test void mcLegacyGroupAssociationMigratesWithoutChangingTemplate()throws Exception{
-        Path mcDir=mcTemp.resolve("legacy-group");MCDocumentStore mcInitial=new MCDocumentStore(mcDir);
-        byte[] mcBytes;try(XWPFDocument mcDoc=new XWPFDocument()){mcDoc.createParagraph().createRun().setText("Plantilla");mcBytes=MCDocumentEngine.mcBytes(mcDoc);}
-        MCTemplate mcTemplate=mcInitial.mcSaveTemplate(new MCTemplate(0,"Anterior",mcBytes,mcBytes));MCTemplateGroup mcGroup=mcInitial.mcSaveGroup(0,"Anterior");
-        try(var mcC=java.sql.DriverManager.getConnection("jdbc:sqlite:"+mcDir.resolve("studio.db"));var mcS=mcC.prepareStatement("INSERT INTO template_group_member(template_id,group_id) VALUES(?,?)")){mcS.setLong(1,mcTemplate.mcId());mcS.setLong(2,mcGroup.mcId());mcS.executeUpdate();}
-        MCDocumentStore mcMigrated=new MCDocumentStore(mcDir);assertThat(mcMigrated.mcGroupIds(mcTemplate.mcId())).containsExactly(mcGroup.mcId());assertThat(mcMigrated.mcTemplates()).hasSize(1);
-        assertThat(new MCDocumentStore(mcDir).mcGroupIds(mcTemplate.mcId())).containsExactly(mcGroup.mcId());
+    @Test void MClegacyGroupAssociationMigratesWithoutChangingTemplate()throws Exception{
+        Path MCdir=MCtemp.resolve("legacy-group");MCDocumentStore MCinitial=new MCDocumentStore(MCdir);
+        byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Plantilla");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}
+        MCTemplate MCtemplate=MCinitial.MCsaveTemplate(new MCTemplate(0,"Anterior",MCbytes,MCbytes));MCTemplateGroup MCgroup=MCinitial.MCsaveGroup(0,"Anterior");
+        try(var MCc=java.sql.DriverManager.getConnection("jdbc:sqlite:"+MCdir.resolve("studio.db"));var MCs=MCc.prepareStatement("INSERT INTO template_group_member(template_id,group_id) VALUES(?,?)")){MCs.setLong(1,MCtemplate.MCid());MCs.setLong(2,MCgroup.MCid());MCs.executeUpdate();}
+        MCDocumentStore MCmigrated=new MCDocumentStore(MCdir);assertThat(MCmigrated.MCgroupIds(MCtemplate.MCid())).containsExactly(MCgroup.MCid());assertThat(MCmigrated.MCtemplates()).hasSize(1);
+        assertThat(new MCDocumentStore(MCdir).MCgroupIds(MCtemplate.MCid())).containsExactly(MCgroup.MCid());
     }
 
-    @Test void mcIndependentApiContextsSurviveTransferAndNeverCrossFill()throws Exception{
-        Path mcSource=mcTemp.resolve("contexts-source");MCDocumentStore mcStore=new MCDocumentStore(mcSource);MCStudioData mcData=new MCStudioData(mcSource);
-        byte[] mcBytes;try(XWPFDocument mcDoc=new XWPFDocument()){mcDoc.createParagraph().createRun().setText("{{dni_1}} {{nombre_1}} {{dni_2}} {{nombre_2}}");mcBytes=MCDocumentEngine.mcBytes(mcDoc);}
-        MCTemplate mcTemplate=mcStore.mcSaveTemplate(new MCTemplate(0,"Dos personas",mcBytes,mcBytes));
-        for(String mcKey:List.of("dni_1","nombre_1","dni_2","nombre_2"))mcStore.mcSaveVariable(new MCVariable(0,mcTemplate.mcId(),mcKey,mcKey,"Texto corto","",false,1));
-        for(int mcI=1;mcI<=2;mcI++){mcData.mcSaveApiContext(new MCStudioData.MCApiContext(mcTemplate.mcId(),"dni_"+mcI,"persona_"+mcI,"DNI",true));mcData.mcSaveApiContext(new MCStudioData.MCApiContext(mcTemplate.mcId(),"nombre_"+mcI,"persona_"+mcI,"DNI",false));}
-        assertThat(MCStudioWindow.mcSameQueryGroup("persona_1","persona_2",2,"dni_1","nombre_2")).isFalse();
-        assertThat(MCStudioWindow.mcSameQueryGroup("persona_1","persona_1",2,"dni_1","nombre_1")).isTrue();
-        Path mcZip=mcTemp.resolve("contexts.zip");new MCStudioTransfer(mcStore,mcData).mcExportConfiguration(mcZip);
-        Path mcTarget=mcTemp.resolve("contexts-target");MCDocumentStore mcImported=new MCDocumentStore(mcTarget);MCStudioData mcImportedData=new MCStudioData(mcTarget);
-        new MCStudioTransfer(mcImported,mcImportedData).mcImportConfiguration(mcZip,MCStudioTransfer.MCConflict.KEEP);
-        assertThat(mcImportedData.mcApiContexts(mcImported.mcTemplates().get(0).mcId())).hasSize(4);
-        assertThat(new MCStudioData(mcTarget).mcApiContexts(mcImported.mcTemplates().get(0).mcId())).hasSize(4);
+    @Test void MCindependentApiContextsSurviveTransferAndNeverCrossFill()throws Exception{
+        Path MCsource=MCtemp.resolve("contexts-source");MCDocumentStore MCstore=new MCDocumentStore(MCsource);MCStudioData MCdata=new MCStudioData(MCsource);
+        byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{dni_1}} {{nombre_1}} {{dni_2}} {{nombre_2}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}
+        MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Dos personas",MCbytes,MCbytes));
+        for(String MCkey:List.of("dni_1","nombre_1","dni_2","nombre_2"))MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),MCkey,MCkey,"Texto corto","",false,1));
+        for(int MCi=1;MCi<=2;MCi++){MCdata.MCsaveApiContext(new MCStudioData.MCApiContext(MCtemplate.MCid(),"dni_"+MCi,"persona_"+MCi,"DNI",true));MCdata.MCsaveApiContext(new MCStudioData.MCApiContext(MCtemplate.MCid(),"nombre_"+MCi,"persona_"+MCi,"DNI",false));}
+        assertThat(MCStudioWindow.MCsameQueryGroup("persona_1","persona_2",2,"dni_1","nombre_2")).isFalse();
+        assertThat(MCStudioWindow.MCsameQueryGroup("persona_1","persona_1",2,"dni_1","nombre_1")).isTrue();
+        Path MCzip=MCtemp.resolve("contexts.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);
+        Path MCtarget=MCtemp.resolve("contexts-target");MCDocumentStore MCimported=new MCDocumentStore(MCtarget);MCStudioData MCimportedData=new MCStudioData(MCtarget);
+        new MCStudioTransfer(MCimported,MCimportedData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);
+        assertThat(MCimportedData.MCapiContexts(MCimported.MCtemplates().get(0).MCid())).hasSize(4);
+        assertThat(new MCStudioData(MCtarget).MCapiContexts(MCimported.MCtemplates().get(0).MCid())).hasSize(4);
     }
 }

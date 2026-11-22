@@ -2,13 +2,11 @@ package com.ejemplo.crudpersona.studio;
 
 import java.util.*;
 
-/** @author MC */
 public final class MCApiFieldCatalog {
-    /** @author MC */
-    public record MCField(@com.fasterxml.jackson.annotation.JsonProperty("service") String mcService,@com.fasterxml.jackson.annotation.JsonProperty("key") String mcKey,@com.fasterxml.jackson.annotation.JsonProperty("label") String mcLabel,@com.fasterxml.jackson.annotation.JsonProperty("factilizaPath") String mcFactilizaPath,@com.fasterxml.jackson.annotation.JsonProperty("apisPeruPath") String mcApisPeruPath){
-        @Override public String toString(){return mcLabel;}
+    public record MCField(@com.fasterxml.jackson.annotation.JsonProperty("service") String MCservice,@com.fasterxml.jackson.annotation.JsonProperty("key") String MCkey,@com.fasterxml.jackson.annotation.JsonProperty("label") String MClabel,@com.fasterxml.jackson.annotation.JsonProperty("factilizaPath") String MCfactilizaPath,@com.fasterxml.jackson.annotation.JsonProperty("apisPeruPath") String MCapisPeruPath){
+        @Override public String toString(){return MClabel;}
     }
-    private static final List<MCField> mcFIELDS=List.of(
+    private static final List<MCField> MCFIELDS=List.of(
         new MCField("DNI","numero","Número de DNI","data.numero","dni"),
         new MCField("DNI","nombres","Nombres","data.nombres","nombres"),
         new MCField("DNI","apellido_paterno","Apellido paterno","data.apellido_paterno","apellidoPaterno"),
@@ -42,44 +40,44 @@ public final class MCApiFieldCatalog {
         new MCField("RUC","capital","Capital",null,"capital")
     );
     private MCApiFieldCatalog(){}
-    public static List<MCField> mcFields(String mcService){return mcFIELDS.stream().filter(mcF->mcF.mcService().equals(mcService)).toList();}
-    public static MCField mcField(String mcService,String mcKey){return mcFields(mcService).stream().filter(mcF->mcF.mcKey().equals(mcKey)).findFirst().orElse(null);}
-    public static String mcCanonical(String mcService,String mcStored){
-        if(mcStored==null||mcStored.isBlank())return null;
-        if(mcStored.startsWith("field:"))return mcStored.substring(6);
-        for(MCField mcF:mcFields(mcService))if(mcStored.equals(mcF.mcFactilizaPath())||mcStored.equals(mcF.mcApisPeruPath())||mcStored.equals(mcF.mcFactilizaPath()==null?null:mcF.mcFactilizaPath().replace("data.","")))return mcF.mcKey();
-        return "legacy:"+mcStored;
+    public static List<MCField> MCfields(String MCservice){return MCFIELDS.stream().filter(MCf->MCf.MCservice().equals(MCservice)).toList();}
+    public static MCField MCfield(String MCservice,String MCkey){return MCfields(MCservice).stream().filter(MCf->MCf.MCkey().equals(MCkey)).findFirst().orElse(null);}
+    public static String MCcanonical(String MCservice,String MCstored){
+        if(MCstored==null||MCstored.isBlank())return null;
+        if(MCstored.startsWith("field:"))return MCstored.substring(6);
+        for(MCField MCf:MCfields(MCservice))if(MCstored.equals(MCf.MCfactilizaPath())||MCstored.equals(MCf.MCapisPeruPath())||MCstored.equals(MCf.MCfactilizaPath()==null?null:MCf.MCfactilizaPath().replace("data.","")))return MCf.MCkey();
+        return "legacy:"+MCstored;
     }
-    public static String mcLabel(String mcService,String mcKey){MCField mcF=mcField(mcService,mcKey);return mcF==null?"Campo anterior sin equivalencia":mcF.mcLabel();}
-    public static Set<String> mcSupportedKeys(String mcProvider,String mcService){Set<String> mcOut=new LinkedHashSet<>();for(MCField mcF:mcFields(mcService))if(("Factiliza".equals(mcProvider)?mcF.mcFactilizaPath():mcF.mcApisPeruPath())!=null)mcOut.add(mcF.mcKey());return mcOut;}
-    public static Map<String,String> mcNormalize(String mcProvider,String mcService,Map<String,String> mcRaw){Map<String,String> mcValues=new LinkedHashMap<>();for(MCField mcField:mcFields(mcService)){String mcPath="Factiliza".equals(mcProvider)?mcField.mcFactilizaPath():mcField.mcApisPeruPath();if(mcPath==null)continue;String mcValue=mcRaw.get(mcPath);if("APIsPERU".equals(mcProvider)&&"telefonos".equals(mcField.mcKey())){List<String> mcNumbers=new ArrayList<>();for(int mcI=0;mcRaw.containsKey("telefonos["+mcI+"]");mcI++){String mcNumber=mcRaw.get("telefonos["+mcI+"]");if(mcNumber!=null&&!mcNumber.isBlank())mcNumbers.add(mcNumber);}mcValue=String.join(", ",mcNumbers);}if(mcValue!=null&&!mcValue.isBlank())mcValues.put(mcField.mcKey(),mcValue);}if("DNI".equals(mcService)){String mcFamily=mcRaw.get("Factiliza".equals(mcProvider)?"data.apellidos":"apellidos");if(mcFamily!=null&&!mcFamily.isBlank())mcValues.put("apellidos",mcFamily);mcNormalizePersonName(mcValues);}return mcValues;}
-    public static void mcNormalizePersonName(Map<String,String> mcValues){
-        String mcGiven=mcCleanName(mcValues.get("nombres")),mcPaternal=mcCleanName(mcValues.get("apellido_paterno")),mcMaternal=mcCleanName(mcValues.get("apellido_materno"));
-        String mcFamily=mcCleanName(mcPaternal+" "+mcMaternal);if(mcFamily.isEmpty())mcFamily=mcCleanName(mcValues.get("apellidos"));
-        String mcFull=mcCleanName(mcValues.get("nombre_completo")),mcFallbackFamily="";
-        if(mcGiven.contains(",")){String[] mcParts=mcGiven.split(",",2);mcFallbackFamily=mcCleanName(mcParts[0]);mcGiven=mcCleanName(mcParts[1]);}
-        if(mcFull.contains(",")){String[] mcParts=mcFull.split(",",2);if(mcFallbackFamily.isEmpty())mcFallbackFamily=mcCleanName(mcParts[0]);if(mcGiven.isEmpty())mcGiven=mcCleanName(mcParts[1]);mcFull=mcCleanName(mcParts[1]+" "+mcParts[0]);}
-        if(mcFamily.isEmpty())mcFamily=mcFallbackFamily;
-        if(mcFamily.isEmpty()&&!mcGiven.isEmpty()&&mcFull.length()>mcGiven.length()){
-            if(mcFull.regionMatches(true,0,mcGiven+" ",0,mcGiven.length()+1))mcFamily=mcCleanName(mcFull.substring(mcGiven.length()));
-            else if(mcFull.regionMatches(true,mcFull.length()-mcGiven.length()-1," "+mcGiven,0,mcGiven.length()+1))mcFamily=mcCleanName(mcFull.substring(0,mcFull.length()-mcGiven.length()));
+    public static String MClabel(String MCservice,String MCkey){MCField MCf=MCfield(MCservice,MCkey);return MCf==null?"Campo anterior sin equivalencia":MCf.MClabel();}
+    public static Set<String> MCsupportedKeys(String MCprovider,String MCservice){Set<String> MCout=new LinkedHashSet<>();for(MCField MCf:MCfields(MCservice))if(("Factiliza".equals(MCprovider)?MCf.MCfactilizaPath():MCf.MCapisPeruPath())!=null)MCout.add(MCf.MCkey());return MCout;}
+    public static Map<String,String> MCnormalize(String MCprovider,String MCservice,Map<String,String> MCraw){Map<String,String> MCvalues=new LinkedHashMap<>();for(MCField MCfield:MCfields(MCservice)){String MCpath="Factiliza".equals(MCprovider)?MCfield.MCfactilizaPath():MCfield.MCapisPeruPath();if(MCpath==null)continue;String MCvalue=MCraw.get(MCpath);if("APIsPERU".equals(MCprovider)&&"telefonos".equals(MCfield.MCkey())){List<String> MCnumbers=new ArrayList<>();for(int MCi=0;MCraw.containsKey("telefonos["+MCi+"]");MCi++){String MCnumber=MCraw.get("telefonos["+MCi+"]");if(MCnumber!=null&&!MCnumber.isBlank())MCnumbers.add(MCnumber);}MCvalue=String.join(", ",MCnumbers);}if(MCvalue!=null&&!MCvalue.isBlank())MCvalues.put(MCfield.MCkey(),MCvalue);}if("DNI".equals(MCservice)){String MCfamily=MCraw.get("Factiliza".equals(MCprovider)?"data.apellidos":"apellidos");if(MCfamily!=null&&!MCfamily.isBlank())MCvalues.put("apellidos",MCfamily);MCnormalizePersonName(MCvalues);}return MCvalues;}
+    public static void MCnormalizePersonName(Map<String,String> MCvalues){
+        String MCgiven=MCcleanName(MCvalues.get("nombres")),MCpaternal=MCcleanName(MCvalues.get("apellido_paterno")),MCmaternal=MCcleanName(MCvalues.get("apellido_materno"));
+        String MCfamily=MCcleanName(MCpaternal+" "+MCmaternal);if(MCfamily.isEmpty())MCfamily=MCcleanName(MCvalues.get("apellidos"));
+        String MCfull=MCcleanName(MCvalues.get("nombre_completo")),MCfallbackFamily="";
+        if(MCgiven.contains(",")){String[] MCparts=MCgiven.split(",",2);MCfallbackFamily=MCcleanName(MCparts[0]);MCgiven=MCcleanName(MCparts[1]);}
+        if(MCfull.contains(",")){String[] MCparts=MCfull.split(",",2);if(MCfallbackFamily.isEmpty())MCfallbackFamily=MCcleanName(MCparts[0]);if(MCgiven.isEmpty())MCgiven=MCcleanName(MCparts[1]);MCfull=MCcleanName(MCparts[1]+" "+MCparts[0]);}
+        if(MCfamily.isEmpty())MCfamily=MCfallbackFamily;
+        if(MCfamily.isEmpty()&&!MCgiven.isEmpty()&&MCfull.length()>MCgiven.length()){
+            if(MCfull.regionMatches(true,0,MCgiven+" ",0,MCgiven.length()+1))MCfamily=MCcleanName(MCfull.substring(MCgiven.length()));
+            else if(MCfull.regionMatches(true,MCfull.length()-MCgiven.length()-1," "+MCgiven,0,MCgiven.length()+1))MCfamily=MCcleanName(MCfull.substring(0,MCfull.length()-MCgiven.length()));
         }
-        if(mcGiven.isEmpty()&&!mcFull.isEmpty()&&!mcFamily.isEmpty())mcGiven=mcStripFamily(mcFull,mcFamily);
-        mcGiven=mcStripFamily(mcGiven,mcFamily);
-        if(!mcGiven.isEmpty()){
-            mcValues.put("nombres",mcGiven);if(!mcFamily.isEmpty()||mcFull.isEmpty())mcFull=mcCleanName(mcGiven+" "+mcFamily);
-            if(mcValues.containsKey("data.nombres"))mcValues.put("data.nombres",mcGiven);
+        if(MCgiven.isEmpty()&&!MCfull.isEmpty()&&!MCfamily.isEmpty())MCgiven=MCstripFamily(MCfull,MCfamily);
+        MCgiven=MCstripFamily(MCgiven,MCfamily);
+        if(!MCgiven.isEmpty()){
+            MCvalues.put("nombres",MCgiven);if(!MCfamily.isEmpty()||MCfull.isEmpty())MCfull=MCcleanName(MCgiven+" "+MCfamily);
+            if(MCvalues.containsKey("data.nombres"))MCvalues.put("data.nombres",MCgiven);
         }
-        if(!mcFamily.isEmpty()&&!mcValues.containsKey("apellidos")&&(!mcPaternal.isEmpty()&&!mcMaternal.isEmpty()||!mcFallbackFamily.isEmpty()||mcPaternal.isEmpty()&&mcMaternal.isEmpty()))mcValues.put("apellidos",mcFamily);
-        if(!mcFull.isEmpty()){mcFull=mcCleanName(mcFull.replace(',', ' '));mcValues.put("nombre_completo",mcFull);if(mcValues.containsKey("data.nombre_completo"))mcValues.put("data.nombre_completo",mcFull);}
+        if(!MCfamily.isEmpty()&&!MCvalues.containsKey("apellidos")&&(!MCpaternal.isEmpty()&&!MCmaternal.isEmpty()||!MCfallbackFamily.isEmpty()||MCpaternal.isEmpty()&&MCmaternal.isEmpty()))MCvalues.put("apellidos",MCfamily);
+        if(!MCfull.isEmpty()){MCfull=MCcleanName(MCfull.replace(',', ' '));MCvalues.put("nombre_completo",MCfull);if(MCvalues.containsKey("data.nombre_completo"))MCvalues.put("data.nombre_completo",MCfull);}
     }
-    private static String mcStripFamily(String mcGiven,String mcFamily){
-        if(mcFamily.isEmpty())return mcGiven;
-        String mcPrevious;do{mcPrevious=mcGiven;if(mcGiven.length()>mcFamily.length()&&mcGiven.regionMatches(true,0,mcFamily+" ",0,mcFamily.length()+1))mcGiven=mcCleanName(mcGiven.substring(mcFamily.length()));if(mcGiven.length()>mcFamily.length()&&mcGiven.regionMatches(true,mcGiven.length()-mcFamily.length()-1," "+mcFamily,0,mcFamily.length()+1))mcGiven=mcCleanName(mcGiven.substring(0,mcGiven.length()-mcFamily.length()));}while(!mcGiven.equals(mcPrevious));return mcGiven;
+    private static String MCstripFamily(String MCgiven,String MCfamily){
+        if(MCfamily.isEmpty())return MCgiven;
+        String MCprevious;do{MCprevious=MCgiven;if(MCgiven.length()>MCfamily.length()&&MCgiven.regionMatches(true,0,MCfamily+" ",0,MCfamily.length()+1))MCgiven=MCcleanName(MCgiven.substring(MCfamily.length()));if(MCgiven.length()>MCfamily.length()&&MCgiven.regionMatches(true,MCgiven.length()-MCfamily.length()-1," "+MCfamily,0,MCfamily.length()+1))MCgiven=MCcleanName(MCgiven.substring(0,MCgiven.length()-MCfamily.length()));}while(!MCgiven.equals(MCprevious));return MCgiven;
     }
-    private static String mcCleanName(String mcValue){return mcValue==null?"":mcValue.replaceAll("[\\s\\u00a0]+"," ").trim();}
-    static Map<String,String> mcNormalizedResponse(String mcProvider,String mcService,Map<String,String> mcResponse){
-        Map<String,String> mcRaw=new LinkedHashMap<>(mcResponse);if("DNI".equals(mcService)){Map<String,String> mcValues=mcNormalize(mcProvider,mcService,mcRaw);String mcPrefix="Factiliza".equals(mcProvider)?"data.":"";for(String mcKey:List.of("nombres","nombre_completo","apellidos"))if(mcValues.containsKey(mcKey))mcRaw.put(mcPrefix+mcKey,mcValues.get(mcKey));}return mcRaw;
+    private static String MCcleanName(String MCvalue){return MCvalue==null?"":MCvalue.replaceAll("[\\s\\u00a0]+"," ").trim();}
+    static Map<String,String> MCnormalizedResponse(String MCprovider,String MCservice,Map<String,String> MCresponse){
+        Map<String,String> MCraw=new LinkedHashMap<>(MCresponse);if("DNI".equals(MCservice)){Map<String,String> MCvalues=MCnormalize(MCprovider,MCservice,MCraw);String MCprefix="Factiliza".equals(MCprovider)?"data.":"";for(String MCkey:List.of("nombres","nombre_completo","apellidos"))if(MCvalues.containsKey(MCkey))MCraw.put(MCprefix+MCkey,MCvalues.get(MCkey));}return MCraw;
     }
-    public static String mcLegacyValue(String mcProvider,String mcStored,Map<String,String> mcRaw){return "Factiliza".equals(mcProvider)?mcRaw.get(mcStored):null;}
+    public static String MClegacyValue(String MCprovider,String MCstored,Map<String,String> MCraw){return "Factiliza".equals(MCprovider)?MCraw.get(MCstored):null;}
 }

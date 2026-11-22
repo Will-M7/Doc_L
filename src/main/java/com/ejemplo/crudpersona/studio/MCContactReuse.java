@@ -9,182 +9,180 @@ import java.sql.SQLException;
 import java.text.Normalizer;
 import java.util.*;
 
-/** @author MC */
 public final class MCContactReuse {
-    /** @author MC */
-    public record MCResult(@com.fasterxml.jackson.annotation.JsonProperty("created") int mcCreated,@com.fasterxml.jackson.annotation.JsonProperty("updated") int mcUpdated,@com.fasterxml.jackson.annotation.JsonProperty("unchanged") int mcUnchanged,@com.fasterxml.jackson.annotation.JsonProperty("skipped") int mcSkipped){}
-    private static final ObjectMapper mcJSON=new ObjectMapper();
+    public record MCResult(@com.fasterxml.jackson.annotation.JsonProperty("created") int MCcreated,@com.fasterxml.jackson.annotation.JsonProperty("updated") int MCupdated,@com.fasterxml.jackson.annotation.JsonProperty("unchanged") int MCunchanged,@com.fasterxml.jackson.annotation.JsonProperty("skipped") int MCskipped){}
+    private static final ObjectMapper MCJSON=new ObjectMapper();
     private MCContactReuse(){}
 
-    public static Map<String,String> mcValuesFor(MCContact mcContact,List<MCContactBinding> mcGroup){
-        Map<String,String> mcValues=new LinkedHashMap<>();
-        Map<String,String> mcExtras=mcApiValues(mcContact);
-        for(MCContactBinding mcB:mcGroup){
-            String mcValue=switch(mcB.mcField()){
-                case "given"->mcContact.mcGiven();case "family"->mcContact.mcFamily();case "document_type"->mcContact.mcDocumentType();
-                case "number"->mcContact.mcNumber();case "address"->mcContact.mcAddress();case "representatives"->mcContact.mcRepresentatives();
-                default->mcExtras.getOrDefault(mcB.mcField().startsWith("extra:")?mcB.mcField().substring(6):mcB.mcField(),"");
+    public static Map<String,String> MCvaluesFor(MCContact MCcontact,List<MCContactBinding> MCgroup){
+        Map<String,String> MCvalues=new LinkedHashMap<>();
+        Map<String,String> MCextras=MCapiValues(MCcontact);
+        for(MCContactBinding MCb:MCgroup){
+            String MCvalue=switch(MCb.MCfield()){
+                case "given"->MCcontact.MCgiven();case "family"->MCcontact.MCfamily();case "document_type"->MCcontact.MCdocumentType();
+                case "number"->MCcontact.MCnumber();case "address"->MCcontact.MCaddress();case "representatives"->MCcontact.MCrepresentatives();
+                default->MCextras.getOrDefault(MCb.MCfield().startsWith("extra:")?MCb.MCfield().substring(6):MCb.MCfield(),"");
             };
-            mcValues.put(mcB.mcVariableKey(),mcValue==null?"":mcValue);
+            MCvalues.put(MCb.MCvariableKey(),MCvalue==null?"":MCvalue);
         }
-        return mcValues;
+        return MCvalues;
     }
 
-    public static MCContact mcFromApi(MCLookupRouter.MCResult mcResult)throws Exception{
-        Map<String,String> mcFields=new LinkedHashMap<>(mcResult.mcRaw());mcFields.putAll(mcResult.mcValues());
-        boolean mcCompany="RUC".equals(mcResult.mcService());if(!mcCompany)MCApiFieldCatalog.mcNormalizePersonName(mcFields);
-        String mcName=mcCompany?mcFields.getOrDefault("razon_social",""):mcFields.getOrDefault("nombres","");
-        if(mcName.isBlank())mcName=mcFields.getOrDefault(mcCompany?"nombre_o_razon_social":"nombre_completo","");
-        String mcFamily=(mcFields.getOrDefault("apellido_paterno","")+" "+mcFields.getOrDefault("apellido_materno","")).trim();if(mcFamily.isBlank())mcFamily=mcFields.getOrDefault("apellidos","");
-        String mcAddress=mcPrefer(mcFields.get("direccion_completa"),mcFields.getOrDefault("direccion",""));
-        String mcReps=mcFields.entrySet().stream().filter(mcE->mcE.getKey().toLowerCase(Locale.ROOT).contains("representante"))
-                .map(Map.Entry::getValue).filter(mcV->mcV!=null&&!mcV.isBlank()).distinct().collect(java.util.stream.Collectors.joining("; "));
-        return new MCContact(0,mcCompany?"Empresa":"Persona",mcName,mcCompany?"":mcFamily,mcResult.mcService(),mcResult.mcIdentifier().trim(),mcAddress,mcReps,mcJSON.writeValueAsString(mcFields));
+    public static MCContact MCfromApi(MCLookupRouter.MCResult MCresult)throws Exception{
+        Map<String,String> MCfields=new LinkedHashMap<>(MCresult.MCraw());MCfields.putAll(MCresult.MCvalues());
+        boolean MCcompany="RUC".equals(MCresult.MCservice());if(!MCcompany)MCApiFieldCatalog.MCnormalizePersonName(MCfields);
+        String MCname=MCcompany?MCfields.getOrDefault("razon_social",""):MCfields.getOrDefault("nombres","");
+        if(MCname.isBlank())MCname=MCfields.getOrDefault(MCcompany?"nombre_o_razon_social":"nombre_completo","");
+        String MCfamily=(MCfields.getOrDefault("apellido_paterno","")+" "+MCfields.getOrDefault("apellido_materno","")).trim();if(MCfamily.isBlank())MCfamily=MCfields.getOrDefault("apellidos","");
+        String MCaddress=MCprefer(MCfields.get("direccion_completa"),MCfields.getOrDefault("direccion",""));
+        String MCreps=MCfields.entrySet().stream().filter(MCe->MCe.getKey().toLowerCase(Locale.ROOT).contains("representante"))
+                .map(Map.Entry::getValue).filter(MCv->MCv!=null&&!MCv.isBlank()).distinct().collect(java.util.stream.Collectors.joining("; "));
+        return new MCContact(0,MCcompany?"Empresa":"Persona",MCname,MCcompany?"":MCfamily,MCresult.MCservice(),MCresult.MCidentifier().trim(),MCaddress,MCreps,MCJSON.writeValueAsString(MCfields));
     }
 
-    public static Map<String,String> mcApiValues(MCContact mcContact){
-        Map<String,String> mcValues=new LinkedHashMap<>();
-        try{JsonNode mcExtras=mcJSON.readTree(mcContact.mcExtrasJson());if(mcExtras!=null)mcFlatten(mcExtras,"",mcValues);}catch(Exception mcIgnored){}
-        String mcService="Empresa".equals(mcContact.mcKind())?"RUC":"DNI";
-        for(String mcProvider:List.of("Factiliza","APIsPERU"))MCApiFieldCatalog.mcNormalize(mcProvider,mcService,mcValues).forEach(mcValues::putIfAbsent);
-        mcValues.put("numero",mcContact.mcNumber());
-        if("RUC".equals(mcService))mcPutNonEmpty(mcValues,"razon_social",mcContact.mcGiven());
+    public static Map<String,String> MCapiValues(MCContact MCcontact){
+        Map<String,String> MCvalues=new LinkedHashMap<>();
+        try{JsonNode MCextras=MCJSON.readTree(MCcontact.MCextrasJson());if(MCextras!=null)MCflatten(MCextras,"",MCvalues);}catch(Exception MCignored){}
+        String MCservice="Empresa".equals(MCcontact.MCkind())?"RUC":"DNI";
+        for(String MCprovider:List.of("Factiliza","APIsPERU"))MCApiFieldCatalog.MCnormalize(MCprovider,MCservice,MCvalues).forEach(MCvalues::putIfAbsent);
+        MCvalues.put("numero",MCcontact.MCnumber());
+        if("RUC".equals(MCservice))MCputNonEmpty(MCvalues,"razon_social",MCcontact.MCgiven());
         else{
-            mcPutNonEmpty(mcValues,"nombres",mcContact.mcGiven());
-            mcPutNonEmpty(mcValues,"apellidos",mcContact.mcFamily());
-            MCApiFieldCatalog.mcNormalizePersonName(mcValues);
+            MCputNonEmpty(MCvalues,"nombres",MCcontact.MCgiven());
+            MCputNonEmpty(MCvalues,"apellidos",MCcontact.MCfamily());
+            MCApiFieldCatalog.MCnormalizePersonName(MCvalues);
         }
-        mcPutNonEmpty(mcValues,"direccion",mcContact.mcAddress());mcPutNonEmpty(mcValues,"direccion_completa",mcContact.mcAddress());
-        mcPutNonEmpty(mcValues,"representantes",mcContact.mcRepresentatives());
-        return mcValues;
+        MCputNonEmpty(MCvalues,"direccion",MCcontact.MCaddress());MCputNonEmpty(MCvalues,"direccion_completa",MCcontact.MCaddress());
+        MCputNonEmpty(MCvalues,"representantes",MCcontact.MCrepresentatives());
+        return MCvalues;
     }
-    private static void mcFlatten(JsonNode mcNode,String mcPath,Map<String,String> mcValues){
-        if(mcNode.isObject())mcNode.fields().forEachRemaining(mcE->mcFlatten(mcE.getValue(),mcPath.isEmpty()?mcE.getKey():mcPath+"."+mcE.getKey(),mcValues));
-        else if(mcNode.isArray()){for(int mcI=0;mcI<mcNode.size();mcI++)mcFlatten(mcNode.get(mcI),mcPath+"["+mcI+"]",mcValues);}
-        else if(!mcNode.isNull())mcValues.put(mcPath,mcNode.asText());
+    private static void MCflatten(JsonNode MCnode,String MCpath,Map<String,String> MCvalues){
+        if(MCnode.isObject())MCnode.fields().forEachRemaining(MCe->MCflatten(MCe.getValue(),MCpath.isEmpty()?MCe.getKey():MCpath+"."+MCe.getKey(),MCvalues));
+        else if(MCnode.isArray()){for(int MCi=0;MCi<MCnode.size();MCi++)MCflatten(MCnode.get(MCi),MCpath+"["+MCi+"]",MCvalues);}
+        else if(!MCnode.isNull())MCvalues.put(MCpath,MCnode.asText());
     }
-    private static void mcPutNonEmpty(Map<String,String> mcValues,String mcKey,String mcValue){if(mcValue!=null&&!mcValue.isBlank())mcValues.put(mcKey,mcValue);}
+    private static void MCputNonEmpty(Map<String,String> MCvalues,String MCkey,String MCvalue){if(MCvalue!=null&&!MCvalue.isBlank())MCvalues.put(MCkey,MCvalue);}
 
-    public static boolean mcClientKey(String mcKey,Collection<MCDocumentStore.MCDefinition> mcDefinitions){String mcBase=MCStudioData.mcVariableKey(MCDocumentEngine.mcBaseKey(mcKey));return mcDefinitions.stream().noneMatch(mcD->!mcD.mcBindToClient()&&MCStudioData.mcVariableKey(mcD.mcKey()).equals(mcBase));}
-    public static Map<String,String> mcClientValues(Map<String,String> mcValues,Collection<MCDocumentStore.MCDefinition> mcDefinitions){Map<String,String> mcFiltered=new LinkedHashMap<>();mcValues.forEach((mcKey,mcValue)->{if(mcClientKey(mcKey,mcDefinitions))mcFiltered.put(mcKey,mcValue);});return mcFiltered;}
-    public static MCResult mcSave(MCStudioData mcData,List<MCContactBinding> mcBindings,Map<String,String> mcValues,Map<String,String> mcVariableTypes,Collection<MCDocumentStore.MCDefinition> mcDefinitions)throws SQLException{
-        return mcSave(mcData,mcBindings.stream().filter(mcB->mcClientKey(mcB.mcVariableKey(),mcDefinitions)).toList(),mcClientValues(mcValues,mcDefinitions),mcVariableTypes);
+    public static boolean MCclientKey(String MCkey,Collection<MCDocumentStore.MCDefinition> MCdefinitions){String MCbase=MCStudioData.MCvariableKey(MCDocumentEngine.MCbaseKey(MCkey));return MCdefinitions.stream().noneMatch(MCd->!MCd.MCbindToClient()&&MCStudioData.MCvariableKey(MCd.MCkey()).equals(MCbase));}
+    public static Map<String,String> MCclientValues(Map<String,String> MCvalues,Collection<MCDocumentStore.MCDefinition> MCdefinitions){Map<String,String> MCfiltered=new LinkedHashMap<>();MCvalues.forEach((MCkey,MCvalue)->{if(MCclientKey(MCkey,MCdefinitions))MCfiltered.put(MCkey,MCvalue);});return MCfiltered;}
+    public static MCResult MCsave(MCStudioData MCdata,List<MCContactBinding> MCbindings,Map<String,String> MCvalues,Map<String,String> MCvariableTypes,Collection<MCDocumentStore.MCDefinition> MCdefinitions)throws SQLException{
+        return MCsave(MCdata,MCbindings.stream().filter(MCb->MCclientKey(MCb.MCvariableKey(),MCdefinitions)).toList(),MCclientValues(MCvalues,MCdefinitions),MCvariableTypes);
     }
-    public static List<MCContactBinding> mcFormBindings(long mcTemplateId,List<MCVariable> mcVariables,List<MCContactBinding> mcExplicit,List<MCApiContext> mcContexts,Map<String,MCApiBinding> mcApi,Collection<MCDocumentStore.MCDefinition> mcDefinitions){
-        Map<String,MCApiBinding> mcFilteredApi=new LinkedHashMap<>();mcApi.forEach((mcKey,mcValue)->{if(mcClientKey(mcKey,mcDefinitions))mcFilteredApi.put(mcKey,mcValue);});
-        return mcFormBindings(mcTemplateId,mcVariables.stream().filter(mcV->mcClientKey(mcV.mcKey(),mcDefinitions)).toList(),mcExplicit.stream().filter(mcB->mcClientKey(mcB.mcVariableKey(),mcDefinitions)).toList(),mcContexts.stream().filter(mcC->mcClientKey(mcC.mcVariableKey(),mcDefinitions)).toList(),mcFilteredApi);
+    public static List<MCContactBinding> MCformBindings(long MCtemplateId,List<MCVariable> MCvariables,List<MCContactBinding> MCexplicit,List<MCApiContext> MCcontexts,Map<String,MCApiBinding> MCapi,Collection<MCDocumentStore.MCDefinition> MCdefinitions){
+        Map<String,MCApiBinding> MCfilteredApi=new LinkedHashMap<>();MCapi.forEach((MCkey,MCvalue)->{if(MCclientKey(MCkey,MCdefinitions))MCfilteredApi.put(MCkey,MCvalue);});
+        return MCformBindings(MCtemplateId,MCvariables.stream().filter(MCv->MCclientKey(MCv.MCkey(),MCdefinitions)).toList(),MCexplicit.stream().filter(MCb->MCclientKey(MCb.MCvariableKey(),MCdefinitions)).toList(),MCcontexts.stream().filter(MCc->MCclientKey(MCc.MCvariableKey(),MCdefinitions)).toList(),MCfilteredApi);
     }
-    public static MCResult mcSave(MCStudioData mcData,List<MCContactBinding> mcBindings,Map<String,String> mcValues,
-                              Map<String,String> mcVariableTypes)throws SQLException{
-        Map<String,List<MCContactBinding>> mcGroups=new LinkedHashMap<>();
-        for(MCContactBinding mcBinding:mcBindings)mcGroups.computeIfAbsent(mcBinding.mcGroupKey(),mcIgnored->new ArrayList<>()).add(mcBinding);
-        int mcCreated=0,mcUpdated=0,mcUnchanged=0,mcSkipped=0;
-        for(List<MCContactBinding> mcGroup:mcGroups.values()){
-            String mcKind=mcGroup.get(0).mcKind();Map<String,String> mcFields=new LinkedHashMap<>();
-            for(MCContactBinding mcB:mcGroup){String mcValue=mcValues.getOrDefault(mcB.mcVariableKey(),"").trim();if(!mcValue.isBlank())mcFields.put(mcB.mcField(),mcValue);}
-            String mcName=mcFields.getOrDefault("given",mcFields.getOrDefault("nombre_completo","")),mcNumber=mcFields.getOrDefault("number","");
-            String mcDocType=mcFields.getOrDefault("document_type","");
-            if("Empresa".equals(mcKind))mcDocType="RUC";
-            else if(mcDocType.isBlank()&&mcNumber.matches("\\d{8}"))mcDocType="DNI";
-            if(!mcValidIdentifier(mcKind,mcDocType,mcNumber)&&!(mcGroup.get(0).mcGroupKey().startsWith("persona:")&&mcNumber.isBlank()&&!mcName.isBlank())){mcSkipped++;continue;}
+    public static MCResult MCsave(MCStudioData MCdata,List<MCContactBinding> MCbindings,Map<String,String> MCvalues,
+                              Map<String,String> MCvariableTypes)throws SQLException{
+        Map<String,List<MCContactBinding>> MCgroups=new LinkedHashMap<>();
+        for(MCContactBinding MCbinding:MCbindings)MCgroups.computeIfAbsent(MCbinding.MCgroupKey(),MCignored->new ArrayList<>()).add(MCbinding);
+        int MCcreated=0,MCupdated=0,MCunchanged=0,MCskipped=0;
+        for(List<MCContactBinding> MCgroup:MCgroups.values()){
+            String MCkind=MCgroup.get(0).MCkind();Map<String,String> MCfields=new LinkedHashMap<>();
+            for(MCContactBinding MCb:MCgroup){String MCvalue=MCvalues.getOrDefault(MCb.MCvariableKey(),"").trim();if(!MCvalue.isBlank())MCfields.put(MCb.MCfield(),MCvalue);}
+            String MCname=MCfields.getOrDefault("given",MCfields.getOrDefault("nombre_completo","")),MCnumber=MCfields.getOrDefault("number","");
+            String MCdocType=MCfields.getOrDefault("document_type","");
+            if("Empresa".equals(MCkind))MCdocType="RUC";
+            else if(MCdocType.isBlank()&&MCnumber.matches("\\d{8}"))MCdocType="DNI";
+            if(!MCvalidIdentifier(MCkind,MCdocType,MCnumber)&&!(MCgroup.get(0).MCgroupKey().startsWith("persona:")&&MCnumber.isBlank()&&!MCname.isBlank())){MCskipped++;continue;}
             try{
-                Map<String,String> mcExtras=new LinkedHashMap<>();String mcPerson=MCDocumentEngine.mcPersonaKey(mcGroup.get(0).mcVariableKey());mcValues.forEach((mcKey,mcValue)->{if(MCDocumentEngine.mcPersonaKey(mcKey).equals(mcPerson))mcExtras.put(MCDocumentEngine.mcBaseKey(mcKey),mcValue);});
-                for(MCContactBinding mcB:mcGroup){String mcValue=mcValues.getOrDefault(mcB.mcVariableKey(),"").trim();if(!mcValue.isBlank()){
-                    mcExtras.put(MCDocumentEngine.mcBaseKey(mcB.mcVariableKey()),mcValue);
-                    String mcCanonical=switch(mcB.mcField()){case "number"->"numero";case "given"->"Empresa".equals(mcKind)?"razon_social":"nombres";case "family"->"apellidos";case "address"->"direccion";case "representatives"->"representantes";default->mcB.mcField().startsWith("extra:")?MCDocumentEngine.mcBaseKey(mcB.mcVariableKey()):mcB.mcField();};
-                    mcExtras.put(mcCanonical,mcValue);
+                Map<String,String> MCextras=new LinkedHashMap<>();String MCperson=MCDocumentEngine.MCpersonaKey(MCgroup.get(0).MCvariableKey());MCvalues.forEach((MCkey,MCvalue)->{if(MCDocumentEngine.MCpersonaKey(MCkey).equals(MCperson))MCextras.put(MCDocumentEngine.MCbaseKey(MCkey),MCvalue);});
+                for(MCContactBinding MCb:MCgroup){String MCvalue=MCvalues.getOrDefault(MCb.MCvariableKey(),"").trim();if(!MCvalue.isBlank()){
+                    MCextras.put(MCDocumentEngine.MCbaseKey(MCb.MCvariableKey()),MCvalue);
+                    String MCcanonical=switch(MCb.MCfield()){case "number"->"numero";case "given"->"Empresa".equals(MCkind)?"razon_social":"nombres";case "family"->"apellidos";case "address"->"direccion";case "representatives"->"representantes";default->MCb.MCfield().startsWith("extra:")?MCDocumentEngine.MCbaseKey(MCb.MCvariableKey()):MCb.MCfield();};
+                    MCextras.put(MCcanonical,MCvalue);
                 }}
-                String mcFamily=mcFields.getOrDefault("family",(mcFields.getOrDefault("apellido_paterno","")+" "+mcFields.getOrDefault("apellido_materno","")).trim());
-                MCContact mcIncoming=new MCContact(0,mcKind,mcName,mcFamily,mcDocType,mcNumber,mcFields.getOrDefault("address",""),mcFields.getOrDefault("representatives",""),mcJSON.writeValueAsString(mcExtras));
-                MCContact mcExisting=mcData.mcMatchingContact(mcIncoming);
-                if(mcExisting==null){mcData.mcUpsertContact(mcIncoming);mcCreated++;continue;}
-                boolean mcFullNameOnly=!mcFields.containsKey("given")&&mcFields.containsKey("nombre_completo")&&!mcFields.containsKey("family")&&!mcFields.containsKey("apellido_paterno")&&!mcFields.containsKey("apellido_materno");
-                boolean mcSameFullName=MCStudioData.mcNormalized(mcName).equals(MCStudioData.mcNormalized(mcExisting.mcGiven()+" "+mcExisting.mcFamily()));
-                if(mcFullNameOnly&&mcSameFullName)mcIncoming=new MCContact(0,mcKind,mcExisting.mcGiven(),mcExisting.mcFamily(),mcDocType,mcNumber,mcIncoming.mcAddress(),mcIncoming.mcRepresentatives(),mcIncoming.mcExtrasJson());
-                MCContact mcMerged=MCStudioData.mcMergeContact(mcExisting,mcIncoming);
-                if(mcFullNameOnly&&!mcSameFullName)mcMerged=new MCContact(mcMerged.mcId(),mcMerged.mcKind(),mcName,"",mcMerged.mcDocumentType(),mcMerged.mcNumber(),mcMerged.mcAddress(),mcMerged.mcRepresentatives(),mcMerged.mcExtrasJson());
-                if(mcExisting.equals(mcMerged)){mcUnchanged++;continue;}
-                mcData.mcSaveContact(mcMerged);mcUpdated++;
-            }catch(java.io.IOException mcE){throw new SQLException("No se pudo guardar el cliente.",mcE);}
+                String MCfamily=MCfields.getOrDefault("family",(MCfields.getOrDefault("apellido_paterno","")+" "+MCfields.getOrDefault("apellido_materno","")).trim());
+                MCContact MCincoming=new MCContact(0,MCkind,MCname,MCfamily,MCdocType,MCnumber,MCfields.getOrDefault("address",""),MCfields.getOrDefault("representatives",""),MCJSON.writeValueAsString(MCextras));
+                MCContact MCexisting=MCdata.MCmatchingContact(MCincoming);
+                if(MCexisting==null){MCdata.MCupsertContact(MCincoming);MCcreated++;continue;}
+                boolean MCfullNameOnly=!MCfields.containsKey("given")&&MCfields.containsKey("nombre_completo")&&!MCfields.containsKey("family")&&!MCfields.containsKey("apellido_paterno")&&!MCfields.containsKey("apellido_materno");
+                boolean MCsameFullName=MCStudioData.MCnormalized(MCname).equals(MCStudioData.MCnormalized(MCexisting.MCgiven()+" "+MCexisting.MCfamily()));
+                if(MCfullNameOnly&&MCsameFullName)MCincoming=new MCContact(0,MCkind,MCexisting.MCgiven(),MCexisting.MCfamily(),MCdocType,MCnumber,MCincoming.MCaddress(),MCincoming.MCrepresentatives(),MCincoming.MCextrasJson());
+                MCContact MCmerged=MCStudioData.MCmergeContact(MCexisting,MCincoming);
+                if(MCfullNameOnly&&!MCsameFullName)MCmerged=new MCContact(MCmerged.MCid(),MCmerged.MCkind(),MCname,"",MCmerged.MCdocumentType(),MCmerged.MCnumber(),MCmerged.MCaddress(),MCmerged.MCrepresentatives(),MCmerged.MCextrasJson());
+                if(MCexisting.equals(MCmerged)){MCunchanged++;continue;}
+                MCdata.MCsaveContact(MCmerged);MCupdated++;
+            }catch(java.io.IOException MCe){throw new SQLException("No se pudo guardar el cliente.",MCe);}
         }
-        return new MCResult(mcCreated,mcUpdated,mcUnchanged,mcSkipped);
+        return new MCResult(MCcreated,MCupdated,MCunchanged,MCskipped);
     }
 
-    public static List<MCContactBinding> mcFormBindings(long mcTemplateId,List<MCVariable> mcVariables,List<MCContactBinding> mcExplicit,List<MCApiContext> mcContexts,Map<String,MCApiBinding> mcApi){
-        Map<String,List<MCVariable>> mcScopes=new LinkedHashMap<>();for(MCVariable mcVariable:mcVariables)mcScopes.computeIfAbsent(MCDocumentEngine.mcPersonaKey(mcVariable.mcKey()),mcK->new ArrayList<>()).add(mcVariable);List<MCContactBinding> mcResult=new ArrayList<>();
-        for(var mcScope:mcScopes.entrySet()){
-            String mcPerson=mcScope.getKey();if(mcPerson.isEmpty()){mcResult.addAll(mcBaseFormBindings(mcTemplateId,mcScope.getValue(),mcExplicit.stream().filter(mcB->MCDocumentEngine.mcPersonaKey(mcB.mcVariableKey()).isEmpty()).toList(),mcContexts.stream().filter(mcC->MCDocumentEngine.mcPersonaKey(mcC.mcVariableKey()).isEmpty()).toList(),mcApi));continue;}
-            List<MCVariable> mcLocal=mcScope.getValue().stream().map(mcV->new MCVariable(mcV.mcId(),mcV.mcTemplateId(),MCDocumentEngine.mcBaseKey(mcV.mcKey()),mcV.mcLabel(),mcV.mcType(),mcV.mcDefaultValue(),mcV.mcRequired(),mcV.mcPosition())).toList();
-            List<MCContactBinding> mcLocalBindings=mcExplicit.stream().filter(mcB->mcPerson.equals(MCDocumentEngine.mcPersonaKey(mcB.mcVariableKey()))).map(mcB->new MCContactBinding(mcB.mcId(),mcTemplateId,mcB.mcGroupKey(),mcB.mcKind(),mcB.mcField(),MCDocumentEngine.mcBaseKey(mcB.mcVariableKey()))).toList();
-            List<MCApiContext> mcLocalContexts=mcContexts.stream().filter(mcC->mcPerson.equals(MCDocumentEngine.mcPersonaKey(mcC.mcVariableKey()))).map(mcC->new MCApiContext(mcTemplateId,MCDocumentEngine.mcBaseKey(mcC.mcVariableKey()),mcC.mcGroupKey(),mcC.mcService(),mcC.mcSource())).toList();
-            Map<String,MCApiBinding> mcLocalApi=new LinkedHashMap<>();mcApi.forEach((mcKey,mcValue)->{if(mcPerson.equals(MCDocumentEngine.mcPersonaKey(mcKey)))mcLocalApi.put(MCDocumentEngine.mcBaseKey(mcKey),mcValue);});
-            List<MCContactBinding> mcBindings=new ArrayList<>(mcBaseFormBindings(mcTemplateId,mcLocal,mcLocalBindings,mcLocalContexts,mcLocalApi));
-            if(mcBindings.isEmpty())for(MCVariable mcV:mcLocal){String mcField=mcManualField(mcV);mcBindings.add(new MCContactBinding(0,mcTemplateId,"persona:"+mcPerson,"Persona",mcField==null?"extra:"+mcV.mcKey():mcField,mcV.mcKey()));}
-            for(MCContactBinding mcB:mcBindings)mcResult.add(new MCContactBinding(0,mcTemplateId,"persona:"+mcPerson,mcB.mcKind(),mcB.mcField(),MCDocumentEngine.mcQualify(mcPerson,mcB.mcVariableKey())));
-        }return mcResult;
+    public static List<MCContactBinding> MCformBindings(long MCtemplateId,List<MCVariable> MCvariables,List<MCContactBinding> MCexplicit,List<MCApiContext> MCcontexts,Map<String,MCApiBinding> MCapi){
+        Map<String,List<MCVariable>> MCscopes=new LinkedHashMap<>();for(MCVariable MCvariable:MCvariables)MCscopes.computeIfAbsent(MCDocumentEngine.MCpersonaKey(MCvariable.MCkey()),MCk->new ArrayList<>()).add(MCvariable);List<MCContactBinding> MCresult=new ArrayList<>();
+        for(var MCscope:MCscopes.entrySet()){
+            String MCperson=MCscope.getKey();if(MCperson.isEmpty()){MCresult.addAll(MCbaseFormBindings(MCtemplateId,MCscope.getValue(),MCexplicit.stream().filter(MCb->MCDocumentEngine.MCpersonaKey(MCb.MCvariableKey()).isEmpty()).toList(),MCcontexts.stream().filter(MCc->MCDocumentEngine.MCpersonaKey(MCc.MCvariableKey()).isEmpty()).toList(),MCapi));continue;}
+            List<MCVariable> MClocal=MCscope.getValue().stream().map(MCv->new MCVariable(MCv.MCid(),MCv.MCtemplateId(),MCDocumentEngine.MCbaseKey(MCv.MCkey()),MCv.MClabel(),MCv.MCtype(),MCv.MCdefaultValue(),MCv.MCrequired(),MCv.MCposition())).toList();
+            List<MCContactBinding> MClocalBindings=MCexplicit.stream().filter(MCb->MCperson.equals(MCDocumentEngine.MCpersonaKey(MCb.MCvariableKey()))).map(MCb->new MCContactBinding(MCb.MCid(),MCtemplateId,MCb.MCgroupKey(),MCb.MCkind(),MCb.MCfield(),MCDocumentEngine.MCbaseKey(MCb.MCvariableKey()))).toList();
+            List<MCApiContext> MClocalContexts=MCcontexts.stream().filter(MCc->MCperson.equals(MCDocumentEngine.MCpersonaKey(MCc.MCvariableKey()))).map(MCc->new MCApiContext(MCtemplateId,MCDocumentEngine.MCbaseKey(MCc.MCvariableKey()),MCc.MCgroupKey(),MCc.MCservice(),MCc.MCsource())).toList();
+            Map<String,MCApiBinding> MClocalApi=new LinkedHashMap<>();MCapi.forEach((MCkey,MCvalue)->{if(MCperson.equals(MCDocumentEngine.MCpersonaKey(MCkey)))MClocalApi.put(MCDocumentEngine.MCbaseKey(MCkey),MCvalue);});
+            List<MCContactBinding> MCbindings=new ArrayList<>(MCbaseFormBindings(MCtemplateId,MClocal,MClocalBindings,MClocalContexts,MClocalApi));
+            if(MCbindings.isEmpty())for(MCVariable MCv:MClocal){String MCfield=MCmanualField(MCv);MCbindings.add(new MCContactBinding(0,MCtemplateId,"persona:"+MCperson,"Persona",MCfield==null?"extra:"+MCv.MCkey():MCfield,MCv.MCkey()));}
+            for(MCContactBinding MCb:MCbindings)MCresult.add(new MCContactBinding(0,MCtemplateId,"persona:"+MCperson,MCb.MCkind(),MCb.MCfield(),MCDocumentEngine.MCqualify(MCperson,MCb.MCvariableKey())));
+        }return MCresult;
     }
-    private static List<MCContactBinding> mcBaseFormBindings(long mcTemplateId,List<MCVariable> mcVariables,List<MCContactBinding> mcExplicit,
-                                                     List<MCApiContext> mcContexts,Map<String,MCApiBinding> mcApi){
-        List<MCContactBinding> mcResult=new ArrayList<>(mcExplicit);
-        Map<String,String> mcSources=new LinkedHashMap<>(),mcServices=new LinkedHashMap<>();
-        for(MCVariable mcV:mcVariables){
-            MCApiContext mcContext=mcContexts.stream().filter(mcC->mcC.mcVariableKey().equals(mcV.mcKey())).findFirst().orElse(null);
-            MCContactBinding mcBound=mcExplicit.stream().filter(mcB->mcB.mcVariableKey().equals(mcV.mcKey())).findFirst().orElse(null);
-            MCApiBinding mcBinding=mcApi.get(mcV.mcKey());
-            String mcService;
-            if(mcContext!=null)mcService=mcContext.mcSource()?mcContext.mcService():null;
-            else if(mcBound!=null)mcService="number".equals(mcBound.mcField())?("Empresa".equals(mcBound.mcKind())?"RUC":"DNI"):null;
-            else if(List.of("DNI","RUC").contains(mcV.mcType()))mcService=mcV.mcType();
-            else if(mcBinding!=null)mcService="numero".equals(MCApiFieldCatalog.mcCanonical(mcBinding.mcService(),mcBinding.mcPath()))?mcBinding.mcService():null;
-            else mcService=mcIdentifierService(mcV);
-            if(mcService==null)continue;
-            String mcGroup=mcContext!=null?mcContext.mcGroupKey():mcBound!=null?mcBound.mcGroupKey():"document:"+mcV.mcKey();
-            mcSources.put(mcV.mcKey(),mcGroup);mcServices.put(mcV.mcKey(),mcService);
-            if(mcBound==null)mcResult.add(new MCContactBinding(0,mcTemplateId,mcGroup,"RUC".equals(mcService)?"Empresa":"Persona","number",mcV.mcKey()));
+    private static List<MCContactBinding> MCbaseFormBindings(long MCtemplateId,List<MCVariable> MCvariables,List<MCContactBinding> MCexplicit,
+                                                     List<MCApiContext> MCcontexts,Map<String,MCApiBinding> MCapi){
+        List<MCContactBinding> MCresult=new ArrayList<>(MCexplicit);
+        Map<String,String> MCsources=new LinkedHashMap<>(),MCservices=new LinkedHashMap<>();
+        for(MCVariable MCv:MCvariables){
+            MCApiContext MCcontext=MCcontexts.stream().filter(MCc->MCc.MCvariableKey().equals(MCv.MCkey())).findFirst().orElse(null);
+            MCContactBinding MCbound=MCexplicit.stream().filter(MCb->MCb.MCvariableKey().equals(MCv.MCkey())).findFirst().orElse(null);
+            MCApiBinding MCbinding=MCapi.get(MCv.MCkey());
+            String MCservice;
+            if(MCcontext!=null)MCservice=MCcontext.MCsource()?MCcontext.MCservice():null;
+            else if(MCbound!=null)MCservice="number".equals(MCbound.MCfield())?("Empresa".equals(MCbound.MCkind())?"RUC":"DNI"):null;
+            else if(List.of("DNI","RUC").contains(MCv.MCtype()))MCservice=MCv.MCtype();
+            else if(MCbinding!=null)MCservice="numero".equals(MCApiFieldCatalog.MCcanonical(MCbinding.MCservice(),MCbinding.MCpath()))?MCbinding.MCservice():null;
+            else MCservice=MCidentifierService(MCv);
+            if(MCservice==null)continue;
+            String MCgroup=MCcontext!=null?MCcontext.MCgroupKey():MCbound!=null?MCbound.MCgroupKey():"document:"+MCv.MCkey();
+            MCsources.put(MCv.MCkey(),MCgroup);MCservices.put(MCv.MCkey(),MCservice);
+            if(MCbound==null)MCresult.add(new MCContactBinding(0,MCtemplateId,MCgroup,"RUC".equals(MCservice)?"Empresa":"Persona","number",MCv.MCkey()));
         }
-        for(MCVariable mcV:mcVariables){
-            if(mcResult.stream().anyMatch(mcB->mcB.mcVariableKey().equals(mcV.mcKey())))continue;
-            MCApiContext mcContext=mcContexts.stream().filter(mcC->mcC.mcVariableKey().equals(mcV.mcKey())).findFirst().orElse(null);
-            MCApiBinding mcBinding=mcApi.get(mcV.mcKey());
-            Set<String> mcCandidates=new LinkedHashSet<>();
-            for(var mcSource:mcSources.entrySet())if((mcContext==null||mcContext.mcGroupKey().equals(mcSource.getValue())&&mcContext.mcService().equals(mcServices.get(mcSource.getKey())))&&(mcBinding==null||mcBinding.mcService().equals(mcServices.get(mcSource.getKey()))))mcCandidates.add(mcSource.getValue());
-            if(mcCandidates.size()!=1)continue;
-            String mcGroup=mcCandidates.iterator().next();String mcSource=mcSources.keySet().stream().filter(mcK->mcSources.get(mcK).equals(mcGroup)).findFirst().orElseThrow();String mcService=mcServices.get(mcSource);
-            String mcCanonical=mcBinding==null?null:MCApiFieldCatalog.mcCanonical(mcService,mcBinding.mcPath());
-            String mcField=mcCanonical==null?mcManualField(mcV):switch(mcCanonical){
-                case "nombres","razon_social"->"given";case "apellidos"->"family";case "direccion","direccion_completa"->"address";case "representantes"->"representatives";case "numero"->"number";default->mcCanonical;
+        for(MCVariable MCv:MCvariables){
+            if(MCresult.stream().anyMatch(MCb->MCb.MCvariableKey().equals(MCv.MCkey())))continue;
+            MCApiContext MCcontext=MCcontexts.stream().filter(MCc->MCc.MCvariableKey().equals(MCv.MCkey())).findFirst().orElse(null);
+            MCApiBinding MCbinding=MCapi.get(MCv.MCkey());
+            Set<String> MCcandidates=new LinkedHashSet<>();
+            for(var MCsource:MCsources.entrySet())if((MCcontext==null||MCcontext.MCgroupKey().equals(MCsource.getValue())&&MCcontext.MCservice().equals(MCservices.get(MCsource.getKey())))&&(MCbinding==null||MCbinding.MCservice().equals(MCservices.get(MCsource.getKey()))))MCcandidates.add(MCsource.getValue());
+            if(MCcandidates.size()!=1)continue;
+            String MCgroup=MCcandidates.iterator().next();String MCsource=MCsources.keySet().stream().filter(MCk->MCsources.get(MCk).equals(MCgroup)).findFirst().orElseThrow();String MCservice=MCservices.get(MCsource);
+            String MCcanonical=MCbinding==null?null:MCApiFieldCatalog.MCcanonical(MCservice,MCbinding.MCpath());
+            String MCfield=MCcanonical==null?MCmanualField(MCv):switch(MCcanonical){
+                case "nombres","razon_social"->"given";case "apellidos"->"family";case "direccion","direccion_completa"->"address";case "representantes"->"representatives";case "numero"->"number";default->MCcanonical;
             };
-            boolean mcDuplicate=false;for(MCContactBinding mcB:mcResult)if(mcB.mcGroupKey().equals(mcGroup)&&mcB.mcField().equals(mcField))mcDuplicate=true;
-            if(mcField==null||mcDuplicate)mcField="extra:"+mcV.mcKey();
-            mcResult.add(new MCContactBinding(0,mcTemplateId,mcGroup,"RUC".equals(mcService)?"Empresa":"Persona",mcField,mcV.mcKey()));
+            boolean MCduplicate=false;for(MCContactBinding MCb:MCresult)if(MCb.MCgroupKey().equals(MCgroup)&&MCb.MCfield().equals(MCfield))MCduplicate=true;
+            if(MCfield==null||MCduplicate)MCfield="extra:"+MCv.MCkey();
+            MCresult.add(new MCContactBinding(0,MCtemplateId,MCgroup,"RUC".equals(MCservice)?"Empresa":"Persona",MCfield,MCv.MCkey()));
         }
-        return mcResult;
+        return MCresult;
     }
-    static String mcIdentifierService(MCVariable mcVariable){
-        if(List.of("DNI","RUC").contains(mcVariable.mcType()))return mcVariable.mcType();
-        String mcText=mcNormalizedName(mcVariable);
-        if(mcText.contains("ruc"))return "RUC";
-        return mcText.contains("dni")?"DNI":null;
+    static String MCidentifierService(MCVariable MCvariable){
+        if(List.of("DNI","RUC").contains(MCvariable.MCtype()))return MCvariable.MCtype();
+        String MCtext=MCnormalizedName(MCvariable);
+        if(MCtext.contains("ruc"))return "RUC";
+        return MCtext.contains("dni")?"DNI":null;
     }
-    private static String mcNormalizedName(MCVariable mcVariable){
-        return Normalizer.normalize(mcVariable.mcKey()+" "+mcVariable.mcLabel(),Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("([a-z])([A-Z])","$1 $2").toLowerCase(Locale.ROOT).replace('_',' ');
+    private static String MCnormalizedName(MCVariable MCvariable){
+        return Normalizer.normalize(MCvariable.MCkey()+" "+MCvariable.MClabel(),Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("([a-z])([A-Z])","$1 $2").toLowerCase(Locale.ROOT).replace('_',' ');
     }
-    private static String mcManualField(MCVariable mcV){
-        String mcText=mcNormalizedName(mcV);
-        if("Domicilio".equals(mcV.mcType())||mcText.matches(".*\\b(direccion|domicilio)\\b.*"))return "address";
-        if(mcText.matches(".*\\b(representantes?)\\b.*"))return "representatives";
-        if(mcText.matches(".*\\b(apellido paterno|primer apellido)\\b.*"))return "apellido_paterno";
-        if(mcText.matches(".*\\b(apellido materno|segundo apellido)\\b.*"))return "apellido_materno";
-        if(mcText.matches(".*\\b(apellidos?)\\b.*"))return "family";
-        if(mcText.matches(".*\\b(nombre completo|nombres completo|nombres com)\\b.*"))return "nombre_completo";
-        if(mcText.matches(".*\\b(nombres?|razon social|cliente|empresa|dirigido|solicitante|destinatario|arrendador|arrendatario)\\b.*"))return "given";
+    private static String MCmanualField(MCVariable MCv){
+        String MCtext=MCnormalizedName(MCv);
+        if("Domicilio".equals(MCv.MCtype())||MCtext.matches(".*\\b(direccion|domicilio)\\b.*"))return "address";
+        if(MCtext.matches(".*\\b(representantes?)\\b.*"))return "representatives";
+        if(MCtext.matches(".*\\b(apellido paterno|primer apellido)\\b.*"))return "apellido_paterno";
+        if(MCtext.matches(".*\\b(apellido materno|segundo apellido)\\b.*"))return "apellido_materno";
+        if(MCtext.matches(".*\\b(apellidos?)\\b.*"))return "family";
+        if(MCtext.matches(".*\\b(nombre completo|nombres completo|nombres com)\\b.*"))return "nombre_completo";
+        if(MCtext.matches(".*\\b(nombres?|razon social|cliente|empresa|dirigido|solicitante|destinatario|arrendador|arrendatario)\\b.*"))return "given";
         return null;
     }
-    private static boolean mcValidIdentifier(String mcKind,String mcType,String mcNumber){
-        if("Empresa".equals(mcKind))return mcNumber.matches("\\d{11}");
-        if(mcType.isBlank())return false;
-        if("DNI".equalsIgnoreCase(mcType))return mcNumber.matches("\\d{8}");
-        return mcNumber.matches("[A-Za-z0-9-]{4,30}");
+    private static boolean MCvalidIdentifier(String MCkind,String MCtype,String MCnumber){
+        if("Empresa".equals(MCkind))return MCnumber.matches("\\d{11}");
+        if(MCtype.isBlank())return false;
+        if("DNI".equalsIgnoreCase(MCtype))return MCnumber.matches("\\d{8}");
+        return MCnumber.matches("[A-Za-z0-9-]{4,30}");
     }
-    private static String mcPrefer(String mcNewer,String mcOlder){return mcNewer==null||mcNewer.isBlank()?mcOlder:mcNewer;}
+    private static String MCprefer(String MCnewer,String MColder){return MCnewer==null||MCnewer.isBlank()?MColder:MCnewer;}
 }
