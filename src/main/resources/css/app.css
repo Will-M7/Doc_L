@@ -47,7 +47,7 @@
 }
 
 .marca-logo {
-    -fx-background-color: -color-accent-emphasis;
+    -fx-background-color: white;
     -fx-background-radius: 11;
     -fx-min-width: 38;
     -fx-min-height: 38;

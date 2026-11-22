@@ -301,7 +301,8 @@ public final class StudioWindow {
     private void buildShell() {
         root.getStyleClass().add("app");
         sidebar=new VBox(6);sidebar.getStyleClass().add("sidebar");sidebar.setPrefWidth(242);sidebar.setMinWidth(242);
-        StackPane logo=new StackPane(new FontIcon("fth-layers"));logo.getStyleClass().add("marca-logo");
+        ImageView logoImage=new ImageView(new Image(StudioWindow.class.getResourceAsStream("/img/icon-128.png")));logoImage.setFitWidth(34);logoImage.setFitHeight(34);logoImage.setPreserveRatio(true);logoImage.setSmooth(true);
+        StackPane logo=new StackPane(logoImage);logo.getStyleClass().add("marca-logo");
         brandTexts=new VBox(1,new Label("Gestion"),new Label("Panel administrativo"));
         brandTexts.getChildren().get(0).getStyleClass().add("marca-titulo");brandTexts.getChildren().get(1).getStyleClass().add("marca-subtitulo");
         HBox brand=new HBox(12,logo,brandTexts);brand.getStyleClass().add("marca");sidebar.getChildren().add(brand);
