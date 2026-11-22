@@ -6,26 +6,33 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 
-/** Additional local records. Connections are short lived so backups can safely replace the database. */
+/** @author MC */
 public final class StudioData {
     private static final ObjectMapper JSON=new ObjectMapper();
+    /** @author MC */
     public record Contact(long id,String kind,String given,String family,String documentType,String number,
                           String address,String representatives,String extrasJson) {
         @Override public String toString(){return ("Empresa".equals(kind)?given:given+" "+family)+" · "+number;}
     }
+    /** @author MC */
     public record History(long id,String title,Long templateId,int templateVersion,String generatedAt,
                           String valuesJson,String docxPath,String pdfPath,byte[] docx,byte[] pdf){
         @Override public String toString(){return generatedAt+" · "+title;}
     }
+    /** @author MC */
     public record ClientDocument(long id,long contactId,String title,String fileName,String extension,
                                  String sourceType,byte[] contentBytes,String updatedAt) {}
+    /** @author MC */
     public record Mapping(long id,long templateId,String sourceKey,String apiField,String targetKey){
         @Override public String toString(){return sourceKey+" → "+apiField+" → "+targetKey;}
     }
+    /** @author MC */
     public record ApiBinding(long definitionId,String service,String path){}
+    /** @author MC */
     public record ApiContext(long templateId,String variableKey,String groupKey,String service,boolean source){
         @Override public String toString(){return groupKey+" · "+service+" · "+variableKey+(source?" (número a consultar)":"");}
     }
+    /** @author MC */
     public record ContactBinding(long id,long templateId,String groupKey,String kind,String field,String variableKey){
         @Override public String toString(){return groupKey+" · "+kind+" · "+field+" → {{"+variableKey+"}}";}
     }
@@ -53,7 +60,6 @@ public final class StudioData {
         }
     }
 
-    /** Import historic snapshots once. Their immutable source identity survives replacements. */
     public List<ClientDocument> clientDocuments(long contactId)throws SQLException{
         Contact contact=contacts().stream().filter(x->x.id()==contactId).findFirst().orElse(null);
         if(contact==null)return List.of();
@@ -107,7 +113,6 @@ public final class StudioData {
             var fields=values.fields();while(fields.hasNext()){
                 var field=fields.next();if(!field.getValue().isValueNode())continue;
                 String key=DocumentEngine.baseKey(field.getKey());
-                // Independent fields must never identify a person in a historic document.
                 if(independent.contains(variableKey(key)))continue;
                 scopes.computeIfAbsent(DocumentEngine.personaKey(field.getKey()),ignored->new LinkedHashMap<>()).put(variableKey(key),field.getValue().asText(""));
             }
@@ -129,7 +134,6 @@ public final class StudioData {
             }return false;
         }catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new SQLException("Valores del historial inválidos.",e);}
     }
-    /** Rebuild old NOT NULL / RESTRICT schemas without changing any document snapshot. */
     static void migrateHistory(Connection c)throws SQLException{
         boolean exists=false,notNull=false,setNull=false;List<String> objects=new ArrayList<>();
         try(Statement s=c.createStatement();ResultSet r=s.executeQuery("PRAGMA table_info(document_history)")){
@@ -173,7 +177,6 @@ public final class StudioData {
             }catch(SQLException e){c.rollback();throw e;}
         }
     }
-    /** Merge non-empty automatic input while retaining data absent from partial responses. */
     public synchronized Contact upsertContact(Contact incoming)throws SQLException{
         Contact existing=matchingContact(incoming);
         return saveContact(existing==null?incoming:mergeContact(existing,incoming));
@@ -279,7 +282,7 @@ public final class StudioData {
             try(ResultSet r=s.executeQuery()){return r.next()?readContact(r):null;}
         }
     }
-    private static Contact readContact(ResultSet r)throws SQLException{return new Contact(r.getLong("id"),r.getString("kind"),r.getString("given"),r.getString("family"),r.getString("document_type"),r.getString("number"),r.getString("address"),r.getString("representatives"),r.getString("extras_json"));}    public record Suggestion(String value,Map<String,String> complements,String origin){}
+    private static Contact readContact(ResultSet r)throws SQLException{return new Contact(r.getLong("id"),r.getString("kind"),r.getString("given"),r.getString("family"),r.getString("document_type"),r.getString("number"),r.getString("address"),r.getString("representatives"),r.getString("extras_json"));}    /** @author MC */ public record Suggestion(String value,Map<String,String> complements,String origin){}
     public static String normalized(String value){return java.text.Normalizer.normalize(value==null?"":value,java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").strip().toLowerCase(Locale.ROOT).replaceAll("\\s+"," ");}
     public static String variableKey(String value){return normalized(value).replace(' ','_');}
     public static boolean personVariable(String key){String k=variableKey(key);return Set.of("nombre","nombres","nombres_com","nombres_completo","nombres_completos","nombre_completo","nombre_cliente","razon_social","persona","cliente","solicitante","dirigido","destinatario","beneficiario").contains(k)||k.startsWith("dirigido_")||k.startsWith("solicitante_");}
@@ -339,7 +342,6 @@ public final class StudioData {
         }
         List<Suggestion> out=new ArrayList<>();for(var entry:results.entrySet()){out.add(new Suggestion(display.get(entry.getKey()),Map.copyOf(entry.getValue()),origins.get(entry.getKey())));if(out.size()==10)break;}return out;
     }
-    /** Learn only pairs present in this document; names update the existing client without losing DNI/API data. */
     public void learnComplements(List<DocumentStore.Definition> definitions,List<DocumentStore.Complement> links,Map<String,String> values)throws SQLException{
         Map<Long,DocumentStore.Definition> defs=new HashMap<>();definitions.forEach(d->defs.put(d.id(),d));Map<String,String> normalizedValues=new HashMap<>();values.forEach((k,v)->normalizedValues.put(variableKey(k),v));
         for(var link:links){var source=defs.get(link.sourceDefId());var target=defs.get(link.targetDefId());if(source==null||target==null)continue;String a=normalizedValues.get(variableKey(source.key())),b=normalizedValues.get(variableKey(target.key()));if(a==null||b==null||a.isBlank()||b.isBlank())continue;
@@ -355,7 +357,6 @@ public final class StudioData {
             upsertContact(incoming);
         }catch(Exception e){if(e instanceof SQLException sql)throw sql;throw new SQLException("No se pudo actualizar el cliente del complemento.",e);}
     }
-    /** Remove legacy full identity uniqueness, which incorrectly treats all undocumented people as one. */
     private static void migrateContact(Connection c)throws SQLException{
         List<String> indexes=new ArrayList<>();boolean rebuild=false;
         try(Statement s=c.createStatement();ResultSet r=s.executeQuery("PRAGMA index_list(contact)")){while(r.next())if(r.getInt("unique")!=0)indexes.add(r.getString("name"));}

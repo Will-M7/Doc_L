@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-/** The existing desktop launcher opens the offline document studio. */
+/** @author MC */
 public class JavaFxApplication extends Application {
     @Override public void start(Stage stage) throws Exception {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());

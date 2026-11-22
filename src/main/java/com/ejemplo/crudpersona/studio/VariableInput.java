@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
-/** Input rules; legacy types remain readable without rewriting saved values. */
+/** @author MC */
 public final class VariableInput {
     public static final List<String> TYPES=List.of("Texto","Número","Mixto","Fecha","Número entero","Número decimal");
     private VariableInput(){}

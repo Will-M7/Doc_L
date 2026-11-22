@@ -14,6 +14,7 @@ import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.*;
 
+/** @author MC */
 class WordDocumentImporterTest {
     private static final String DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
     @TempDir Path directory;
@@ -134,7 +135,6 @@ class WordDocumentImporterTest {
     }
 
     private Path legacyFile(String extension) throws IOException {
-        // Fixture propio generado desde OOXML con LibreOffice en formato Word 97; no requiere LO para los tests offline.
         try (InputStream input = getClass().getResourceAsStream("legacy-word.doc.bin")) {
             assertThat(input).isNotNull();
             return Files.write(directory.resolve("binario." + extension), input.readAllBytes());

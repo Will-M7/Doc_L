@@ -8,6 +8,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/** @author MC */
 class PartialGenerationTest {
     @Test void missingBlankAndNullValuesBecomeEmptyInBodyTablesHeadersAndFooters()throws Exception{
         byte[] template;

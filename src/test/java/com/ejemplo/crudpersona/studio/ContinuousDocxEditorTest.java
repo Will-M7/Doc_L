@@ -5,6 +5,7 @@ import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
+/** @author MC */
 class ContinuousDocxEditorTest {
     @Test void tabsRoundTripAsOoxmlElementsWithoutChangingSpacesTextOrOrder()throws Exception{
         try(XWPFDocument doc=new XWPFDocument()){

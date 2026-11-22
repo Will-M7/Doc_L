@@ -9,8 +9,9 @@ import java.sql.SQLException;
 import java.text.Normalizer;
 import java.util.*;
 
-/** Shared local-first contact values and automatic non-empty merging. */
+/** @author MC */
 public final class ContactReuse {
+    /** @author MC */
     public record Result(int created,int updated,int unchanged,int skipped){}
     private static final ObjectMapper JSON=new ObjectMapper();
     private ContactReuse(){}
@@ -29,7 +30,6 @@ public final class ContactReuse {
         return values;
     }
 
-    /** Both canonical values and every provider path survive partial responses and offline reuse. */
     public static Contact fromApi(LookupRouter.Result result)throws Exception{
         Map<String,String> fields=new LinkedHashMap<>(result.raw());fields.putAll(result.values());
         boolean company="RUC".equals(result.service());if(!company)ApiFieldCatalog.normalizePersonName(fields);
@@ -44,7 +44,7 @@ public final class ContactReuse {
 
     public static Map<String,String> apiValues(Contact contact){
         Map<String,String> values=new LinkedHashMap<>();
-        try{JsonNode extras=JSON.readTree(contact.extrasJson());if(extras!=null)flatten(extras,"",values);}catch(Exception ignored){/* Legacy base fields remain usable. */}
+        try{JsonNode extras=JSON.readTree(contact.extrasJson());if(extras!=null)flatten(extras,"",values);}catch(Exception ignored){}
         String service="Empresa".equals(contact.kind())?"RUC":"DNI";
         for(String provider:List.of("Factiliza","APIsPERU"))ApiFieldCatalog.normalize(provider,service,values).forEach(values::putIfAbsent);
         values.put("numero",contact.number());
@@ -110,7 +110,6 @@ public final class ContactReuse {
         return new Result(created,updated,unchanged,skipped);
     }
 
-    /** Explicit associations win; implicit fields are used only for an unambiguous query group. */
     public static List<ContactBinding> formBindings(long templateId,List<Variable> variables,List<ContactBinding> explicit,List<ApiContext> contexts,Map<String,ApiBinding> api){
         Map<String,List<Variable>> scopes=new LinkedHashMap<>();for(Variable variable:variables)scopes.computeIfAbsent(DocumentEngine.personaKey(variable.key()),k->new ArrayList<>()).add(variable);List<ContactBinding> result=new ArrayList<>();
         for(var scope:scopes.entrySet()){

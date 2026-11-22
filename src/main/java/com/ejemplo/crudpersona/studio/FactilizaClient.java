@@ -11,14 +11,16 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/** Exact routes and response envelope from Factiliza DNI/RUC consultation docs. */
+/** @author MC */
 public final class FactilizaClient {
+    /** @author MC */
     public static final class HttpStatusException extends IOException {
         private final int statusCode;private final long retryAfterSeconds;
         public HttpStatusException(int statusCode,long retryAfterSeconds,String message){super(message);this.statusCode=statusCode;this.retryAfterSeconds=retryAfterSeconds;}
         public int statusCode(){return statusCode;}
         public long retryAfterSeconds(){return retryAfterSeconds;}
     }
+    /** @author MC */
     public record Result(String type,String number,Map<String,String> data,String message){}
     private static final URI BASE=URI.create("https://api.factiliza.com/v1/");
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();

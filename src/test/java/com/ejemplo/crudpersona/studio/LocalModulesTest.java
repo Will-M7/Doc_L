@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.zip.ZipInputStream;
 import static org.assertj.core.api.Assertions.*;
 
+/** @author MC */
 class LocalModulesTest {
     @TempDir Path temp;
 

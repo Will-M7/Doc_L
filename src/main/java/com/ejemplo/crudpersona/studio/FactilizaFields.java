@@ -2,7 +2,7 @@ package com.ejemplo.crudpersona.studio;
 
 import java.util.*;
 
-/** Paths shown in the official sample responses. Actual responses can add more paths. */
+/** @author MC */
 public final class FactilizaFields {
     private FactilizaFields(){}
     public static List<String> paths(String service){

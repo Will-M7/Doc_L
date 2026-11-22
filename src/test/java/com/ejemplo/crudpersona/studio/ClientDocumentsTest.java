@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
+/** @author MC */
 class ClientDocumentsTest {
     @TempDir Path directory;
     private Contact client(StudioData data,String given,String family,String number)throws Exception{

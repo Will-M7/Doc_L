@@ -14,6 +14,7 @@ import java.io.*;
 
 import static org.assertj.core.api.Assertions.*;
 
+/** @author MC */
 class StudioTransferTest {
     @TempDir Path temp;
     private static final ObjectMapper JSON=new ObjectMapper();
@@ -24,7 +25,6 @@ class StudioTransferTest {
         TemplateGroup shared=source.saveGroup(0,"Compartido"),exclusive=source.saveGroup(0,"Exclusivo");source.setTemplateGroups(selected.id(),List.of(shared.id()));source.setTemplateGroups(other.id(),List.of(shared.id(),exclusive.id()));
         Definition dni=source.saveDefinition(new Definition(0,"dni","DNI","DNI",""));Definition name=source.saveDefinition(new Definition(0,"nombre","Nombre","Texto corto",""));Definition city=source.saveDefinition(new Definition(0,"ciudad","Ciudad","Texto corto",""));Definition unrelated=source.saveDefinition(new Definition(0,"otro","Otro","Texto corto",""));
         source.bindDefinition(selected.id(),dni.id(),true,1);source.bindDefinition(selected.id(),name.id(),false,2);source.bindDefinition(other.id(),unrelated.id(),false,1);
-        // Ciudad occurs in OOXML without an explicit variable row.
         data.saveApiBinding(new ApiBinding(name.id(),"DNI","field:nombres"));data.saveApiBinding(new ApiBinding(city.id(),"DNI","field:distrito"));data.saveApiBinding(new ApiBinding(unrelated.id(),"RUC","field:razon_social"));
         data.saveApiContext(new ApiContext(selected.id(),"dni","cliente","DNI",true));data.saveApiContext(new ApiContext(selected.id(),"nombre","cliente","DNI",false));data.saveContactBinding(new ContactBinding(0,selected.id(),"cliente","Persona","given","nombre"));
         data.saveMapping(new Mapping(0,selected.id(),"dni","nombres","nombre"));

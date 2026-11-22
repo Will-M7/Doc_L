@@ -22,9 +22,11 @@ import java.sql.*;
 import java.util.*;
 import java.util.zip.*;
 
-/** Portable configuration ZIP, client export ZIP and password-protected full local backup. API tokens are excluded. */
+/** @author MC */
 public final class StudioTransfer {
+    /** @author MC */
     public enum Conflict {KEEP,REPLACE}
+    /** @author MC */
     public record ImportResult(int templates,int kinds,int conflicts,int clients){
         public ImportResult(int templates,int kinds,int conflicts){this(templates,kinds,conflicts,0);}
     }
@@ -158,7 +160,6 @@ public final class StudioTransfer {
             throw new IOException("Falta configuration.json o clients.json en el paquete.");
         }
 
-        // Validate the clients section before mutating configuration in a combined package.
         List<Contact> clients=entriesByName.containsKey("clients.json")?readClients(entriesByName.get("clients.json")):List.of();
 
         int templateCount=0,kindCount=0,conflicts=0,clientCount=0;

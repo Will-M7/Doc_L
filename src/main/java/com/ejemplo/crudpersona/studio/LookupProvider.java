@@ -3,6 +3,7 @@ package com.ejemplo.crudpersona.studio;
 import java.util.Map;
 import java.util.Set;
 
+/** @author MC */
 public interface LookupProvider {
     String name();
     Set<String> services();

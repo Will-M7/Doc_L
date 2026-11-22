@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/** @author MC */
 class TemplateCatalogUiTest {
     @TempDir Path temp;
 
@@ -349,7 +350,6 @@ class TemplateCatalogUiTest {
         Definition year=store.saveDefinition(new Definition(0,"Nombre_Anio","Nombre del año","Texto corto",annual,false,"dd/MM/yyyy",false));
         Definition global=store.saveDefinition(new Definition(0,"Frase","Frase","Texto corto",phrase,false,"dd/MM/yyyy",false));
         data.saveApiBinding(new ApiBinding(dni.id(),"DNI","field:numero"));data.saveApiBinding(new ApiBinding(name.id(),"DNI","field:nombre_completo"));data.saveApiBinding(new ApiBinding(address.id(),"DNI","field:direccion"));
-        // Legacy prefixed global fields still belong exclusively to the independent card.
         Template template=template(store,"Tarjetas","{{Persona_1.Nombre_Anio}} {{Persona_1.DNI}} {{Persona_1.nombre}} {{Frase}} {{Persona_2.DNI}} {{Persona_2.nombre}} {{Persona_2.Direccion}}");
         store.bindDefinition(template.id(),year.id(),"Persona_1.Nombre_Anio",false,1);data.saveApiBinding(new ApiBinding(year.id(),"DNI","field:nombre_completo"));
         store.addPersona(template.id(),"Dirigido");store.addPersona(template.id(),"Solicitante");TemplateGroup group=store.saveGroup(0,"Cartas");store.setTemplateGroups(template.id(),List.of(group.id()));
@@ -534,7 +534,6 @@ class TemplateCatalogUiTest {
             assertThat(((ComboBox<Integer>)value(window,"fontSizeChoice")).getValue()).isEqualTo(12);assertThat(((ComboBox<String>)value(window,"fontChoice")).getValue()).isEqualTo("Arial");Map<String,Button> buttons=value(window,"selectionFormatButtons");for(String state:List.of("bold","italic","underline"))assertThat(buttons.get(state).getStyleClass()).doesNotContain("ribbon-btn-active");
             js(window,"key('b');window.studio.fontSize(13)");assertThat(js(window,"window.studio.selectionFormat().bold")).isEqualTo(true);assertThat(js(window,"window.studio.selectionFormat().fontSizePt")).isEqualTo(13);
             js(window,"document.execCommand('insertText',false,'X')");assertThat(js(window,"window.studio.selectionFormat().fontSizePt")).isEqualTo(13);assertThat(js(window,"document.getElementById('editor').textContent").toString()).startsWith("AXntes");js(window,"key('z');key('y');key('z')");assertThat(js(window,"editor.textContent")).isEqualTo("Antes ⟦nombre⟧ después");
-            // A mixed text-and-variable range receives the same direct formatting.
             js(window,"var r=document.createRange();r.selectNodeContents(editor.querySelector('p'));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.dispatchEvent(new Event('selectionchange'));window.studio.fontSize(22)");assertThat(js(window,"window.studio.selectionFormat().fontSizePt")).isEqualTo(22);
             js(window,"window.beforeSync=editor.innerHTML;window.studio.notifySelectionFormat()");return null;
         });fx(()->{
@@ -547,6 +546,7 @@ class TemplateCatalogUiTest {
         });}finally{fx(()->{((Stage)value(window,"stage")).close();Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());return null;});}
     }
 
+    /** @author MC */
     @FunctionalInterface private interface DialogCheck {void check(DialogPane pane)throws Exception;}
     private static AtomicReference<Throwable> answerDialog(ButtonType answer,DialogCheck check){AtomicReference<Throwable> problem=new AtomicReference<>();Platform.runLater(()->{DialogPane pane=dialogPane();try{check.check(pane);}catch(Throwable e){problem.set(e);}finally{((Button)pane.lookupButton(answer)).fire();}});return problem;}
     private static DialogPane dialogPane(){return javafx.stage.Window.getWindows().stream().filter(javafx.stage.Window::isShowing).map(w->w.getScene().getRoot()).filter(p->p instanceof DialogPane).map(p->(DialogPane)p).findFirst().orElseThrow();}

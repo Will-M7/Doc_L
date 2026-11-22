@@ -6,7 +6,7 @@ import org.apache.poi.xwpf.usermodel.*;
 
 import java.io.*;
 
-/** Offline PDF renderer for common DOCX content; text remains selectable. */
+/** @author MC */
 public final class DocxPdfExporter {
     private DocxPdfExporter(){}
     public static byte[] render(byte[] docx)throws Exception{

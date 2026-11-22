@@ -5,16 +5,19 @@ import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 
-/** Local, independent SQLite store. DOCX originals and edited copies are durable BLOBs. */
+/** @author MC */
 public final class DocumentStore {
+    /** @author MC */
     public record Template(long id, String name, byte[] original, byte[] edited) {
         @Override public String toString() { return name; }
     }
+    /** @author MC */
     public record Variable(long id, long templateId, String key, String label, String type,
                            String defaultValue, boolean required, int position) {
         @Override public String toString() { return label + "  {{" + key + "}}"; }
     }
     public static final List<String> DATE_FORMATS=List.of("dd/MM/yyyy","d 'de' MMMM 'de' yyyy","EEEE, d 'de' MMMM 'de' yyyy","dd-MM-yyyy","yyyy-MM-dd");
+    /** @author MC */
     public record Definition(long id, String key, String label, String type, String defaultValue,boolean autoCurrentDate,String dateFormat,boolean bindToClient) {
         public Definition(long id,String key,String label,String type,String defaultValue){this(id,key,label,type,defaultValue,false,"dd/MM/yyyy",true);}
         public Definition(long id,String key,String label,String type,String defaultValue,boolean autoCurrentDate,String dateFormat){this(id,key,label,type,defaultValue,autoCurrentDate,dateFormat,true);}
@@ -23,12 +26,15 @@ public final class DocumentStore {
         public String currentDate(){return java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(dateFormat,Locale.forLanguageTag("es-PE")));}
         @Override public String toString() { return label + "  {{" + key + "}} · " + type + " #" + id; }
     }
+    /** @author MC */
     public record Kind(long id, String title, String category, String description,
                        long templateId, String fields, boolean active) {
         @Override public String toString() { return title; }
     }
+    /** @author MC */
     public record TemplateGroup(long id,String name,int count){@Override public String toString(){return name+" ("+count+")";}}
 
+    /** @author MC */
     public record Persona(long id,long templateId,String personaKey,String displayName,int sortOrder){@Override public String toString(){return displayName;}}
     public List<Persona> personas(long templateId)throws SQLException{
         List<Persona> out=new ArrayList<>();try(Connection c=connect();PreparedStatement s=c.prepareStatement("SELECT * FROM template_persona WHERE template_id=? ORDER BY sort_order,id")){s.setLong(1,templateId);try(ResultSet r=s.executeQuery()){while(r.next())out.add(new Persona(r.getLong("id"),templateId,r.getString("persona_key"),r.getString("display_name"),r.getInt("sort_order")));}}return out;
@@ -43,6 +49,7 @@ public final class DocumentStore {
     }
     public void renamePersona(long id,String name)throws SQLException{if(name==null||name.isBlank())throw new IllegalArgumentException("Escriba un nombre o rol.");try(Connection c=connect();PreparedStatement s=c.prepareStatement("UPDATE template_persona SET display_name=? WHERE id=?")){s.setString(1,name.trim());s.setLong(2,id);s.executeUpdate();}}
     public void deletePersona(long id)throws SQLException{try(Connection c=connect();PreparedStatement s=c.prepareStatement("DELETE FROM template_persona WHERE id=?")){s.setLong(1,id);s.executeUpdate();}}
+    /** @author MC */
     public record Complement(long id,long sourceDefId,long targetDefId,boolean bidirectional){}
     private final Path directory;
     private final String url;
@@ -169,7 +176,6 @@ public final class DocumentStore {
             s.setLong(1,variableId);try(ResultSet r=s.executeQuery()){return r.next()?r.getLong(1):0;}
         }
     }
-    /** Oriented links: inverse entries are returned only for bidirectional relationships. */
     public List<Complement> complements(long definitionId)throws SQLException{
         List<Complement> out=new ArrayList<>();for(Complement link:complements()){
             if(link.sourceDefId()==definitionId)out.add(link);

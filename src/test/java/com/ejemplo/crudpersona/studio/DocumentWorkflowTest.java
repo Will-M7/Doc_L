@@ -18,6 +18,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/** @author MC */
 class DocumentWorkflowTest {
     @TempDir Path temp;
 

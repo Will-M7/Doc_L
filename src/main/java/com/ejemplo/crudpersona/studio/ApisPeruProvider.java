@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
-/** Contract from https://dniruc.apisperu.com/doc/swagger (consultation API only). */
+/** @author MC */
 public final class ApisPeruProvider implements LookupProvider {
     private static final String BASE="https://dniruc.apisperu.com/api/v1/";
     private static final ObjectMapper JSON=new ObjectMapper();

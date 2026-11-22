@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
+/** @author MC */
 class ContactReuseTest {
     @TempDir Path temp;
 

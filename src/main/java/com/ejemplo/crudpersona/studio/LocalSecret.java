@@ -11,7 +11,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
-/** API token lives outside SQLite and transfer packages. Windows uses per-user DPAPI. */
+/** @author MC */
 public final class LocalSecret {
     private final Path secret, keyFile;
     private final boolean windows=System.getProperty("os.name","").toLowerCase().contains("win");

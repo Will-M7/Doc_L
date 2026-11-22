@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/** @author MC */
 class HistoryRetentionTest {
     @TempDir Path temp;
 
@@ -46,7 +47,6 @@ class HistoryRetentionTest {
     @Test void directSqlDeleteLeavesHistoryDetachedAndReadable()throws Exception{
         DocumentStore store=new DocumentStore(temp);byte[] docx;try(XWPFDocument document=new XWPFDocument()){docx=DocumentEngine.bytes(document);}
         Template template=store.saveTemplate(new Template(0,"Plantilla",docx,docx));StudioData data=new StudioData(temp);data.saveHistory(new History(0,"Generado",template.id(),1,null,"{}",null,null,docx,null));
-        // The SQL foreign key also protects snapshots for deletes made by another connection.
         try(Connection c=DriverManager.getConnection("jdbc:sqlite:"+data.database());Statement s=c.createStatement()){s.execute("PRAGMA foreign_keys=ON");s.executeUpdate("DELETE FROM template WHERE id="+template.id());}
         History history=new StudioData(temp).history().get(0);assertThat(history.templateId()).isNull();assertThat(history.docx()).containsExactly(docx);
     }

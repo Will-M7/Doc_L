@@ -2,8 +2,9 @@ package com.ejemplo.crudpersona.studio;
 
 import java.util.*;
 
-/** Provider-neutral fields shown to the user; paths stay behind the adapters. */
+/** @author MC */
 public final class ApiFieldCatalog {
+    /** @author MC */
     public record Field(String service,String key,String label,String factilizaPath,String apisPeruPath){
         @Override public String toString(){return label;}
     }
@@ -52,7 +53,6 @@ public final class ApiFieldCatalog {
     public static String label(String service,String key){Field f=field(service,key);return f==null?"Campo anterior sin equivalencia":f.label();}
     public static Set<String> supportedKeys(String provider,String service){Set<String> out=new LinkedHashSet<>();for(Field f:fields(service))if(("Factiliza".equals(provider)?f.factilizaPath():f.apisPeruPath())!=null)out.add(f.key());return out;}
     public static Map<String,String> normalize(String provider,String service,Map<String,String> raw){Map<String,String> values=new LinkedHashMap<>();for(Field field:fields(service)){String path="Factiliza".equals(provider)?field.factilizaPath():field.apisPeruPath();if(path==null)continue;String value=raw.get(path);if("APIsPERU".equals(provider)&&"telefonos".equals(field.key())){List<String> numbers=new ArrayList<>();for(int i=0;raw.containsKey("telefonos["+i+"]");i++){String number=raw.get("telefonos["+i+"]");if(number!=null&&!number.isBlank())numbers.add(number);}value=String.join(", ",numbers);}if(value!=null&&!value.isBlank())values.put(field.key(),value);}if("DNI".equals(service)){String family=raw.get("Factiliza".equals(provider)?"data.apellidos":"apellidos");if(family!=null&&!family.isBlank())values.put("apellidos",family);normalizePersonName(values);}return values;}
-    /** One normalization for provider results, form fields and locally reused contacts. */
     public static void normalizePersonName(Map<String,String> values){
         String given=cleanName(values.get("nombres")),paternal=cleanName(values.get("apellido_paterno")),maternal=cleanName(values.get("apellido_materno"));
         String family=cleanName(paternal+" "+maternal);if(family.isEmpty())family=cleanName(values.get("apellidos"));

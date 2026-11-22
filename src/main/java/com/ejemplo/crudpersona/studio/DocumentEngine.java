@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Keeps the OOXML package intact; only text runs containing markers are changed. */
+/** @author MC */
 public final class DocumentEngine {
     public static String personaKey(String key){int dot=key.indexOf('.');return dot<0?"":key.substring(0,dot);}
     public static String baseKey(String key){int dot=key.indexOf('.');return dot<0?key:key.substring(dot+1);}
@@ -45,6 +45,7 @@ public final class DocumentEngine {
     }
 
     private static void replace(XWPFParagraph paragraph, Map<String, String> values) {
+        /** @author MC */
         record Segment(org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText text,int start){}
         List<Segment> segments=new ArrayList<>();StringBuilder joined=new StringBuilder();
         for(XWPFRun run:paragraph.getRuns())try(var cursor=run.getCTR().newCursor()){

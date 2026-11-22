@@ -5,8 +5,9 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
-/** Non-secret metadata in SQLite; each token remains encrypted outside the database. */
+/** @author MC */
 public final class ApiCredentialStore {
+    /** @author MC */
     public record Credential(long id,String name,String provider,boolean enabled,String createdAt,String status,
                              String invalidMonth,int invalidStreak,long retryAfter,String lastUsed,
                              int requests,int successes,int failures){
@@ -27,7 +28,7 @@ public final class ApiCredentialStore {
         }
         LocalSecret legacy=new LocalSecret(directory);
         if(legacy.configured()&&!legacyImported()){
-            try{if(credentials().stream().noneMatch(c->c.name().equals("Factiliza anterior")))add("Factiliza anterior","Factiliza",legacy.load());markLegacyImported();}catch(Exception ignored){/* Keep the original protected file for manual recovery. */}
+            try{if(credentials().stream().noneMatch(c->c.name().equals("Factiliza anterior")))add("Factiliza anterior","Factiliza",legacy.load());markLegacyImported();}catch(Exception ignored){}
         }
     }
     private boolean legacyImported()throws SQLException{try(Connection c=open();Statement s=c.createStatement();ResultSet r=s.executeQuery("SELECT 1 FROM api_credential_meta WHERE key='factiliza_legacy_imported'")){return r.next();}}

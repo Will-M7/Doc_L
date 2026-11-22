@@ -13,7 +13,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-/** Normaliza documentos y plantillas Word; nunca modifica el archivo de origen. */
+/** @author MC */
 public final class WordDocumentImporter {
     private static final Set<String> EXTENSIONS = Set.of("doc", "docx", "docm", "dot", "dotx", "dotm");
     private static final String DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
@@ -30,7 +30,6 @@ public final class WordDocumentImporter {
         return importToDocx(file, WordDocumentImporter::convertWithLibreOffice);
     }
 
-    /** Stored client files use the same normalization path as files selected from disk. */
     public static byte[] importToDocx(byte[] content,String fileName)throws IOException{
         String name=Path.of(fileName).getFileName().toString();int dot=name.lastIndexOf('.');
         if(dot<0||!EXTENSIONS.contains(name.substring(dot+1).toLowerCase(Locale.ROOT)))throw new IllegalArgumentException(FORMATS);
@@ -38,7 +37,7 @@ public final class WordDocumentImporter {
         try{Files.write(temporary,content);return importToDocx(temporary);}finally{Files.deleteIfExists(temporary);}
     }
 
-    // Permite comprobar el camino sin LibreOffice sin depender del PATH de la máquina.
+    /** @author MC */
     @FunctionalInterface
     interface OfficeConverter { byte[] convert(Path file) throws IOException; }
 
@@ -58,7 +57,6 @@ public final class WordDocumentImporter {
                 return source;
             }
             if (!extension.equals("doc") && !extension.equals("dot")) return normalizeOoxml(source);
-            // No enviar archivos arbitrarios renombrados como .doc a un conversor externo.
             try (POIFSFileSystem ole = new POIFSFileSystem(new ByteArrayInputStream(source))) {
                 if (!ole.getRoot().hasEntry("WordDocument")
                         || !(ole.getRoot().hasEntry("0Table") || ole.getRoot().hasEntry("1Table")))
@@ -106,7 +104,6 @@ public final class WordDocumentImporter {
             Set<PackagePartName> remove = new HashSet<>();
             for (PackagePart part : parts) {
                 String type = part.getContentType().toLowerCase(Locale.ROOT);
-                // DOCX no admite VBA. Cambiar el paquete también invalida sus firmas.
                 if (type.contains("vba") || type.contains("digital-signature")) remove.add(part.getPartName());
             }
             for (PackagePart part : parts) {
@@ -125,7 +122,6 @@ public final class WordDocumentImporter {
             }
             rootRelationships.forEach(pkg::removeRelationship);
             for (PackagePartName name : remove) {
-                // removePart no elimina automáticamente el .rels del componente retirado.
                 PackagePartName relationships = PackagingURIHelper.getRelationshipPartName(name);
                 if (pkg.containPart(relationships)) pkg.removePart(relationships);
                 pkg.removePart(name);
@@ -246,7 +242,6 @@ public final class WordDocumentImporter {
     }
 
     private static void copyTable(org.apache.poi.hwpf.usermodel.Table source, XWPFTable target) {
-        // createTable() contiene una fila/celda inicial; reutilizarlas evita blancos añadidos.
         for (int rowIndex = 0; rowIndex < source.numRows(); rowIndex++) {
             var sourceRow = source.getRow(rowIndex);
             XWPFTableRow row = rowIndex == 0 ? target.getRow(0) : target.createRow();

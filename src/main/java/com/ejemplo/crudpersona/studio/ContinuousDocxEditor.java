@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
-/** Bridges a single editable HTML flow to the original OOXML package. Unchanged parts stay untouched. */
+/** @author MC */
 final class ContinuousDocxEditor {
     private static final Pattern TOKEN=Pattern.compile("\\{\\{([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?)}}");
     private final XWPFDocument document;
@@ -26,7 +26,6 @@ final class ContinuousDocxEditor {
     ContinuousDocxEditor(XWPFDocument document){this(document,Map.of());}
     ContinuousDocxEditor(XWPFDocument document,Map<String,String> personaNames){this.document=document;this.personaNames=Map.copyOf(personaNames);}
 
-    /** Editable generation keeps token identities in the DOM while displaying their filled values. */
     String generationHtml()throws IOException{
         try(InputStream input=Objects.requireNonNull(getClass().getResourceAsStream("/editor/document-editor.html"))){
             return new String(input.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8)
@@ -47,12 +46,11 @@ final class ContinuousDocxEditor {
         return out.toString();
     }
 
-    /** Uses the same paragraphs, runs and tables as the editor, without editing chrome or tokens. */
     String previewHtml(){
         readOnly=true;
         if(document.getStyles()!=null&&document.getStyles().getPackagePart()!=null)try(InputStream in=document.getStyles().getPackagePart().getInputStream()){
             var styles=org.openxmlformats.schemas.wordprocessingml.x2006.main.CTStyles.Factory.parse(in);if(styles.getDocDefaults()!=null&&styles.getDocDefaults().getRPrDefault()!=null)previewDefaults=styles.getDocDefaults().getRPrDefault().getRPr();
-        }catch(Exception ignored){/* In-memory defaults and style chains are still available. */}
+        }catch(Exception ignored){}
         try{
             var section=document.getDocument().getBody().getSectPr();double width=794,height=1123,left=96,right=96,top=96,bottom=96,header=48,footer=48;
             if(section!=null){
@@ -143,6 +141,7 @@ final class ContinuousDocxEditor {
         String color=cell.getColor();if(color!=null&&color.matches("[A-Fa-f0-9]{6}"))style.append("background:#").append(color).append(';');return style.toString();
     }
     private static String borderStyle(String side,org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder border){String val=String.valueOf(border.getVal());if("nil".equals(val)||"none".equals(val))return "border-"+side+":none;";Object color=border.getColor();String hex=color instanceof byte[] bytes?java.util.HexFormat.of().formatHex(bytes):String.valueOf(color);if(!hex.matches("[A-Fa-f0-9]{6}"))hex="000000";return "border-"+side+":"+(border.getSz()==null?1:border.getSz().doubleValue()/6)+"px "+("double".equals(val)?"double":"dashed".equals(val)?"dashed":"solid")+" #"+hex+";";}
+    /** @author MC */
     private record InlineToken(int start,int end,String key){}
     private String inlineText(String text,int start,List<InlineToken> tokens,String highlight){
         StringBuilder html=new StringBuilder();int at=0,end=start+text.length();
@@ -271,6 +270,7 @@ final class ContinuousDocxEditor {
         });
     }
     private static boolean hasPageBreak(Element e){NodeList spans=e.getElementsByTagName("span");for(int i=0;i<spans.getLength();i++)if(spans.item(i) instanceof Element s&&s.getAttribute("class").contains("page-break"))return true;return false;}
+    /** @author MC */
     private record Style(String font,double size,boolean bold,boolean italic,boolean underline,String color,String highlight){Style(){this("Arial",12,false,false,false,null,null);}}
     private static void appendNodes(XWPFParagraph p,Node parent,Style inherited) throws Exception {
         NodeList nodes=parent.getChildNodes();for(int i=0;i<nodes.getLength();i++){

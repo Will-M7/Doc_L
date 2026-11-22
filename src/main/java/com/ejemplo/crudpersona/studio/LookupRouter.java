@@ -7,9 +7,11 @@ import java.net.http.HttpTimeoutException;
 import java.time.Instant;
 import java.util.*;
 
-/** Bounded provider fallback. A failed lookup never changes document fields. */
+/** @author MC */
 public final class LookupRouter {
+    /** @author MC */
     public enum Status {SUCCESS,PARTIAL,NO_CREDENTIAL,NO_INTERNET,TIMEOUT,TEMPORARY,RATE_LIMIT,INVALID,PERMISSION,UNSUPPORTED,NOT_FOUND,BAD_RESPONSE}
+    /** @author MC */
     public record Result(String service,String identifier,String provider,Map<String,String> values,
                          Set<String> available,Set<String> unavailable,Status status,String error,Map<String,String> raw){
         public boolean usable(){return status==Status.SUCCESS||status==Status.PARTIAL;}

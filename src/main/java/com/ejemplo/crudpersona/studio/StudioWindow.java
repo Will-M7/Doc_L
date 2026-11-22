@@ -55,7 +55,7 @@ import java.util.*;
 import java.util.regex.*;
 import java.time.LocalDate;
 
-/** Offline desktop workflow: template editor, document catalog and generator. */
+/** @author MC */
 public final class StudioWindow {
     private static final Pattern TOKEN = Pattern.compile("\\{\\{([a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z][a-zA-Z0-9_]*)?)}}");
     private static final List<String> TYPES = VariableInput.TYPES;
@@ -269,10 +269,12 @@ public final class StudioWindow {
     }
     public Parent root() { return root; }
 
+    /** @author MC */
     interface DocumentActions {
         void open(Path document)throws Exception;
         void print(Path document)throws Exception;
     }
+    /** @author MC */
     private static final class SystemDocumentActions implements DocumentActions {
         @Override public void open(Path document)throws Exception{
             try{if(Desktop.isDesktopSupported()&&Desktop.getDesktop().isSupported(Desktop.Action.OPEN)){Desktop.getDesktop().open(document.toFile());return;}}catch(IOException|UnsupportedOperationException ignored){}
@@ -364,6 +366,7 @@ public final class StudioWindow {
         if(icon!=null)b.setGraphic(new FontIcon(icon));
         b.setOnAction(e->safe(action));return b;
     }
+    /** @author MC */
     @FunctionalInterface private interface CheckedAction {void run()throws Exception;}
     private void clientAction(CheckedAction action){try{action.run();}catch(Exception e){error(e);}}
     private void safe(Runnable action){try{action.run();}catch(Exception e){error(e);}}
@@ -560,9 +563,10 @@ public final class StudioWindow {
             });
             editorTextColor.setValue(Color.web(state.path("textColor").asText("#000000")));
             editorHighlightColor.setValue(Color.web(state.path("highlightColor").asText("#ffffff")));
-        }catch(IOException|IllegalArgumentException ignored){/* Ignore incomplete selection notifications. */}
+        }catch(IOException|IllegalArgumentException ignored){}
         finally{updatingToolbarFromSelection=false;}
     }
+    /** @author MC */
     public final class EditorBridge {
         public void saveCurrentTemplate(){Platform.runLater(()->safe(StudioWindow.this::saveTemplate));}
         public void onSelectionFormatChanged(String jsonState){Platform.runLater(()->updateToolbarFromSelection(jsonState));}
@@ -825,7 +829,6 @@ public void markDirty(){Platform.runLater(()->{dirty=true;updateEditorSaveStatus
                 if(definition!=null&&!definition.bindToClient())independent.add(variable);
                 else clients.computeIfAbsent(DocumentEngine.personaKey(variable.key()),key->new ArrayList<>()).add(variable);
             }
-            // The stable sort preserves configured person order when field counts match.
             List<String> scopes=new ArrayList<>(clients.entrySet().stream().filter(entry->!entry.getValue().isEmpty())
                 .sorted(Comparator.comparingInt((Map.Entry<String,List<Variable>> entry)->entry.getValue().size()).reversed()).map(Map.Entry::getKey).toList());
             if(!independent.isEmpty())scopes.add(independentScope);
@@ -888,6 +891,7 @@ public void markDirty(){Platform.runLater(()->{dirty=true;updateEditorSaveStatus
         XWPFDocument normalized=DocumentEngine.open(DocumentEngine.bytes(generationDocument));generationDocument.close();generationDocument=normalized;generationModel=new ContinuousDocxEditor(normalized);
         preview.getEngine().executeScript("window.studio.accept("+jsonString("<div>"+generationModel.html()+"</div>")+")");
     }
+    /** @author MC */
     public final class GenerationBridge {
         public void markDirty(){generatedHistoryId=0;generatedPdf=null;}
         public void tableSelected(boolean selected){} public void imageSelected(boolean selected){}
@@ -1012,6 +1016,7 @@ public void markDirty(){Platform.runLater(()->{dirty=true;updateEditorSaveStatus
         if(link!=null){for(var original:store.complements())if(original.id()==link.id()){if(original.sourceDefId()!=selectedDefinition.id()&&!complementBoth.isSelected()){store.deleteComplement(original.id());store.saveComplement(selectedDefinition.id(),target.id(),false);}else store.saveComplement(original.sourceDefId(),original.targetDefId(),complementBoth.isSelected());break;}}
         else store.saveComplement(selectedDefinition.id(),target.id(),complementBoth.isSelected());refreshComplements();saved("Complemento vinculado");
     }catch(Exception e){error(e);}}
+    /** @author MC */
     private record ContactExtra(String key,String value){}
     private Node contactVariables(){
         definitionChoice(contactExtraChoice);contactVariableTable.setEditable(true);contactVariableTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);contactVariableTable.setPrefHeight(180);contactVariableTable.setMinHeight(110);
