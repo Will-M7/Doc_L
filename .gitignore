@@ -39,3 +39,6 @@ AUDITORIA_PROYECTO.md
 INFORME-*.md
 CONTEXTO.md
 plantillas-ejemplo/
+
+# Paquetes de distribución locales
+/dist/

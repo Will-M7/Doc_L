@@ -22,11 +22,11 @@ class MCDocumentWorkflowTest {
     @TempDir Path MCtemp;
 
     @Test void MCpersistsGroupsAndTransfersTemplateAssociations() throws Exception {
-        MCDocumentStore MCsource=new MCDocumentStore(MCtemp.resolve("source"));MCStudioData MCsourceData=new MCStudioData(MCsource.MCdirectory());
+        MCDocumentStore MCsource=new MCDocumentStore(MCtemp.resolve("source"), false);MCStudioData MCsourceData=new MCStudioData(MCsource.MCdirectory());
         byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Hola {{nombre}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}
         MCTemplate MCtemplate=MCsource.MCsaveTemplate(new MCTemplate(0,"Carta libre",MCbytes,MCbytes));MCTemplateGroup MCgroup=MCsource.MCsaveGroup(0,"Mis plantillas");MCsource.MCmoveTemplate(MCtemplate.MCid(),MCgroup.MCid());
         Path MCpackageFile=MCtemp.resolve("config.zip");new MCStudioTransfer(MCsource,MCsourceData).MCexportConfiguration(MCpackageFile);
-        MCDocumentStore MCtarget=new MCDocumentStore(MCtemp.resolve("target"));MCStudioData MCtargetData=new MCStudioData(MCtarget.MCdirectory());new MCStudioTransfer(MCtarget,MCtargetData).MCimportConfiguration(MCpackageFile,MCStudioTransfer.MCConflict.KEEP);
+        MCDocumentStore MCtarget=new MCDocumentStore(MCtemp.resolve("target"), false);MCStudioData MCtargetData=new MCStudioData(MCtarget.MCdirectory());new MCStudioTransfer(MCtarget,MCtargetData).MCimportConfiguration(MCpackageFile,MCStudioTransfer.MCConflict.KEEP);
         assertThat(MCtarget.MCgroups()).extracting(MCTemplateGroup::MCname).contains("Mis plantillas");
         assertThat(MCtarget.MCgroupOf(MCtarget.MCtemplates().get(0).MCid())).isEqualTo(MCtarget.MCgroups().get(0).MCid());
         MCtarget.MCdeleteGroup(MCtarget.MCgroups().get(0).MCid(),null);
@@ -47,12 +47,12 @@ class MCDocumentWorkflowTest {
             MCdoc.createTable(1,1).getRow(0).getCell(0).setText("Tabla conservada");
             MCoriginal=MCDocumentEngine.MCbytes(MCdoc);
         }
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);
         MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Paginado",MCoriginal,MCoriginal));
         MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),"nombre","Nombre","Texto corto","",false,1));
         MCKind MCkind=MCstore.MCsaveKind(new MCKind(0,"Paginado","","",MCtemplate.MCid(),"nombre",true));
         MCstore.MCsaveKindFieldRules(MCkind.MCid(),Map.of("nombre",true),Map.of("nombre","Ejemplo"));
-        MCDocumentStore MCreopened=new MCDocumentStore(MCtemp);
+        MCDocumentStore MCreopened=new MCDocumentStore(MCtemp, false);
         assertThat(MCreopened.MCkindDefaults(MCkind.MCid())).containsEntry("nombre","Ejemplo");
         byte[] MCgenerated=MCDocumentEngine.MCgenerate(MCreopened.MCtemplates().get(0).MCedited(),MCreopened.MCkindDefaults(MCkind.MCid()));
         try(XWPFDocument MCdoc=MCDocumentEngine.MCopen(MCgenerated)){
@@ -81,7 +81,7 @@ class MCDocumentWorkflowTest {
             MCdoc.createParagraph().createRun().addPicture(new ByteArrayInputStream(MCimageBytes.toByteArray()),XWPFDocument.PICTURE_TYPE_PNG,"sample.png",Units.toEMU(20),Units.toEMU(20));
             MCoriginal = MCDocumentEngine.MCbytes(MCdoc);
         }
-        MCDocumentStore MCstore = new MCDocumentStore(MCtemp);
+        MCDocumentStore MCstore = new MCDocumentStore(MCtemp, false);
         MCTemplate MCtemplate = MCstore.MCsaveTemplate(new MCTemplate(0,"Ejemplo",MCoriginal,MCoriginal));
         try (XWPFDocument MCedit = MCDocumentEngine.MCopen(MCtemplate.MCedited())) {
             XWPFParagraph MCp = MCedit.createParagraph();
@@ -92,7 +92,7 @@ class MCDocumentWorkflowTest {
         for (int MCi=1;MCi<=5;MCi++) MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),"persona"+MCi+"_nombre","Nombre "+MCi,"Texto corto","",true,MCi));
         MCKind MCkind = MCstore.MCsaveKind(new MCKind(0,"Cinco personas","","",MCtemplate.MCid(),"persona1_nombre,persona2_nombre,persona3_nombre,persona4_nombre,persona5_nombre",true));
 
-        MCDocumentStore MCreopened = new MCDocumentStore(MCtemp);
+        MCDocumentStore MCreopened = new MCDocumentStore(MCtemp, false);
         assertThat(MCreopened.MCtemplates()).hasSize(1);
         assertThat(MCreopened.MCtemplates().get(0).MCoriginal()).isEqualTo(MCoriginal);
         assertThat(MCreopened.MCvariables(MCtemplate.MCid())).hasSize(5);

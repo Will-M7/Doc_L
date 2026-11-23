@@ -1,0 +1,150 @@
+name: Build executables
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Nueva versión que coincide con pom.xml
+        required: true
+        default: v1.1.0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: executables-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Windows exe and portable
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Validate release version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os, re, xml.etree.ElementTree as ET
+          version = ET.parse('pom.xml').findtext('{http://maven.apache.org/POM/4.0.0}version')
+          tag = os.environ['RELEASE_TAG']
+          assert re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag) and tag == 'v' + version, 'El tag debe coincidir con pom.xml'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('APP_VERSION=' + version + '\n')
+          PY
+      - name: Locate WiX 3
+        shell: pwsh
+        run: |
+          $candle = Get-ChildItem 'C:\Program Files (x86)\WiX Toolset v3*\bin\candle.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $candle) {
+            choco install wixtoolset --version=3.14.1 --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $candle = Get-ChildItem 'C:\Program Files (x86)\WiX Toolset v3*\bin\candle.exe' | Select-Object -First 1
+          }
+          $candle.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Test on Windows
+        shell: cmd
+        run: mvnw.cmd clean test
+      - name: Build installer and portable
+        shell: cmd
+        run: package-windows.cmd %APP_VERSION%
+      - name: Smoke test packaged Windows launcher
+        shell: pwsh
+        run: |
+          $launcher = Get-ChildItem 'target\windows-package-*\portable\EstudioDocumental\EstudioDocumental.exe' | Select-Object -First 1
+          $env:APPDATA = Join-Path $env:RUNNER_TEMP 'ed-smoke-appdata'
+          $env:JAVA_TOOL_OPTIONS = '-Dprism.order=sw'
+          $process = Start-Process -FilePath $launcher.FullName -PassThru
+          try {
+            Start-Sleep -Seconds 8
+            if ($process.HasExited) { throw 'El ejecutable terminó antes de abrir la aplicación' }
+            python -c "import os,sqlite3,pathlib; p=pathlib.Path(os.environ['APPDATA'])/'DocumentStudio'/'studio.db'; c=sqlite3.connect(p.as_uri()+'?mode=ro',uri=True); assert c.execute('SELECT COUNT(*) FROM variable_definition').fetchone()[0]==48; assert c.execute('SELECT COUNT(*) FROM api_credential').fetchone()[0]==0"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id }
+          }
+      - name: Checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem dist -File | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)" | Set-Content "$($_.FullName).sha256" -Encoding ascii
+          }
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: windows-executables
+          path: dist/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux portable
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Native libraries and virtual display
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libxtst6 libxi6 libxrender1 libasound2t64
+      - name: Test on Linux
+        run: xvfb-run -a -s '-screen 0 1440x920x24' ./mvnw clean test
+      - name: Build Linux image
+        run: bash scripts/package-linux.sh
+      - name: Smoke test packaged Linux launcher
+        run: |
+          launcher=$(find target -path '*/app/EstudioDocumental/bin/EstudioDocumental' -print -quit)
+          mkdir -p "$RUNNER_TEMP/ed-smoke-home"
+          status=0
+          xvfb-run -a timeout 10 env JAVA_TOOL_OPTIONS="-Duser.home=$RUNNER_TEMP/ed-smoke-home -Dprism.order=sw" "$launcher" || status=$?
+          test "$status" = 124
+          python - <<'PY'
+          import os, sqlite3, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP'])/'ed-smoke-home'/'.document-studio'/'studio.db'
+          c = sqlite3.connect(p.as_uri()+'?mode=ro', uri=True)
+          assert c.execute('SELECT COUNT(*) FROM variable_definition').fetchone()[0] == 48
+          assert c.execute('SELECT COUNT(*) FROM api_credential').fetchone()[0] == 0
+          PY
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: linux-executable
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish new release assets
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create release or append assets without replacing existing files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/*
+          else
+            gh release create "$RELEASE_TAG" dist/* --target "$GITHUB_SHA" \
+              --title "Estudio Documental ${RELEASE_TAG#v}" --generate-notes
+          fi

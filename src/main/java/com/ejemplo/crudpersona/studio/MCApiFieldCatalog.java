@@ -18,6 +18,8 @@ public final class MCApiFieldCatalog {
         new MCField("DNI","provincia","Provincia","data.provincia",null),
         new MCField("DNI","distrito","Distrito","data.distrito",null),
         new MCField("DNI","ubigeo","Ubigeo","data.ubigeo[2]",null),
+        new MCField("DNI","ubigeo_departamento","Código de departamento","data.ubigeo[0]",null),
+        new MCField("DNI","ubigeo_provincia","Código de provincia","data.ubigeo[1]",null),
         new MCField("DNI","ubigeo_reniec","Ubigeo RENIEC","data.ubigeo_reniec",null),
         new MCField("DNI","ubigeo_sunat","Ubigeo SUNAT","data.ubigeo_sunat",null),
         new MCField("DNI","fecha_nacimiento","Fecha de nacimiento","data.fecha_nacimiento",null),
@@ -35,6 +37,8 @@ public final class MCApiFieldCatalog {
         new MCField("RUC","provincia","Provincia","data.provincia","provincia"),
         new MCField("RUC","distrito","Distrito","data.distrito","distrito"),
         new MCField("RUC","ubigeo","Ubigeo","data.ubigeo[2]","ubigeo"),
+        new MCField("RUC","ubigeo_departamento","Código de departamento","data.ubigeo[0]",null),
+        new MCField("RUC","ubigeo_provincia","Código de provincia","data.ubigeo[1]",null),
         new MCField("RUC","ubigeo_sunat","Ubigeo SUNAT","data.ubigeo_sunat",null),
         new MCField("RUC","telefonos","Teléfonos",null,"telefonos[0]"),
         new MCField("RUC","capital","Capital",null,"capital")

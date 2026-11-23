@@ -58,6 +58,11 @@ public final class MCDocumentStore {
     }
 
     public MCDocumentStore(Path MCdirectory) throws Exception {
+        this(MCdirectory, true);
+    }
+
+    // Empty catalogs are useful for isolated migration and workflow fixtures.
+    MCDocumentStore(Path MCdirectory, boolean MCinitializeDefaults) throws Exception {
         this.MCdirectory = MCdirectory;
         Files.createDirectories(MCdirectory);
         MCurl = "jdbc:sqlite:" + MCdirectory.resolve("studio.db");
@@ -85,6 +90,59 @@ public final class MCDocumentStore {
             MCs.executeUpdate("PRAGMA foreign_keys=ON");
         }
         MCmigrateDefinitions();
+        if (MCinitializeDefaults) MCseedDefaultVariables();
+    }
+
+    private void MCseedDefaultVariables() throws SQLException {
+        try (Connection MCc = MCconnect(); Statement MCs = MCc.createStatement()) {
+            MCs.execute("BEGIN IMMEDIATE");
+            try {
+                MCs.executeUpdate("CREATE TABLE IF NOT EXISTS studio_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL)");
+                boolean MCalreadySeeded;
+                try (ResultSet MCr = MCs.executeQuery("SELECT 1 FROM studio_meta WHERE key='default_variables_seeded' AND value='1'")) {
+                    MCalreadySeeded = MCr.next();
+                }
+                if (MCalreadySeeded) { MCs.execute("COMMIT"); return; }
+                // The existing binding table is the source of truth for API linkage.
+                MCs.executeUpdate("CREATE TABLE IF NOT EXISTS variable_api_binding(definition_id INTEGER PRIMARY KEY,service TEXT NOT NULL,path TEXT NOT NULL)");
+                Set<String> MCused = new HashSet<>();
+                for (String MCservice : List.of("DNI", "RUC")) {
+                    for (MCApiFieldCatalog.MCField MCfield : MCApiFieldCatalog.MCfields(MCservice)) {
+                        String MCkey = "numero".equals(MCfield.MCkey()) ? MCservice.toLowerCase(Locale.ROOT) : MCfield.MCkey();
+                        if (!MCused.add(MCkey)) MCkey = MCservice.toLowerCase(Locale.ROOT) + "_" + MCkey;
+                        String MClabel = MCfield.MClabel() + " (" + MCservice + ")";
+                        MCseedDefinition(MCc, new MCDefinition(0, MCkey, MClabel, "Texto", ""), MCservice, "field:" + MCfield.MCkey());
+                    }
+                }
+                MCseedDefinition(MCc, new MCDefinition(0, "fecha", "Fecha del documento", "Texto", "", true, "d 'de' MMMM 'de' yyyy", true), null, null);
+                MCseedDefinition(MCc, new MCDefinition(0, "ciudad", "Ciudad", "Texto", ""), null, null);
+                MCseedDefinition(MCc, new MCDefinition(0, "nombre_anio", "Nombre del Año Oficial", "Texto", "", false, "dd/MM/yyyy", false), null, null);
+                String[][] MCmanual = {{"cargo", "Cargo"}, {"entidad", "Entidad"}, {"tramite", "Trámite"},
+                    {"telefono", "Teléfono"}, {"correo", "Correo electrónico"}, {"nacionalidad", "Nacionalidad"},
+                    {"estado_civil", "Estado civil"}, {"estado_civil_texto", "Estado civil en texto"},
+                    {"monto", "Monto"}, {"plazo", "Plazo"}};
+                for (String[] MCitem : MCmanual)
+                    MCseedDefinition(MCc, new MCDefinition(0, MCitem[0], MCitem[1], "monto".equals(MCitem[0]) ? "Número decimal" : "Texto", ""), null, null);
+                MCs.executeUpdate("INSERT INTO studio_meta(key,value) VALUES('default_variables_seeded','1') ON CONFLICT(key) DO UPDATE SET value='1'");
+                MCs.execute("COMMIT");
+            } catch (SQLException | RuntimeException MCfailure) {
+                MCs.execute("ROLLBACK");
+                throw MCfailure;
+            }
+        }
+    }
+
+    private static void MCseedDefinition(Connection MCc, MCDefinition MCdefinition, String MCservice, String MCpath) throws SQLException {
+        // Preserve every existing definition and its bindings, even on first upgrade.
+        try (PreparedStatement MCcheck = MCc.prepareStatement("SELECT 1 FROM variable_definition WHERE key=?")) {
+            MCcheck.setString(1, MCdefinition.MCkey());
+            try (ResultSet MCr = MCcheck.executeQuery()) { if (MCr.next()) return; }
+        }
+        long MCid = MCinsertDefinition(MCc, MCdefinition.MCkey(), MCdefinition.MClabel(), MCdefinition.MCtype(), MCdefinition.MCdefaultValue());
+        MCsaveDate(MCc, MCid, MCdefinition);
+        if (MCservice != null) try (PreparedStatement MCbinding = MCc.prepareStatement("INSERT OR IGNORE INTO variable_api_binding(definition_id,service,path) VALUES(?,?,?)")) {
+            MCbinding.setLong(1, MCid); MCbinding.setString(2, MCservice); MCbinding.setString(3, MCpath); MCbinding.executeUpdate();
+        }
     }
 
     public Path MCdirectory() { return MCdirectory; }

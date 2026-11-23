@@ -17,7 +17,7 @@ class MCClientDocumentsTest {
     private byte[] MCword(String MCtext)throws Exception{try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText(MCtext);return MCDocumentEngine.MCbytes(MCdoc);}}
 
     @Test void MCuploadingAndReplacingUpdatesTheSameRowAndSurvivesReopening()throws Exception{
-        new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
+        new MCDocumentStore(MCdirectory, false);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
         MCClientDocument MCoriginal=MCdata.MCaddClientDocument(MCclient.MCid(),"Antiguo","antiguo.docx","DOCX",MCword("Antes"));
         byte[] MCreplacement="%PDF-Nuevo".getBytes(java.nio.charset.StandardCharsets.UTF_8);
         MCdata.MCreplaceClientDocument(MCoriginal.MCid(),"Nuevo","nuevo.pdf","PDF",MCreplacement,"UPLOADED");
@@ -29,7 +29,7 @@ class MCClientDocumentsTest {
     }
 
     @Test void MCgeneratedHistoryIsMatchedAcrossPeopleAndNeverRestoresAReplacedFile()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);
+        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory, false);MCStudioData MCdata=new MCStudioData(MCdirectory);
         MCContact MCana=MCclient(MCdata,"Ana","Pérez","12345678"),MCluis=MCclient(MCdata,"Luisito","",""),MCunrelated=MCclient(MCdata,"Otra persona","","");
         byte[] MCsource=MCword("Carta original");MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Carta",MCsource,MCsource));
         MCHistory MChistory=MCdata.MCsaveHistory(new MCHistory(0,"Carta",MCtemplate.MCid(),1,null,"{\"Persona_1.DNI\":\"12345678\",\"Persona_1.nombres\":\"Ana\",\"Persona_1.apellidos\":\"Pérez\",\"Persona_2.Dirigido\":\"Luisito\"}",null,null,MCsource,"%PDF-original".getBytes()));
@@ -46,7 +46,7 @@ class MCClientDocumentsTest {
     }
 
     @Test void MCexplicitContactIdentityAndIndependentFieldsAreKeptSeparate()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
+        MCDocumentStore MCstore=new MCDocumentStore(MCdirectory, false);MCStudioData MCdata=new MCStudioData(MCdirectory);MCContact MCclient=MCclient(MCdata,"Luisito","","");
         byte[] MCbytes=MCword("Sin variables");MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Carta",MCbytes,MCbytes));
         MCDefinition MCindependent=MCstore.MCsaveDefinition(new MCDefinition(0,"Dirigido","Global","Texto corto",""));
         MCstore.MCsaveDefinition(new MCDefinition(MCindependent.MCid(),MCindependent.MCkey(),MCindependent.MClabel(),MCindependent.MCtype(),MCindependent.MCdefaultValue(),false,"dd/MM/yyyy",false));

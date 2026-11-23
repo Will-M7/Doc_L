@@ -36,7 +36,7 @@ class MCTemplateCatalogUiTest {
     @AfterAll static void MCstopToolkit(){Platform.exit();}
 
     @Test void MClibraryAlwaysShowsAllTemplatesAndHighlightsOnlyMembersOfTheSelectedRealGroup()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCfirst=MCtemplate(MCstore,"Solicitud","Plantilla"),MCsecond=MCtemplate(MCstore,"Carta","Plantilla"),MCunassigned=MCtemplate(MCstore,"Libre","Plantilla");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCfirst=MCtemplate(MCstore,"Solicitud","Plantilla"),MCsecond=MCtemplate(MCstore,"Carta","Plantilla"),MCunassigned=MCtemplate(MCstore,"Libre","Plantilla");
         MCTemplateGroup MCrequests=MCstore.MCsaveGroup(0,"Solicitudes"),MCletters=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCfirst.MCid(),List.of(MCrequests.MCid()));MCstore.MCsetTemplateGroups(MCsecond.MCid(),List.of(MCletters.MCid()));
         MCfx(()->{
             Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCwindow));
@@ -55,7 +55,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCgeneratorContainsOnlyRealGroupsAndTheirRealTemplatesAndBuildsActualMarkers()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCfirst=MCtemplate(MCstore,"Carta","{{cliente_dni}} {{nombre}}"),MCsecond=MCtemplate(MCstore,"Contrato","Otro"),MCunassigned=MCtemplate(MCstore,"Sin asignar","Otro");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCfirst=MCtemplate(MCstore,"Carta","{{cliente_dni}} {{nombre}}"),MCsecond=MCtemplate(MCstore,"Contrato","Otro"),MCunassigned=MCtemplate(MCstore,"Sin asignar","Otro");
         MCTemplateGroup MCa=MCstore.MCsaveGroup(0,"A"),MCb=MCstore.MCsaveGroup(0,"B");MCstore.MCsetTemplateGroups(MCfirst.MCid(),List.of(MCa.MCid()));MCstore.MCsetTemplateGroups(MCsecond.MCid(),List.of(MCb.MCid()));
         MCstore.MCsaveVariable(new MCVariable(0,MCfirst.MCid(),"nombre","Nombre","Texto corto","",false,1));MCstore.MCsaveDefinition(new MCDefinition(0,"cliente_dni","DNI del cliente","Texto corto",""));
         MCstore.MCsaveKind(new MCKind(0,"Registro antiguo","","",MCfirst.MCid(),"campo_antiguo",true));
@@ -71,7 +71,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCsettingsLayoutKeepsExactlyThreeScopesAndButtonStylesInBothThemes()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCtemplate(MCstore,"Carta","Contenido");MCstore.MCsaveGroup(0,"Cartas");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCtemplate(MCstore,"Carta","Contenido");MCstore.MCsaveGroup(0,"Cartas");
         MCfx(()->{
             Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);Scene MCscene=MCscene(MCwindow);MCstage.setScene(MCscene);
             try{
@@ -97,7 +97,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCgenerationUsesLocalExtrasThenSavesManualChangesAndApiResultsWithoutConfirmation()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCApiCredentialStore MCvault=new MCApiCredentialStore(MCtemp);MCvault.MCadd("Prueba","Factiliza","fixture-token");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCApiCredentialStore MCvault=new MCApiCredentialStore(MCtemp);MCvault.MCadd("Prueba","Factiliza","fixture-token");
         MCTemplate MCtemplate=MCtemplate(MCstore,"Carta","{{dni}} {{nombre}} {{direccion}} {{ubigeo}}");
         MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
         List<MCVariable> MCvariables=new ArrayList<>();int MCposition=1;
@@ -124,7 +124,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCopeningAndPrintingSaveNamedIdentifierFormsAndAllExtrasBeforeDispatch()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Documento","{{documento}} {{cliente}} {{apellidos}} {{direccion}} {{referencia}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Documentos");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Documento","{{documento}} {{cliente}} {{apellidos}} {{direccion}} {{referencia}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Documentos");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
         for(String MCkey:List.of("documento","cliente","apellidos","direccion","referencia"))MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),MCkey,MCkey.equals("documento")?"DNI del cliente":MCkey,"Texto corto","",false,1));
         List<Path> MCopened=new ArrayList<>(),MCprinted=new ArrayList<>();MCStudioWindow.MCDocumentActions MCactions=new MCStudioWindow.MCDocumentActions(){
             public void MCopen(Path MCfile)throws Exception{assertThat(MCdata.MCmatchingContact("Persona","DNI","12345678").MCgiven()).isEqualTo("Ana");MCopened.add(MCfile);}
@@ -147,7 +147,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCenteringCompleteRucAutomaticallyQueriesOnlyOnceThenReusesLocalData()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Empresa","{{ruc_empresa}} {{razon_social}} {{direccion}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Empresas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Empresa","{{ruc_empresa}} {{razon_social}} {{direccion}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Empresas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
         for(String MCkey:List.of("ruc_empresa","razon_social","direccion"))MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),MCkey,MCkey,"Texto corto","",false,1));
         MCApiCredentialStore MCvault=new MCApiCredentialStore(MCtemp);MCvault.MCadd("Prueba","Factiliza","fixture-token");AtomicInteger MCcalls=new AtomicInteger();MCLookupProvider MCprovider=new MCLookupProvider(){public String MCname(){return "Factiliza";}public Set<String> MCservices(){return Set.of("RUC");}public Map<String,String> MCquery(String MCservice,String MCnumber,String MCcredential){MCcalls.incrementAndGet();return Map.of("data.numero",MCnumber,"data.nombre_o_razon_social","ACME","data.direccion","Cusco");}};
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore,new MCLookupRouter(MCvault,List.of(MCprovider)));MCstage.setScene(MCscene(MCcreated));return MCcreated;});
@@ -159,7 +159,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCdeletingTemplateRequiresConfirmationAndKeepsGeneratedDocuments()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Carta","Documento");MCdata.MCsaveHistory(new MCHistory(0,"Carta generada",MCtemplate.MCid(),1,null,"{}",null,null,MCtemplate.MCedited(),null));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Carta","Documento");MCdata.MCsaveHistory(new MCHistory(0,"Carta generada",MCtemplate.MCid(),1,null,"{}",null,null,MCtemplate.MCedited(),null));
         MCfx(()->{
             Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCwindow));
             try{
@@ -173,7 +173,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCvariableWarningLoadsTheFirstActualAffectedTemplateAndPaletteHeaderCanExpandAgain()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCunrelated=MCtemplate(MCstore,"Afectada","Sin variables"),MCaffected=MCtemplate(MCstore,"Afectada","Con {{nombre}}"),MCsecond=MCtemplate(MCstore,"Otra","{{nombre}}");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCunrelated=MCtemplate(MCstore,"Afectada","Sin variables"),MCaffected=MCtemplate(MCstore,"Afectada","Con {{nombre}}"),MCsecond=MCtemplate(MCstore,"Otra","{{nombre}}");
         MCDefinition MCdefinition=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));MCstore.MCbindDefinition(MCaffected.MCid(),MCdefinition.MCid(),false,1);MCstore.MCbindDefinition(MCsecond.MCid(),MCdefinition.MCid(),false,1);
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCunrelated);return MCcreated;});
         try{
@@ -192,7 +192,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCpreviewOpenAndPrintAllowAllRequiredFieldsEmptyOrOnlySomeFilled()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Parcial","Nombre {{nombre}}; DNI {{dni}}; Total {{total}}; Fecha {{fecha}}; {{sin_definicion}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate=MCtemplate(MCstore,"Parcial","Nombre {{nombre}}; DNI {{dni}}; Total {{total}}; Fecha {{fecha}}; {{sin_definicion}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
         for(String MCkey:List.of("nombre","dni","total","fecha"))MCstore.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),MCkey,MCkey,switch(MCkey){case "dni"->"DNI";case "total"->"Número decimal";case "fecha"->"Fecha";default->"Texto corto";},"",true,1));
         List<Path> MCpaths=new ArrayList<>();MCStudioWindow.MCDocumentActions MCactions=new MCStudioWindow.MCDocumentActions(){public void MCopen(Path MCpath){MCpaths.add(MCpath);}public void MCprint(Path MCpath){MCpaths.add(MCpath);}};
         MCfx(()->{
@@ -207,7 +207,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCwebEditorMovesChipsWithoutDuplicatesCoalescesGuideAndDeletesOnlyRightClickedOccurrence()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);byte[] MCbytes;
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);byte[] MCbytes;
         try(XWPFDocument MCdocument=new XWPFDocument()){
             MCdocument.createParagraph().createRun().setText("{{nombre}}");XWPFParagraph MCuntouched=MCdocument.createParagraph();MCuntouched.setStyle("Heading1");MCuntouched.createRun().setText("Intacto");MCdocument.createParagraph().createRun().setText("Otra {{nombre}}");MCdocument.createTable(1,1).getRow(0).getCell(0).setText("Destino");MCbytes=MCDocumentEngine.MCbytes(MCdocument);
         }
@@ -241,7 +241,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCpointerDragMovesTheSameChipCancelsWithEscapeAndKeepsTheGuideCompact()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);byte[] MCbytes;
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);byte[] MCbytes;
         try(XWPFDocument MCdocument=new XWPFDocument()){
             MCdocument.createParagraph().createRun().setText("{{nombre}}");MCdocument.createParagraph().createRun().setText("Destino");XWPFParagraph MCuntouched=MCdocument.createParagraph();MCuntouched.setStyle("Heading1");MCuntouched.createRun().setText("Intacto");MCbytes=MCDocumentEngine.MCbytes(MCdocument);
         }
@@ -273,7 +273,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCribbonKeepsThreeCompactTabsWithFeatherIconsAndDescriptiveTooltipsInBothThemes()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Cinta","Texto de prueba");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate=MCtemplate(MCstore,"Cinta","Texto de prueba");
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
         try{
             MCawaitEditor(MCwindow);
@@ -313,7 +313,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCwebkitEnterSplitsKeepEarlierParagraphsAndRepeatedEmptyLinesWhenSaved()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);byte[] MCbytes;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocument.createParagraph().createRun().setText("Línea superior");MCdocument.createParagraph().createRun().setText("Arriba abajo");MCdocument.createParagraph().createRun().setText("Última");MCbytes=MCDocumentEngine.MCbytes(MCdocument);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Enter",MCbytes,MCbytes));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);byte[] MCbytes;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocument.createParagraph().createRun().setText("Línea superior");MCdocument.createParagraph().createRun().setText("Arriba abajo");MCdocument.createParagraph().createRun().setText("Última");MCbytes=MCDocumentEngine.MCbytes(MCdocument);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Enter",MCbytes,MCbytes));
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
         try{MCawaitEditor(MCwindow);MCfx(()->{
             MCjs(MCwindow,"var editor=document.getElementById('editor');editor.focus();var text=editor.querySelectorAll('p')[1].querySelector('span').firstChild;var r=document.createRange();r.setStart(text,6);r.collapse(true);var s=window.getSelection();s.removeAllRanges();s.addRange(r);editor.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));document.execCommand('insertParagraph');editor.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));document.execCommand('insertParagraph');window.MCstudio.MChtml()");
@@ -323,7 +323,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCcomplementCardsClientExtrasAndGeneratorCompleteAndLearnWithoutDocuments()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"Dirigido","Dirigido","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"Cargo","Cargo","Texto","")),MCobject=MCstore.MCsaveDefinition(new MCDefinition(0,"objeto","Objeto","Texto","")),MCprice=MCstore.MCsaveDefinition(new MCDefinition(0,"precio","Precio","Texto",""));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"Dirigido","Dirigido","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"Cargo","Cargo","Texto","")),MCobject=MCstore.MCsaveDefinition(new MCDefinition(0,"objeto","Objeto","Texto","")),MCprice=MCstore.MCsaveDefinition(new MCDefinition(0,"precio","Precio","Texto",""));
         MCTemplate MCtemplate=MCtemplate(MCstore,"Complementos","{{Dirigido}} {{Cargo}} {{objeto}} {{precio}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCTemplate MCsingle=MCtemplate(MCstore,"Solo objeto","{{objeto}}");MCstore.MCsetTemplateGroups(MCsingle.MCid(),List.of(MCgroup.MCid()));for(MCDefinition MCd:List.of(MCname,MCrole,MCobject,MCprice))MCstore.MCbindDefinition(MCtemplate.MCid(),MCd.MCid(),false,(int)MCd.MCid());
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();return MCcreated;});
         try{MCfx(()->{
@@ -343,7 +343,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCgeneratorSeparatesIndependentFieldsAndOrdersClientCardsByDescendingFieldCount()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);
         MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","DNI","")),MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto","")),MCaddress=MCstore.MCsaveDefinition(new MCDefinition(0,"Direccion","Dirección","Texto corto",""));
         String MCannual="Año institucional",MCphrase="Frase del documento";
         MCDefinition MCyear=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_Anio","Nombre del año","Texto corto",MCannual,false,"dd/MM/yyyy",false));
@@ -374,7 +374,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCparticipantsIsolateLocalApiComplementsContactsAndFormattedCurrentDates()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","Mixto","")),MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombres_Com","Nombres completos","Texto","")),MCaddress=MCstore.MCsaveDefinition(new MCDefinition(0,"Direccion","Dirección","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"Cargo","Cargo","Texto","")),MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"Fecha","Fecha","Fecha","",true,"EEEE, d 'de' MMMM 'de' yyyy"));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","Mixto","")),MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombres_Com","Nombres completos","Texto","")),MCaddress=MCstore.MCsaveDefinition(new MCDefinition(0,"Direccion","Dirección","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"Cargo","Cargo","Texto","")),MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"Fecha","Fecha","Fecha","",true,"EEEE, d 'de' MMMM 'de' yyyy"));
         MCdata.MCsaveApiBinding(new MCApiBinding(MCdni.MCid(),"DNI","field:numero"));MCdata.MCsaveApiBinding(new MCApiBinding(MCname.MCid(),"DNI","field:nombre_completo"));MCdata.MCsaveApiBinding(new MCApiBinding(MCaddress.MCid(),"DNI","field:direccion"));MCstore.MCsaveComplement(MCname.MCid(),MCrole.MCid(),true);
         MCTemplate MCtemplate=MCtemplate(MCstore,"Personas","{{DNI}} {{Fecha}} {{Persona_1.DNI}} {{Persona_1.Nombres_Com}} {{Persona_1.Direccion}} {{Persona_1.Cargo}} {{Persona_1.Fecha}} {{Persona_2.DNI}} {{Persona_2.Nombres_Com}} {{Persona_2.Direccion}} {{Persona_2.Cargo}}");MCstore.MCaddPersona(MCtemplate.MCid(),"Solicitante");MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
         MCdata.MCsaveContact(new MCContact(0,"Persona","Ana","Pérez","DNI","11111111","Lima","","{\"Cargo\":\"Directora\"}"));MCdata.MCsaveContact(new MCContact(0,"Persona","Luis","Ruiz","DNI","22222222","Cusco","","{\"Cargo\":\"Secretario\"}"));MCdata.MCsaveContact(new MCContact(0,"Persona","General","","DNI","33333333","Piura","","{}"));
@@ -391,7 +391,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCeditorPersonContextQualifiesChipsAndAutomaticDateCardPersistsItsSettings()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","Mixto","")),MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"Fecha","Fecha","Fecha",""));MCTemplate MCtemplate=MCtemplate(MCstore,"Editor personas","Texto ");MCstore.MCaddPersona(MCtemplate.MCid(),"Solicitante");MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","Mixto","")),MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"Fecha","Fecha","Fecha",""));MCTemplate MCtemplate=MCtemplate(MCstore,"Editor personas","Texto ");MCstore.MCaddPersona(MCtemplate.MCid(),"Solicitante");MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
         try{MCawaitEditor(MCwindow);MCfx(()->{
             ComboBox<MCDocumentStore.MCPersona> MCpeople=MCvalue(MCwindow,"MCeditorPersona");assertThat(MCpeople.getItems()).extracting(MCDocumentStore.MCPersona::MCdisplayName).containsExactly("General (sin persona)","Solicitante","Dirigido");MCpeople.getSelectionModel().select(2);((ListView<MCDefinition>)MCvalue(MCwindow,"MCvariableList")).getSelectionModel().select(MCdni);
@@ -402,7 +402,7 @@ class MCTemplateCatalogUiTest {
         });MCawaitEditor(MCwindow);MCfx(()->{MCinvoke(MCwindow,"MCshowEditor");MCsnapshotConfigured(MCwindow,"personas-editor");ComboBox<MCDocumentStore.MCPersona> MCpeople=MCvalue(MCwindow,"MCeditorPersona");MCpeople.getSelectionModel().select(MCpeople.getItems().stream().filter(MCp->MCp.MCpersonaKey().equals("Persona_3")).findFirst().orElseThrow());AtomicReference<Throwable> MCproblem=MCanswerDialog(ButtonType.YES,MCpane->{});MCinvoke(MCwindow,"MCremoveEditorPersona");assertThat(MCproblem.get()).isNull();assertThat(MCstore.MCpersonas(MCtemplate.MCid())).hasSize(2);try(XWPFDocument MCsaved=MCDocumentEngine.MCopen(MCstore.MCtemplates().get(0).MCedited())){assertThat(MCDocumentEngine.MCmarkers(MCsaved)).containsExactlyInAnyOrder("Persona_1.DNI","Persona_2.DNI");}return null;});}finally{MCfx(()->{((Stage)MCvalue(MCwindow,"MCstage")).close();return null;});}
     }
     @Test void MCgenerationShowsCompleteEditableDocumentFromHeaderToFooterAndResetsOnTemplateChange()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);byte[] MCbytes;
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);byte[] MCbytes;
         try(XWPFDocument MCdoc=new XWPFDocument()){
             var MCsection=MCdoc.getDocument().getBody().addNewSectPr();var MCsize=MCsection.addNewPgSz();MCsize.setW(java.math.BigInteger.valueOf(11910));MCsize.setH(java.math.BigInteger.valueOf(16840));var MCmargins=MCsection.addNewPgMar();MCmargins.setLeft(java.math.BigInteger.valueOf(1440));MCmargins.setRight(java.math.BigInteger.valueOf(1080));MCmargins.setTop(java.math.BigInteger.valueOf(1440));MCmargins.setBottom(java.math.BigInteger.valueOf(1440));MCmargins.setHeader(java.math.BigInteger.valueOf(720));MCmargins.setFooter(java.math.BigInteger.valueOf(720));
             var MCheader=MCdoc.createHeader(org.apache.poi.wp.usermodel.HeaderFooterType.DEFAULT).createParagraph();MCheader.setAlignment(org.apache.poi.xwpf.usermodel.ParagraphAlignment.CENTER);MCheader.createRun().setText("MEMBRETE COMPLETO");
@@ -422,7 +422,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCeditorHasNoPageHeaderAndApiFullNameIsNormalizedInFormAndResults()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCfull=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre_completo","Nombre completo","Texto corto",""));MCTemplate MCtemplate=MCtemplate(MCstore,"Nombre","{{nombre_completo}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCdata.MCsaveApiBinding(new MCApiBinding(MCfull.MCid(),"DNI","field:nombre_completo"));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCfull=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre_completo","Nombre completo","Texto corto",""));MCTemplate MCtemplate=MCtemplate(MCstore,"Nombre","{{nombre_completo}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCdata.MCsaveApiBinding(new MCApiBinding(MCfull.MCid(),"DNI","field:nombre_completo"));
         MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCwindow));MCstage.show();try{
             MCinvoke(MCwindow,"MCshowEditor");MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();assertThat(MCwindow.MCroot().lookupAll(".pagina-cabecera")).isEmpty();VBox MCpage=(VBox)((StackPane)MCvalue(MCwindow,"MCworkspace")).getChildren().get(0);assertThat(MCpage.getChildren()).containsExactly((Node)MCvalue(MCwindow,"MCeditorPage"));
             MCinvoke(MCwindow,"MCshowGenerator");((ComboBox<MCTemplate>)MCvalue(MCwindow,"MCgenerateTemplate")).getSelectionModel().selectFirst();assertThat(MCwindow.MCroot().lookupAll(".pagina-cabecera")).hasSize(1);
@@ -430,7 +430,7 @@ class MCTemplateCatalogUiTest {
         }finally{MCstage.close();}return null;});
     }
     @Test void MCclientDocumentsAreDefaultAndGenerationReplacesAnUnmarkedWordWithManualEdits()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCContact MCclient=MCdata.MCsaveContact(new MCContact(0,"Persona","Luisito","","","","","","{}"));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCContact MCclient=MCdata.MCsaveContact(new MCContact(0,"Persona","Luisito","","","","","","{}"));
         byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Texto original");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}
         MCClientDocument MCoriginal=MCdata.MCaddClientDocument(MCclient.MCid(),"Solicitud","solicitud.docx","docx",MCbytes);
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowContacts");return MCcreated;});
@@ -451,7 +451,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCgenerationKeepsManualChangesWhileFormValuesContinueToReplaceMarkers()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Carta editable","Para {{nombre}}.");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto","Ana"));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate=MCtemplate(MCstore,"Carta editable","Para {{nombre}}.");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto","Ana"));
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowGenerator");((ComboBox<MCTemplate>)MCvalue(MCcreated,"MCgenerateTemplate")).getSelectionModel().selectFirst();return MCcreated;});
         try{MCawaitPreview(MCwindow);MCfx(()->{
             MCpreviewJs(MCwindow,"var p=document.querySelector('#editor p'),s=document.createElement('span');s.textContent=' Ajuste manual.';s.style.fontStyle='italic';p.appendChild(s);document.querySelector('#editor').dispatchEvent(new Event('input',{bubbles:true}));");
@@ -466,11 +466,11 @@ class MCTemplateCatalogUiTest {
     private static Object MCpreviewJs(MCStudioWindow MCwindow,String MCscript)throws Exception{return ((javafx.scene.web.WebView)MCvalue(MCwindow,"MCpreview")).getEngine().executeScript(MCscript);}
     private static void MCawaitPreview(MCStudioWindow MCwindow)throws Exception{long MCdeadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);while(System.nanoTime()<MCdeadline){if(MCfx(()->((javafx.scene.web.WebView)MCvalue(MCwindow,"MCpreview")).getEngine().getLoadWorker().getState()==javafx.concurrent.Worker.State.SUCCEEDED&&Boolean.TRUE.equals(MCpreviewJs(MCwindow,"window.previewReady===true"))))return;Thread.sleep(25);}throw new AssertionError("No se cargó la vista previa");}
     @Test void MConeEnterAndRepeatedSynchronizationDoNotAddBlankParagraphsOrSpaces()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Un Enter","Antes  {{nombre}} después ");MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate=MCtemplate(MCstore,"Un Enter","Antes  {{nombre}} después ");MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
         try{MCawaitEditor(MCwindow);MCfx(()->{MCjs(MCwindow,"var editor=document.getElementById('editor'),p=editor.querySelector('p'),r=document.createRange();editor.focus();r.selectNodeContents(p);r.collapse(false);var selection=window.getSelection();selection.removeAllRanges();selection.addRange(r);editor.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));document.execCommand('insertParagraph')");MCinvoke(MCwindow,"MCsyncEditor");MCinvoke(MCwindow,"MCsyncEditor");XWPFDocument MCdoc=MCvalue(MCwindow,"MCdocument");assertThat(MCdoc.getParagraphs()).extracting(XWPFParagraph::getText).containsExactly("Antes  {{nombre}} después ","");MCinvoke(MCwindow,"MCsaveTemplate");return null;});MCawaitEditor(MCwindow);MCfx(()->{MCinvoke(MCwindow,"MCsaveTemplate");try(XWPFDocument MCsaved=MCDocumentEngine.MCopen(MCstore.MCtemplates().get(0).MCedited())){assertThat(MCsaved.getParagraphs()).extracting(XWPFParagraph::getText).containsExactly("Antes  {{nombre}} después ","");}return null;});}finally{MCfx(()->{((Stage)MCvalue(MCwindow,"MCstage")).close();return null;});}
     }
     @Test void MCindependentScopeControlsInsertionDragGeneralDefaultsAndExcludesClientReuse()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);String MCannual="Año de la Esperanza y el Fortalecimiento de la Democracia";MCDefinition MCoriginal=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_del_Anio","Nombre del Año","Texto corto",MCannual));MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","DNI","")),MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);String MCannual="Año de la Esperanza y el Fortalecimiento de la Democracia";MCDefinition MCoriginal=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_del_Anio","Nombre del Año","Texto corto",MCannual));MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","DNI","")),MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));
         MCTemplate MCtemplate=MCtemplate(MCstore,"Global","{{Persona_1.Nombre_del_Anio}} {{DNI}} {{nombre}} {{Persona_1.DNI}} {{Persona_1.nombre}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");MCstore.MCbindDefinition(MCtemplate.MCid(),MCoriginal.MCid(),"Persona_1.Nombre_del_Anio",false,1);MCdata.MCsaveApiBinding(new MCApiBinding(MCoriginal.MCid(),"DNI","field:nombre_completo"));MCstore.MCsaveComplement(MCname.MCid(),MCoriginal.MCid(),true);MCdata.MCsaveContactBinding(new MCContactBinding(0,MCtemplate.MCid(),"viejo","Persona","extra:Nombre_del_Anio","Persona_1.Nombre_del_Anio"));
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();return MCcreated;});
         try{MCfx(()->{
@@ -488,7 +488,7 @@ class MCTemplateCatalogUiTest {
         });}finally{MCfx(()->{((Map<String,javafx.animation.PauseTransition>)MCvalue(MCwindow,"MClookupDelays")).values().forEach(javafx.animation.PauseTransition::stop);((Map<String,javafx.animation.PauseTransition>)MCvalue(MCwindow,"MCcomplementDelays")).values().forEach(javafx.animation.PauseTransition::stop);((Stage)MCvalue(MCwindow,"MCstage")).close();return null;});}
     }
     @Test void MCtabAndShiftTabStayInDocumentNavigateCellsAndPersistRealTabs()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate;
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate;
         try(XWPFDocument MCdoc=new XWPFDocument()){
             MCdoc.createParagraph().createRun().setText("Antes  después ");var MCtable=MCdoc.createTable(1,2);MCtable.getRow(0).getCell(0).setText("Primera");MCtable.getRow(0).getCell(1).setText("Segunda");byte[] MCbytes=MCDocumentEngine.MCbytes(MCdoc);MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Tabulaciones",MCbytes,MCbytes));
         }
@@ -507,7 +507,7 @@ class MCTemplateCatalogUiTest {
     }
 
     @Test void MCvariableFormattingKeyboardUndoAndSelectionSynchronizeHomeWithoutEditingLoops()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCTemplate MCtemplate=MCtemplate(MCstore,"Formato","Antes {{nombre}} después");
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCTemplate MCtemplate=MCtemplate(MCstore,"Formato","Antes {{nombre}} después");
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();MCinvoke(MCcreated,"MCshowEditor");MCinvoke(MCcreated,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCtemplate);return MCcreated;});
         try{MCawaitEditor(MCwindow);MCfx(()->{
             MCjs(MCwindow,"window.editor=document.getElementById('editor');window.key=function(key,shift,ctrl,meta){return editor.dispatchEvent(new KeyboardEvent('keydown',{key:key,shiftKey:!!shift,ctrlKey:ctrl!==false,metaKey:!!meta,bubbles:true,cancelable:true}))};editor.querySelector('.variable').click()");

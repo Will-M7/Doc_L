@@ -17,7 +17,7 @@ class MCHistoryRetentionTest {
 
     @Test void MCmigratesLegacyHistoryAndDeletingTemplateRetainsEverySnapshotAndOtherTemplateLink()throws Exception{
         for(boolean MCrestrictive:List.of(false,true)){
-            Path MCdirectory=MCtemp.resolve(MCrestrictive?"restrict":"not-null");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);
+            Path MCdirectory=MCtemp.resolve(MCrestrictive?"restrict":"not-null");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory, false);
             byte[] MCdocx;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocument.createParagraph().createRun().setText("Documento conservado");MCdocx=MCDocumentEngine.MCbytes(MCdocument);}
             byte[] MCpdf=MCDocxPdfExporter.MCrender(MCdocx);MCTemplate MCremoved=MCstore.MCsaveTemplate(new MCTemplate(0,"Borrable",MCdocx,MCdocx)),MCretained=MCstore.MCsaveTemplate(new MCTemplate(0,"Conservada",MCdocx,MCdocx));
             try(Connection MCc=DriverManager.getConnection("jdbc:sqlite:"+MCdirectory.resolve("studio.db"));Statement MCs=MCc.createStatement()){
@@ -44,7 +44,7 @@ class MCHistoryRetentionTest {
     }
 
     @Test void MCdirectSqlDeleteLeavesHistoryDetachedAndReadable()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);byte[] MCdocx;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocx=MCDocumentEngine.MCbytes(MCdocument);}
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);byte[] MCdocx;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocx=MCDocumentEngine.MCbytes(MCdocument);}
         MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Plantilla",MCdocx,MCdocx));MCStudioData MCdata=new MCStudioData(MCtemp);MCdata.MCsaveHistory(new MCHistory(0,"Generado",MCtemplate.MCid(),1,null,"{}",null,null,MCdocx,null));
         try(Connection MCc=DriverManager.getConnection("jdbc:sqlite:"+MCdata.MCdatabase());Statement MCs=MCc.createStatement()){MCs.execute("PRAGMA foreign_keys=ON");MCs.executeUpdate("DELETE FROM template WHERE id="+MCtemplate.MCid());}
         MCHistory MChistory=new MCStudioData(MCtemp).MChistory().get(0);assertThat(MChistory.MCtemplateId()).isNull();assertThat(MChistory.MCdocx()).containsExactly(MCdocx);

@@ -13,20 +13,82 @@ import static org.assertj.core.api.Assertions.*;
 class MCLocalModulesTest {
     @TempDir Path MCtemp;
 
+    @Test void MCnewDatabaseSeedsCompleteCatalogWithoutCredentialsOrPrivateContent() throws Exception {
+        MCDocumentStore MCstore = new MCDocumentStore(MCtemp);
+        MCStudioData MCdata = new MCStudioData(MCtemp);
+        Map<String, MCDefinition> MCdefinitions = new HashMap<>();
+        for (MCDefinition MCdefinition : MCstore.MCdefinitions()) MCdefinitions.put(MCdefinition.MCkey(), MCdefinition);
+        assertThat(MCdefinitions).containsKeys("dni", "ruc", "nombre_completo", "nombres", "apellido_paterno", "apellido_materno",
+            "razon_social", "nombre_comercial", "direccion", "ruc_direccion", "ubigeo", "ruc_ubigeo", "sexo", "fecha_nacimiento",
+            "fecha", "ciudad", "nombre_anio", "cargo", "entidad", "tramite", "telefono", "correo", "nacionalidad", "estado_civil_texto", "monto", "plazo");
+        for (String MCservice : List.of("DNI", "RUC")) for (var MCfield : MCApiFieldCatalog.MCfields(MCservice)) {
+            assertThat(MCdata.MCapiBindings()).anySatisfy(MCb -> {
+                assertThat(MCb.MCservice()).isEqualTo(MCservice);
+                assertThat(MCb.MCpath()).isEqualTo("field:" + MCfield.MCkey());
+                assertThat(MCdefinitions.values().stream().filter(MCd -> MCd.MCid() == MCb.MCdefinitionId()).findFirst().orElseThrow().MCbindToClient()).isTrue();
+            });
+        }
+        assertThat(MCdata.MCapiBindings()).hasSize(MCApiFieldCatalog.MCfields("DNI").size() + MCApiFieldCatalog.MCfields("RUC").size());
+        MCDefinition MCdate = MCdefinitions.get("fecha");
+        assertThat(MCdate.MCautoCurrentDate()).isTrue();
+        assertThat(MCdate.MCbindToClient()).isTrue();
+        assertThat(MCdate.MCdateFormat()).isEqualTo("d 'de' MMMM 'de' yyyy");
+        assertThat(MCdate.MCinitialValue()).isEqualTo(MCdate.MCcurrentDate());
+        assertThat(MCdefinitions.get("nombre_anio").MCbindToClient()).isFalse();
+        assertThat(MCdefinitions.get("nombre_anio").MCdefaultValue()).isEmpty();
+        assertThat(new MCApiCredentialStore(MCtemp).MCcredentials()).isEmpty();
+        assertThat(MCstore.MCtemplates()).isEmpty();
+        assertThat(MCdata.MCcontacts()).isEmpty();
+        assertThat(MCdata.MChistory()).isEmpty();
+        try (var MCfiles = Files.list(MCtemp)) { assertThat(MCfiles.map(MCp -> MCp.getFileName().toString()).toList()).noneMatch(MCn -> MCn.endsWith(".secret") || MCn.endsWith(".key")); }
+    }
+
+    @Test void MCseedRunsOnceAndPreservesExistingEditsBindingsAndUserDeletions() throws Exception {
+        MCDocumentStore MClegacy = new MCDocumentStore(MCtemp, false);
+        MCDefinition MCcustom = MClegacy.MCsaveDefinition(new MCDefinition(0, "dni", "Mi documento manual", "Texto", "personalizado"));
+        MCDocumentStore MCstore = new MCDocumentStore(MCtemp);
+        assertThat(MCstore.MCdefinitions()).contains(MCcustom);
+        MCStudioData MCdata = new MCStudioData(MCtemp);
+        assertThat(MCdata.MCapiBinding(MCcustom.MCid())).isNull();
+        MCDefinition MCcity = MCstore.MCdefinitions().stream().filter(MCd -> MCd.MCkey().equals("ciudad")).findFirst().orElseThrow();
+        MCDefinition MCedited = new MCDefinition(MCcity.MCid(), "ciudad", "Mi ciudad", "Texto", "Valor local");
+        MCstore.MCsaveDefinition(MCedited);
+        MCDefinition MCdeleted = MCstore.MCdefinitions().stream().filter(MCd -> MCd.MCkey().equals("cargo")).findFirst().orElseThrow();
+        MCstore.MCdeleteDefinition(MCdeleted.MCid());
+        var MCbefore = MCstore.MCdefinitions();
+        assertThat(new MCDocumentStore(MCtemp).MCdefinitions()).containsExactlyElementsOf(MCbefore).contains(MCcustom, MCedited);
+        assertThat(new MCDocumentStore(MCtemp).MCdefinitions()).noneMatch(MCd -> MCd.MCkey().equals("cargo"));
+        try (var MCc = java.sql.DriverManager.getConnection("jdbc:sqlite:" + MCtemp.resolve("studio.db")); var MCs = MCc.createStatement();
+             var MCr = MCs.executeQuery("SELECT value FROM studio_meta WHERE key='default_variables_seeded'")) {
+            assertThat(MCr.next()).isTrue(); assertThat(MCr.getString(1)).isEqualTo("1");
+        }
+    }
+
+    @Test void MCfailedSeedRollsBackDefinitionsBindingsAndMarkerBeforeRetry() throws Exception {
+        new MCDocumentStore(MCtemp, false);
+        try (var MCc = java.sql.DriverManager.getConnection("jdbc:sqlite:" + MCtemp.resolve("studio.db")); var MCs = MCc.createStatement()) {
+            MCs.executeUpdate("CREATE TRIGGER reject_seed BEFORE INSERT ON variable_definition WHEN NEW.key='fecha' BEGIN SELECT RAISE(ABORT,'fixture rejection'); END");
+        }
+        assertThatThrownBy(() -> new MCDocumentStore(MCtemp)).hasMessageContaining("fixture rejection");
+        assertThat(new MCDocumentStore(MCtemp, false).MCdefinitions()).isEmpty();
+        try (var MCc = java.sql.DriverManager.getConnection("jdbc:sqlite:" + MCtemp.resolve("studio.db")); var MCs = MCc.createStatement()) { MCs.executeUpdate("DROP TRIGGER reject_seed"); }
+        assertThat(new MCDocumentStore(MCtemp).MCdefinitions()).anyMatch(MCd -> MCd.MCkey().equals("fecha"));
+    }
+
     @Test void MCindependentDefinitionsKeepTheirGlobalDefaultAndScopeAcrossMigrationAndZip()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("globals"));MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());String MCannual="Año de la Esperanza y el Fortalecimiento de la Democracia";
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("globals"), false);MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());String MCannual="Año de la Esperanza y el Fortalecimiento de la Democracia";
         MCDefinition MCglobal=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_del_Anio","Nombre del Año","Texto corto",MCannual,false,"dd/MM/yyyy",false));MCDefinition MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));
         assertThat(MCglobal.MCbindToClient()).isFalse();assertThat(MCglobal.MCeditorKey("Persona_1")).isEqualTo("Nombre_del_Anio");assertThat(MCglobal.MCinitialValue()).isEqualTo(MCannual);assertThat(MCname.MCbindToClient()).isTrue();assertThat(MCname.MCeditorKey("Persona_1")).isEqualTo("Persona_1.nombre");
         byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{Nombre_del_Anio}} {{Persona_1.nombre}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Institucional",MCbytes,MCbytes));
         assertThat(MCstore.MCbindDefinition(MCtemplate.MCid(),MCglobal.MCid(),"Persona_1.Nombre_del_Anio",false,1).MCkey()).isEqualTo("Nombre_del_Anio");MCstore.MCbindDefinition(MCtemplate.MCid(),MCname.MCid(),"Persona_1.nombre",false,2);MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");
-        assertThat(new MCDocumentStore(MCstore.MCdirectory()).MCdefinitions()).contains(MCglobal,MCname);Path MCzip=MCtemp.resolve("globals.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);
-        MCDocumentStore MCtarget=new MCDocumentStore(MCtemp.resolve("import"));MCStudioData MCtargetData=new MCStudioData(MCtarget.MCdirectory());new MCStudioTransfer(MCtarget,MCtargetData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);assertThat(MCtarget.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals(MCglobal.MCkey())).findFirst().orElseThrow()).satisfies(MCd->{assertThat(MCd.MCbindToClient()).isFalse();assertThat(MCd.MCinitialValue()).isEqualTo(MCannual);});
+        assertThat(new MCDocumentStore(MCstore.MCdirectory(), false).MCdefinitions()).contains(MCglobal,MCname);Path MCzip=MCtemp.resolve("globals.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);
+        MCDocumentStore MCtarget=new MCDocumentStore(MCtemp.resolve("import"), false);MCStudioData MCtargetData=new MCStudioData(MCtarget.MCdirectory());new MCStudioTransfer(MCtarget,MCtargetData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);assertThat(MCtarget.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals(MCglobal.MCkey())).findFirst().orElseThrow()).satisfies(MCd->{assertThat(MCd.MCbindToClient()).isFalse();assertThat(MCd.MCinitialValue()).isEqualTo(MCannual);});
         new MCStudioTransfer(MCtarget,MCtargetData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.REPLACE);assertThat(MCtarget.MCdefinitions()).hasSize(2);assertThat(MCtarget.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("nombre")).findFirst().orElseThrow().MCbindToClient()).isTrue();
-        var MCjson=new com.fasterxml.jackson.databind.ObjectMapper();com.fasterxml.jackson.databind.node.ObjectNode MCprevious;try(ZipInputStream MCinput=new ZipInputStream(Files.newInputStream(MCzip))){MCinput.getNextEntry();MCprevious=(com.fasterxml.jackson.databind.node.ObjectNode)MCjson.readTree(MCinput.readAllBytes());}assertThat(MCprevious.path("version").asInt()).isEqualTo(9);MCprevious.put("version",8);for(var MCdefinition:MCprevious.path("definitions"))((com.fasterxml.jackson.databind.node.ObjectNode)MCdefinition).remove("bindToClient");Path MClegacy=MCtemp.resolve("previous.zip");try(var MCoutput=new java.util.zip.ZipOutputStream(Files.newOutputStream(MClegacy))){MCoutput.putNextEntry(new java.util.zip.ZipEntry("configuration.json"));MCoutput.write(MCjson.writeValueAsBytes(MCprevious));MCoutput.closeEntry();}MCDocumentStore MColdImport=new MCDocumentStore(MCtemp.resolve("previous"));new MCStudioTransfer(MColdImport,new MCStudioData(MColdImport.MCdirectory())).MCimportConfiguration(MClegacy,MCStudioTransfer.MCConflict.KEEP);assertThat(MColdImport.MCdefinitions()).allMatch(MCDefinition::MCbindToClient);
+        var MCjson=new com.fasterxml.jackson.databind.ObjectMapper();com.fasterxml.jackson.databind.node.ObjectNode MCprevious;try(ZipInputStream MCinput=new ZipInputStream(Files.newInputStream(MCzip))){MCinput.getNextEntry();MCprevious=(com.fasterxml.jackson.databind.node.ObjectNode)MCjson.readTree(MCinput.readAllBytes());}assertThat(MCprevious.path("version").asInt()).isEqualTo(9);MCprevious.put("version",8);for(var MCdefinition:MCprevious.path("definitions"))((com.fasterxml.jackson.databind.node.ObjectNode)MCdefinition).remove("bindToClient");Path MClegacy=MCtemp.resolve("previous.zip");try(var MCoutput=new java.util.zip.ZipOutputStream(Files.newOutputStream(MClegacy))){MCoutput.putNextEntry(new java.util.zip.ZipEntry("configuration.json"));MCoutput.write(MCjson.writeValueAsBytes(MCprevious));MCoutput.closeEntry();}MCDocumentStore MColdImport=new MCDocumentStore(MCtemp.resolve("previous"), false);new MCStudioTransfer(MColdImport,new MCStudioData(MColdImport.MCdirectory())).MCimportConfiguration(MClegacy,MCStudioTransfer.MCConflict.KEEP);assertThat(MColdImport.MCdefinitions()).allMatch(MCDefinition::MCbindToClient);
     }
 
     @Test void MCindependentVariablesAreNeverClientBindingsOrExtrasEvenWithOldPersonPrefixes()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCglobal=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_del_Anio","Nombre del Año","Texto corto","Valor institucional",false,"dd/MM/yyyy",false));List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);MCDefinition MCglobal=MCstore.MCsaveDefinition(new MCDefinition(0,"Nombre_del_Anio","Nombre del Año","Texto corto","Valor institucional",false,"dd/MM/yyyy",false));List<MCDefinition> MCdefinitions=MCstore.MCdefinitions();
         List<MCVariable> MCvars=List.of(new MCVariable(0,1,"dni","DNI","DNI","",false,1),new MCVariable(0,1,"nombre","Nombre","Texto corto","",false,2),new MCVariable(0,1,MCglobal.MCkey(),MCglobal.MClabel(),MCglobal.MCtype(),MCglobal.MCdefaultValue(),false,3),new MCVariable(0,1,"Persona_1.Nombre_del_Anio",MCglobal.MClabel(),MCglobal.MCtype(),MCglobal.MCdefaultValue(),false,4));
         List<MCContactBinding> MCold=List.of(new MCContactBinding(0,1,"document:dni","Persona","extra:Nombre_del_Anio",MCglobal.MCkey()),new MCContactBinding(0,1,"document:dni","Persona","extra:Nombre_del_Anio","Persona_1.Nombre_del_Anio"));List<MCContactBinding> MCbindings=MCContactReuse.MCformBindings(1,MCvars,MCold,List.of(),Map.of(),MCdefinitions);assertThat(MCbindings).extracting(MCContactBinding::MCvariableKey).containsExactlyInAnyOrder("dni","nombre");
         Map<String,String> MCvalues=Map.of("dni","12345678","nombre","Ana",MCglobal.MCkey(),MCglobal.MCinitialValue(),"Persona_1.Nombre_del_Anio",MCglobal.MCinitialValue());List<MCContactBinding> MCwithOld=new ArrayList<>(MCbindings);MCwithOld.addAll(MCold);assertThat(MCContactReuse.MCsave(MCdata,MCwithOld,MCvalues,Map.of(),MCdefinitions).MCcreated()).isEqualTo(1);var MCcontact=MCdata.MCcontacts().get(0);assertThat(MCcontact.MCgiven()).isEqualTo("Ana");assertThat(MCcontact.MCextrasJson()).doesNotContain(MCglobal.MCkey(),MCglobal.MCinitialValue(),"Persona_1");assertThat(MCContactReuse.MCsave(MCdata,MCwithOld,MCvalues,Map.of(),MCdefinitions).MCcreated()).isZero();
@@ -39,24 +101,24 @@ class MCLocalModulesTest {
         try(XWPFDocument MCresult=MCDocumentEngine.MCopen(MCDocumentEngine.MCgenerate(MCbytes,Map.of("Persona_1.DNI","11111111","Persona_2.DNI","22222222","DNI","33333333","Persona_1.Cargo","Presidente","Persona_2.Nombres_Com","María Ruiz")))){assertThat(MCresult.getParagraphs().get(0).getText()).isEqualTo("11111111 / 22222222 / 33333333");assertThat(MCresult.getHeaderList().get(0).getText()).contains("Presidente");assertThat(MCresult.getTables().get(0).getText()).contains("María Ruiz");assertThat(MCDocumentEngine.MCmarkers(MCresult)).isEmpty();}
     }
     @Test void MCpersonasAndAutomaticDateDefinitionsPersistAndTravelWithConfiguration()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("source"));MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{Persona_1.DNI}} {{Persona_2.DNI}} {{Fecha}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Personas",MCbytes,MCbytes));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("source"), false);MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());byte[] MCbytes;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{Persona_1.DNI}} {{Persona_2.DNI}} {{Fecha}}");MCbytes=MCDocumentEngine.MCbytes(MCdoc);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Personas",MCbytes,MCbytes));
         MCDefinition MCdni=MCstore.MCsaveDefinition(new MCDefinition(0,"DNI","DNI","Mixto","")),MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"Fecha","Fecha","Fecha","",true,"d 'de' MMMM 'de' yyyy"));MCstore.MCbindDefinition(MCtemplate.MCid(),MCdni.MCid(),"Persona_1.DNI",false,1);MCstore.MCbindDefinition(MCtemplate.MCid(),MCdni.MCid(),"Persona_2.DNI",false,2);MCstore.MCbindDefinition(MCtemplate.MCid(),MCdate.MCid(),false,3);
-        MCPersona MCfirst=MCstore.MCaddPersona(MCtemplate.MCid(),"Solicitante"),MCsecond=MCstore.MCaddPersona(MCtemplate.MCid(),"Arrendador");assertThat(MCfirst.MCpersonaKey()).isEqualTo("Persona_1");assertThat(MCsecond.MCpersonaKey()).isEqualTo("Persona_2");MCstore.MCrenamePersona(MCsecond.MCid(),"Arrendatario");assertThat(MCstore.MCpersonas(MCtemplate.MCid())).extracting(MCPersona::MCdisplayName).containsExactly("Solicitante","Arrendatario");assertThat(new MCDocumentStore(MCstore.MCdirectory()).MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("Fecha")).findFirst().orElseThrow().MCautoCurrentDate()).isTrue();
-        Path MCzip=MCtemp.resolve("personas.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);MCDocumentStore MCimported=new MCDocumentStore(MCtemp.resolve("target"));MCimported.MCsaveDefinition(new MCDefinition(0,"otro","Otro","Texto",""));MCStudioTransfer MCtransfer=new MCStudioTransfer(MCimported,new MCStudioData(MCimported.MCdirectory()));MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);
+        MCPersona MCfirst=MCstore.MCaddPersona(MCtemplate.MCid(),"Solicitante"),MCsecond=MCstore.MCaddPersona(MCtemplate.MCid(),"Arrendador");assertThat(MCfirst.MCpersonaKey()).isEqualTo("Persona_1");assertThat(MCsecond.MCpersonaKey()).isEqualTo("Persona_2");MCstore.MCrenamePersona(MCsecond.MCid(),"Arrendatario");assertThat(MCstore.MCpersonas(MCtemplate.MCid())).extracting(MCPersona::MCdisplayName).containsExactly("Solicitante","Arrendatario");assertThat(new MCDocumentStore(MCstore.MCdirectory(), false).MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("Fecha")).findFirst().orElseThrow().MCautoCurrentDate()).isTrue();
+        Path MCzip=MCtemp.resolve("personas.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);MCDocumentStore MCimported=new MCDocumentStore(MCtemp.resolve("target"), false);MCimported.MCsaveDefinition(new MCDefinition(0,"otro","Otro","Texto",""));MCStudioTransfer MCtransfer=new MCStudioTransfer(MCimported,new MCStudioData(MCimported.MCdirectory()));MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);
         MCTemplate MCcopy=MCimported.MCtemplates().get(0);assertThat(MCimported.MCpersonas(MCcopy.MCid())).extracting(MCPersona::MCdisplayName).containsExactly("Solicitante","Arrendatario");assertThat(MCimported.MCvariables(MCcopy.MCid())).extracting(MCVariable::MCkey).containsExactly("Persona_1.DNI","Persona_2.DNI","Fecha");assertThat(MCimported.MCdefinitionId(MCimported.MCvariables(MCcopy.MCid()).get(0).MCid())).isEqualTo(MCimported.MCdefinitionId(MCimported.MCvariables(MCcopy.MCid()).get(1).MCid()));MCDefinition MCrestored=MCimported.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("Fecha")).findFirst().orElseThrow();assertThat(MCrestored.MCautoCurrentDate()).isTrue();assertThat(MCrestored.MCdateFormat()).isEqualTo(MCdate.MCdateFormat());assertThat(MCrestored.MCcurrentDate()).isEqualTo(MCdate.MCcurrentDate());assertThat(MCcopy.MCedited()).containsExactly(MCbytes);
         MCimported.MCdeletePersona(MCimported.MCpersonas(MCcopy.MCid()).get(0).MCid());assertThat(MCimported.MCpersonas(MCcopy.MCid())).hasSize(1);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.REPLACE);assertThat(MCimported.MCpersonas(MCcopy.MCid())).hasSize(2);MCimported.MCdeleteTemplate(MCcopy.MCid());assertThat(MCimported.MCpersonas(MCcopy.MCid())).isEmpty();
     }
     @Test void MCparticipantContactsAndTheirExtrasNeverMixAndAllowMissingDocuments()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);List<MCVariable> MCvariables=new ArrayList<>();for(String MCkey:List.of("Persona_1.DNI","Persona_1.Nombres_Com","Persona_1.Cargo","Persona_2.DNI","Persona_2.Nombres_Com","Persona_2.Cargo","Persona_3.Nombres_Com","Persona_3.Cargo"))MCvariables.add(new MCVariable(0,1,MCkey,MCDocumentEngine.MCbaseKey(MCkey),"Texto","",false,MCvariables.size()));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);List<MCVariable> MCvariables=new ArrayList<>();for(String MCkey:List.of("Persona_1.DNI","Persona_1.Nombres_Com","Persona_1.Cargo","Persona_2.DNI","Persona_2.Nombres_Com","Persona_2.Cargo","Persona_3.Nombres_Com","Persona_3.Cargo"))MCvariables.add(new MCVariable(0,1,MCkey,MCDocumentEngine.MCbaseKey(MCkey),"Texto","",false,MCvariables.size()));
         List<MCContactBinding> MCbindings=MCContactReuse.MCformBindings(1,MCvariables,List.of(),List.of(),Map.of());Map<String,String> MCvalues=new LinkedHashMap<>(Map.of("Persona_1.DNI","11111111","Persona_1.Nombres_Com","Ana Pérez","Persona_1.Cargo","Directora","Persona_2.DNI","22222222","Persona_2.Nombres_Com","Luis Ruiz","Persona_2.Cargo","Secretario","Persona_3.Nombres_Com","Luisito","Persona_3.Cargo","Presidente","Fecha","Privado"));
         assertThat(MCContactReuse.MCsave(MCdata,MCbindings,MCvalues,Map.of()).MCcreated()).isEqualTo(3);MCContact MCana=MCdata.MCmatchingContact("Persona","DNI","11111111"),MCluis=MCdata.MCmatchingContact("Persona","DNI","22222222");assertThat(MCana.MCgiven()).isEqualTo("Ana Pérez");assertThat(MCana.MCextrasJson()).contains("Directora").doesNotContain("Luis Ruiz","Secretario","Persona_2","Privado");assertThat(MCluis.MCextrasJson()).contains("Secretario").doesNotContain("Ana Pérez","Directora");assertThat(MCdata.MCfindContacts("Luisito").get(0).MCnumber()).isEmpty();assertThat(MCContactReuse.MCsave(MCdata,MCbindings,MCvalues,Map.of()).MCcreated()).isZero();MCvalues.put("Persona_1.Cargo","Presidenta");MCContactReuse.MCsave(MCdata,MCbindings,MCvalues,Map.of());assertThat(MCdata.MCmatchingContact("Persona","DNI","22222222")).isEqualTo(MCluis);assertThat(MCdata.MCcontacts()).hasSize(3);
     }
     @Test void MClegacyDefinitionsReceiveSafeAutomaticDateDefaults()throws Exception{
         try(var MCc=java.sql.DriverManager.getConnection("jdbc:sqlite:"+MCtemp.resolve("studio.db"));var MCs=MCc.createStatement()){MCs.execute("PRAGMA foreign_keys=ON");MCs.executeUpdate("CREATE TABLE variable_definition(id INTEGER PRIMARY KEY,key TEXT NOT NULL,label TEXT NOT NULL,type TEXT NOT NULL,default_value TEXT)");MCs.executeUpdate("INSERT INTO variable_definition VALUES(1,'Fecha','Fecha','Fecha','')");}
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCDefinition MCdate=MCstore.MCdefinitions().get(0);assertThat(MCdate.MCbindToClient()).isTrue();assertThat(MCdate.MCautoCurrentDate()).isFalse();assertThat(MCdate.MCdateFormat()).isEqualTo("dd/MM/yyyy");MCstore.MCsaveDefinition(new MCDefinition(MCdate.MCid(),MCdate.MCkey(),MCdate.MClabel(),MCdate.MCtype(),"",true,"EEEE, d 'de' MMMM 'de' yyyy"));assertThat(new MCDocumentStore(MCtemp).MCdefinitions().get(0).MCcurrentDate()).isEqualTo(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-PE"))));
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCDefinition MCdate=MCstore.MCdefinitions().get(0);assertThat(MCdate.MCbindToClient()).isTrue();assertThat(MCdate.MCautoCurrentDate()).isFalse();assertThat(MCdate.MCdateFormat()).isEqualTo("dd/MM/yyyy");MCstore.MCsaveDefinition(new MCDefinition(MCdate.MCid(),MCdate.MCkey(),MCdate.MClabel(),MCdate.MCtype(),"",true,"EEEE, d 'de' MMMM 'de' yyyy"));assertThat(new MCDocumentStore(MCtemp, false).MCdefinitions().get(0).MCcurrentDate()).isEqualTo(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy",Locale.forLanguageTag("es-PE"))));
     }
     @Test void MCcomplementsLearnObjectsAndUndocumentedPeopleInBothDirectionsAndStayLocal()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);
         MCDefinition MCobject=MCstore.MCsaveDefinition(new MCDefinition(0,"objeto","Objeto","Texto","")),MCprice=MCstore.MCsaveDefinition(new MCDefinition(0,"precio","Precio","Texto","")),MCperson=MCstore.MCsaveDefinition(new MCDefinition(0,"Dirigido","Dirigido","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"Cargo","Cargo","Texto",""));
         MCstore.MCsaveComplement(MCobject.MCid(),MCprice.MCid(),true);MCstore.MCsaveComplement(MCperson.MCid(),MCrole.MCid(),true);
         assertThat(MCstore.MCcomplements(MCobject.MCid())).extracting(MCComplement::MCtargetDefId).containsExactly(MCprice.MCid());assertThat(MCstore.MCcomplements(MCprice.MCid())).extracting(MCComplement::MCtargetDefId).containsExactly(MCobject.MCid());assertThatThrownBy(()->MCstore.MCsaveComplement(MCobject.MCid(),MCobject.MCid(),true)).isInstanceOf(IllegalArgumentException.class);
@@ -70,14 +132,14 @@ class MCLocalModulesTest {
     }
 
     @Test void MCcontactsWithoutDocumentsDeduplicateByNormalizedNameAndSearchAllExtraValues()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);MCStudioData MCdata=new MCStudioData(MCtemp);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);MCStudioData MCdata=new MCStudioData(MCtemp);
         MCContact MCana=MCdata.MCsaveContact(new MCContact(0,"Persona","Ána","Pérez","DNI","","Lima","","{\"Cargo\":\"Presidenta\",\"Asociacion\":\"Los Pinos\"}"));MCContact MCluis=MCdata.MCsaveContact(new MCContact(0,"Persona","Luisito","","DNI","","","","{\"cargo\":\"Secretario\"}"));assertThat(MCdata.MCcontacts()).hasSize(2);
         MCContact MCupdated=MCdata.MCupsertContact(new MCContact(0,"Persona"," ana "," PÉREZ ","","","","","{\"Cargo\":\"Tesorera\"}"));assertThat(MCupdated.MCid()).isEqualTo(MCana.MCid());assertThat(MCdata.MCcontacts()).hasSize(2);assertThat(MCupdated.MCextrasJson()).contains("Los Pinos","Tesorera");assertThat(MCdata.MCfindContacts("ana perez")).extracting(MCContact::MCid).containsExactly(MCana.MCid());assertThat(MCdata.MCfindContacts("LOS PINOS")).extracting(MCContact::MCid).containsExactly(MCana.MCid());assertThat(MCdata.MCfindContactsByVariable("CARGO","secre",true)).extracting(MCContact::MCid).containsExactly(MCluis.MCid());
         MCContact MCdocumented=MCdata.MCsaveContact(new MCContact(0,"Persona","Juan","Pérez","DNI","12345678","Cusco","","{\"otro\":\"conservado\"}"));MCDefinition MCname=MCstore.MCsaveDefinition(new MCDefinition(0,"dirigido","Dirigido","Texto","")),MCrole=MCstore.MCsaveDefinition(new MCDefinition(0,"cargo","Cargo","Texto",""));MCstore.MCsaveComplement(MCname.MCid(),MCrole.MCid(),true);MCdata.MClearnComplements(MCstore.MCdefinitions(),MCstore.MCcomplements(),Map.of("dirigido","Juan Pérez","cargo","Director"));MCContact MCafter=MCdata.MCmatchingContact("Persona","DNI","12345678");assertThat(MCafter.MCid()).isEqualTo(MCdocumented.MCid());assertThat(MCafter.MCaddress()).isEqualTo("Cusco");assertThat(MCafter.MCextrasJson()).contains("conservado","Director");assertThat(MCdata.MCcontacts()).hasSize(3);
     }
 
     @Test void MCmigratesLegacyUniqueContactIdentityWithoutLosingExistingData()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp, false);
         try(var MCc=java.sql.DriverManager.getConnection("jdbc:sqlite:"+MCtemp.resolve("studio.db"));var MCs=MCc.createStatement()){
             MCs.execute("PRAGMA foreign_keys=ON");MCs.executeUpdate("CREATE TABLE contact(id INTEGER PRIMARY KEY,kind TEXT NOT NULL,given TEXT NOT NULL,family TEXT NOT NULL DEFAULT '',document_type TEXT NOT NULL DEFAULT '',number TEXT NOT NULL DEFAULT '',address TEXT NOT NULL DEFAULT '',representatives TEXT NOT NULL DEFAULT '',extras_json TEXT NOT NULL DEFAULT '{}',UNIQUE(kind,document_type,number))");MCs.executeUpdate("INSERT INTO contact(kind,given,document_type,number,extras_json) VALUES('Persona','Luisito','DNI','','{\"cargo\":\"Presidente\"}')");
         }
@@ -85,14 +147,14 @@ class MCLocalModulesTest {
     }
 
     @Test void MCcomplementDefinitionsAndLinksTravelWithFilteredTemplateConfiguration()throws Exception{
-        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("export"));MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());MCDefinition MCsource=MCstore.MCsaveDefinition(new MCDefinition(0,"objeto","Objeto","Texto","")),MCtarget=MCstore.MCsaveDefinition(new MCDefinition(0,"precio","Precio","Texto",""));MCstore.MCsaveComplement(MCsource.MCid(),MCtarget.MCid(),true);
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp.resolve("export"), false);MCStudioData MCdata=new MCStudioData(MCstore.MCdirectory());MCDefinition MCsource=MCstore.MCsaveDefinition(new MCDefinition(0,"objeto","Objeto","Texto","")),MCtarget=MCstore.MCsaveDefinition(new MCDefinition(0,"precio","Precio","Texto",""));MCstore.MCsaveComplement(MCsource.MCid(),MCtarget.MCid(),true);
         byte[] MCbytes;try(XWPFDocument MCdocument=new XWPFDocument()){MCdocument.createParagraph().createRun().setText("{{objeto}}");MCbytes=MCDocumentEngine.MCbytes(MCdocument);}MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Complementos",MCbytes,MCbytes));MCstore.MCbindDefinition(MCtemplate.MCid(),MCsource.MCid(),false,1);Path MCzip=MCtemp.resolve("complementos.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip,List.of(MCtemplate.MCid()));
-        MCDocumentStore MCimported=new MCDocumentStore(MCtemp.resolve("import"));MCStudioData MCimportedData=new MCStudioData(MCimported.MCdirectory());MCStudioTransfer MCtransfer=new MCStudioTransfer(MCimported,MCimportedData);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);assertThat(MCimported.MCdefinitions()).hasSize(2);assertThat(MCimported.MCcomplements()).hasSize(1);MCDefinition MCprice=MCimported.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("precio")).findFirst().orElseThrow();assertThat(MCimported.MCcomplements(MCprice.MCid())).hasSize(1);assertThat(MCimported.MCtemplates().get(0).MCedited()).containsExactly(MCbytes);
+        MCDocumentStore MCimported=new MCDocumentStore(MCtemp.resolve("import"), false);MCStudioData MCimportedData=new MCStudioData(MCimported.MCdirectory());MCStudioTransfer MCtransfer=new MCStudioTransfer(MCimported,MCimportedData);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);MCtransfer.MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);assertThat(MCimported.MCdefinitions()).hasSize(2);assertThat(MCimported.MCcomplements()).hasSize(1);MCDefinition MCprice=MCimported.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("precio")).findFirst().orElseThrow();assertThat(MCimported.MCcomplements(MCprice.MCid())).hasSize(1);assertThat(MCimported.MCtemplates().get(0).MCedited()).containsExactly(MCbytes);
         MCdata.MCsaveContact(new MCContact(0,"Persona","Luisito","","","","","","{\"cargo\":\"Presidente\"}"));MCdata.MCsaveContact(new MCContact(0,"Persona","María","","","","","","{}"));Path MCclients=MCtemp.resolve("personas.zip");new MCStudioTransfer(MCstore,MCdata).MCexportClients(MCclients);MCtransfer.MCimportConfiguration(MCclients,MCStudioTransfer.MCConflict.KEEP);MCtransfer.MCimportConfiguration(MCclients,MCStudioTransfer.MCConflict.KEEP);assertThat(MCimportedData.MCcontacts()).hasSize(2);assertThat(MCimportedData.MCfindContacts("Presidente")).hasSize(1);
     }
 
     @Test void MCtemplateCatalogGroupsFiltersAndEditorSaveRemainIndependent()throws Exception{
-        Path MCdirectory=MCtemp.resolve("catalog");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);
+        Path MCdirectory=MCtemp.resolve("catalog");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory, false);MCStudioData MCdata=new MCStudioData(MCdirectory);
         byte[] MCdocx;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Plantilla");MCdocx=MCDocumentEngine.MCbytes(MCdoc);}
         MCTemplate MCfirst=MCstore.MCsaveTemplate(new MCTemplate(0,"Solicitud",MCdocx,MCdocx));MCdata.MCrecordRevision(MCfirst.MCid(),MCdocx);
         MCTemplateGroup MCsolicitudes=MCstore.MCsaveGroup(0,"Solicitudes");
@@ -112,11 +174,11 @@ class MCLocalModulesTest {
         MCstore.MCsaveTemplate(new MCTemplate(MCfirst.MCid(),"Solicitud editada",MCfirst.MCoriginal(),MCfirst.MCedited()));assertThat(MCstore.MCgroupIds(MCfirst.MCid())).hasSize(2);
         MCTemplate MCcopy=MCstore.MCsaveTemplate(new MCTemplate(0,"Solicitud (copia)",MCfirst.MCoriginal(),MCfirst.MCedited()));assertThat(MCstore.MCgroupIds(MCcopy.MCid())).isEmpty();
         MCstore.MCdeleteGroup(MCsolicitudes.MCid(),null);assertThat(MCstore.MCtemplates()).hasSize(3);assertThat(MCstore.MCgroupIds(MCfirst.MCid())).containsExactly(MCfrecuentes.MCid());
-        MCDocumentStore MCreopened=new MCDocumentStore(MCdirectory);assertThat(MCreopened.MCgroupIds(MCfirst.MCid())).containsExactly(MCfrecuentes.MCid());assertThat(MCreopened.MCgroupIds(MCcopy.MCid())).isEmpty();assertThat(new MCStudioData(MCdirectory).MCrevisionDates()).containsKey(MCfirst.MCid());
+        MCDocumentStore MCreopened=new MCDocumentStore(MCdirectory, false);assertThat(MCreopened.MCgroupIds(MCfirst.MCid())).containsExactly(MCfrecuentes.MCid());assertThat(MCreopened.MCgroupIds(MCcopy.MCid())).isEmpty();assertThat(new MCStudioData(MCdirectory).MCrevisionDates()).containsKey(MCfirst.MCid());
     }
 
     @Test void MCtransferBackupAndReopen()throws Exception{
-        Path MCfirst=MCtemp.resolve("first"),MCsecond=MCtemp.resolve("second");MCDocumentStore MCa=new MCDocumentStore(MCfirst);MCStudioData MCextra=new MCStudioData(MCfirst);
+        Path MCfirst=MCtemp.resolve("first"),MCsecond=MCtemp.resolve("second");MCDocumentStore MCa=new MCDocumentStore(MCfirst, false);MCStudioData MCextra=new MCStudioData(MCfirst);
         byte[] MCdocx;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Hola {{nombre}}");MCdocx=MCDocumentEngine.MCbytes(MCdoc);}
         MCTemplate MCtemplate=MCa.MCsaveTemplate(new MCTemplate(0,"Saludo",MCdocx,MCdocx));MCextra.MCrecordRevision(MCtemplate.MCid(),MCdocx);
         MCa.MCsaveVariable(new MCVariable(0,MCtemplate.MCid(),"nombre","Nombre","Texto corto","",true,1));
@@ -127,7 +189,7 @@ class MCLocalModulesTest {
         MCLocalSecret MCsecret=new MCLocalSecret(MCfirst);MCsecret.MCsave("token-privado");assertThat(MCsecret.MCload()).isEqualTo("token-privado");
         Path MCconfig=MCtemp.resolve("config.zip");MCStudioTransfer MCtransfer=new MCStudioTransfer(MCa,MCextra);MCtransfer.MCexportConfiguration(MCconfig);
         try(ZipInputStream MCzip=new ZipInputStream(Files.newInputStream(MCconfig))){assertThat(MCzip.getNextEntry().getName()).isEqualTo("configuration.json");assertThat(new String(MCzip.readAllBytes())).doesNotContain("token-privado","12345678");}
-        MCDocumentStore MCb=new MCDocumentStore(MCsecond);MCStudioData MCbData=new MCStudioData(MCsecond);
+        MCDocumentStore MCb=new MCDocumentStore(MCsecond, false);MCStudioData MCbData=new MCStudioData(MCsecond);
         MCStudioTransfer.MCImportResult MCimported=new MCStudioTransfer(MCb,MCbData).MCimportConfiguration(MCconfig,MCStudioTransfer.MCConflict.KEEP);
         assertThat(MCimported.MCtemplates()).isEqualTo(1);assertThat(MCb.MCtemplates()).hasSize(1);assertThat(MCb.MCvariables(MCb.MCtemplates().get(0).MCid())).hasSize(1);assertThat(MCb.MCkinds()).hasSize(1);assertThat(MCbData.MCmappings(MCb.MCtemplates().get(0).MCid())).hasSize(1);assertThat(MCbData.MCcontacts()).isEmpty();assertThat(MCbData.MChistory()).isEmpty();
         assertThat(new MCStudioTransfer(MCb,MCbData).MCimportConfiguration(MCconfig,MCStudioTransfer.MCConflict.KEEP).MCconflicts()).isGreaterThan(0);
@@ -150,7 +212,7 @@ class MCLocalModulesTest {
     }
 
     @Test void MCvariableApiBindingsRemainIndependentAndTransferWithoutClientData()throws Exception{
-        Path MCfirst=MCtemp.resolve("api-source"),MCsecond=MCtemp.resolve("api-target");MCDocumentStore MCstore=new MCDocumentStore(MCfirst);MCStudioData MCdata=new MCStudioData(MCfirst);
+        Path MCfirst=MCtemp.resolve("api-source"),MCsecond=MCtemp.resolve("api-target");MCDocumentStore MCstore=new MCDocumentStore(MCfirst, false);MCStudioData MCdata=new MCStudioData(MCfirst);
         MCDefinition MCoriginal=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto","Antiguo"));
         MCdata.MCsaveApiBinding(new MCApiBinding(MCoriginal.MCid(),"DNI","data.nombres"));
         MCDefinition MCcopy=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre_copia","Nombre (copia)",MCoriginal.MCtype(),""));
@@ -164,14 +226,14 @@ class MCLocalModulesTest {
         assertThatThrownBy(()->MCstore.MCdeleteDefinition(MCoriginal.MCid())).hasMessageContaining("API");
         MCdata.MCsaveContact(new MCContact(0,"Persona","Ana","","DNI","12345678","","","{}"));
         Path MCpackageFile=MCtemp.resolve("api.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCpackageFile);
-        MCDocumentStore MCtarget=new MCDocumentStore(MCsecond);MCStudioData MCimported=new MCStudioData(MCsecond);new MCStudioTransfer(MCtarget,MCimported).MCimportConfiguration(MCpackageFile,MCStudioTransfer.MCConflict.KEEP);
+        MCDocumentStore MCtarget=new MCDocumentStore(MCsecond, false);MCStudioData MCimported=new MCStudioData(MCsecond);new MCStudioTransfer(MCtarget,MCimported).MCimportConfiguration(MCpackageFile,MCStudioTransfer.MCConflict.KEEP);
         MCDefinition MCtransferred=MCtarget.MCdefinitions().stream().filter(MCd->MCd.MCkey().equals("nombre")).findFirst().orElseThrow();
         assertThat(MCimported.MCapiBinding(MCtransferred.MCid()).MCpath()).isEqualTo("data.nombres");assertThat(MCimported.MCcontacts()).isEmpty();
     }
 
     @Test void MCsharedDefinitionsBindToTemplatesAndSurviveTransfer()throws Exception{
         Path MCsource=MCtemp.resolve("variables-source"),MCdestination=MCtemp.resolve("variables-destination");
-        MCDocumentStore MCstore=new MCDocumentStore(MCsource);MCStudioData MCdata=new MCStudioData(MCsource);
+        MCDocumentStore MCstore=new MCDocumentStore(MCsource, false);MCStudioData MCdata=new MCStudioData(MCsource);
         MCDefinition MCdefinition=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre_libre","Nombre","Texto corto",""));
         byte[] MCdocx;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("Hola {{nombre_libre}}");MCdocx=MCDocumentEngine.MCbytes(MCdoc);}
         MCTemplate MCfirst=MCstore.MCsaveTemplate(new MCTemplate(0,"Primera",MCdocx,MCdocx));MCTemplate MCsecond=MCstore.MCsaveTemplate(new MCTemplate(0,"Segunda",MCdocx,MCdocx));
@@ -183,17 +245,17 @@ class MCLocalModulesTest {
         byte[] MCoutput=MCDocumentEngine.MCgenerate(MCfirst.MCedited(),Map.of("nombre_libre","Ana"));
         try(XWPFDocument MCgenerated=MCDocumentEngine.MCopen(MCoutput)){assertThat(MCgenerated.getParagraphs().get(0).getText()).isEqualTo("Hola Ana");}
         Path MCzip=MCtemp.resolve("variables.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCzip);
-        MCDocumentStore MCimported=new MCDocumentStore(MCdestination);MCStudioData MCimportedData=new MCStudioData(MCdestination);
+        MCDocumentStore MCimported=new MCDocumentStore(MCdestination, false);MCStudioData MCimportedData=new MCStudioData(MCdestination);
         new MCStudioTransfer(MCimported,MCimportedData).MCimportConfiguration(MCzip,MCStudioTransfer.MCConflict.KEEP);
         assertThat(MCimported.MCdefinitions()).hasSize(1);
         assertThat(MCimported.MCdefinitionId(MCimported.MCvariables(MCimported.MCtemplates().get(0).MCid()).get(0).MCid())).isEqualTo(MCimported.MCdefinitions().get(0).MCid());
         assertThat(MCimported.MCkindRequirements(MCimported.MCkinds().get(0).MCid())).containsEntry("nombre_libre",true);
         assertThat(MCimported.MCkindDefaults(MCimported.MCkinds().get(0).MCid())).containsEntry("nombre_libre","Valor local");
-        assertThat(new MCDocumentStore(MCdestination).MCdefinitions()).hasSize(1);
+        assertThat(new MCDocumentStore(MCdestination, false).MCdefinitions()).hasSize(1);
     }
 
     @Test void MCexplicitGroupsSaveAndReuseIndependentContactsWithoutDuplicates()throws Exception{
-        Path MCdirectory=MCtemp.resolve("contact-groups");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory);MCStudioData MCdata=new MCStudioData(MCdirectory);
+        Path MCdirectory=MCtemp.resolve("contact-groups");MCDocumentStore MCstore=new MCDocumentStore(MCdirectory, false);MCStudioData MCdata=new MCStudioData(MCdirectory);
         byte[] MCdocx;try(XWPFDocument MCdoc=new XWPFDocument()){MCdoc.createParagraph().createRun().setText("{{nombre_a}} {{nombre_b}} {{empresa}} ");MCdocx=MCDocumentEngine.MCbytes(MCdoc);}
         MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Grupos",MCdocx,MCdocx));
         List<MCStudioData.MCContactBinding> MCbindings=new ArrayList<>();
@@ -218,7 +280,7 @@ class MCLocalModulesTest {
         assertThat(MCContactReuse.MCsave(MCdata,MCbindings,MCwithoutDocument,MCtypes).MCskipped()).isEqualTo(1);
         assertThat(MCdata.MCcontacts()).hasSize(3);
         Path MCconfig=MCtemp.resolve("groups.zip");new MCStudioTransfer(MCstore,MCdata).MCexportConfiguration(MCconfig);
-        Path MCimportedDirectory=MCtemp.resolve("groups-imported");MCDocumentStore MCimported=new MCDocumentStore(MCimportedDirectory);MCStudioData MCimportedData=new MCStudioData(MCimportedDirectory);
+        Path MCimportedDirectory=MCtemp.resolve("groups-imported");MCDocumentStore MCimported=new MCDocumentStore(MCimportedDirectory, false);MCStudioData MCimportedData=new MCStudioData(MCimportedDirectory);
         new MCStudioTransfer(MCimported,MCimportedData).MCimportConfiguration(MCconfig,MCStudioTransfer.MCConflict.KEEP);
         assertThat(MCimportedData.MCcontactBindings(MCimported.MCtemplates().get(0).MCid())).hasSize(8);
         assertThat(MCimportedData.MCcontacts()).isEmpty();
@@ -231,11 +293,11 @@ class MCLocalModulesTest {
             MCs.executeUpdate("CREATE TABLE variable(id INTEGER PRIMARY KEY,template_id INTEGER NOT NULL,key TEXT NOT NULL,label TEXT NOT NULL,type TEXT NOT NULL,default_value TEXT,required INTEGER NOT NULL,position INTEGER NOT NULL,UNIQUE(template_id,key))");
             MCs.executeUpdate("INSERT INTO variable(template_id,key,label,type,default_value,required,position) VALUES(1,'dato','Nombre','Texto corto','',1,1),(2,'dato','Monto','Monto','0',0,1)");
         }
-        MCDocumentStore MCmigrated=new MCDocumentStore(MCdirectory);
+        MCDocumentStore MCmigrated=new MCDocumentStore(MCdirectory, false);
         assertThat(MCmigrated.MCdefinitions()).hasSize(2);
         assertThat(MCmigrated.MCvariables(1)).hasSize(1);
         assertThat(MCmigrated.MCvariables(2)).hasSize(1);
         assertThat(MCmigrated.MCdefinitionId(MCmigrated.MCvariables(1).get(0).MCid())).isNotEqualTo(MCmigrated.MCdefinitionId(MCmigrated.MCvariables(2).get(0).MCid()));
-        assertThat(new MCDocumentStore(MCdirectory).MCdefinitions()).hasSize(2);
+        assertThat(new MCDocumentStore(MCdirectory, false).MCdefinitions()).hasSize(2);
     }
 }
