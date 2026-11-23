@@ -88,3 +88,7 @@ jpackage --type app-image --name EstudioDocumental --app-version 1.0.0 --input t
 ### Tecnologías
 
 Java 17 · JavaFX 21 · AtlantaFX · Apache POI · OpenPDF · SQLite · Jackson
+
+### Autor
+
+Alejandro Chino Leon
