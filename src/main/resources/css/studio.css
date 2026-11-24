@@ -289,3 +289,26 @@
 .generator-variables-panel.collapsed { -fx-padding: 8 2 8 2; }
 .client-panel-heading { -fx-padding: 0 0 12 0; }
 .client-update-banner { -fx-padding: 10; -fx-background-color: -color-accent-subtle; -fx-background-radius: 6; -fx-font-weight: bold; }
+
+/* Generation in batches and explicit spreadsheet mapping. */
+.god-mode-card, .batch-document-card, .excel-mapping-card {
+    -fx-padding: 14; -fx-spacing: 10;
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 8; -fx-background-radius: 8;
+}
+.generation-modes { -fx-padding: 4 0 8 0; }
+.generation-modes .toggle-button { -fx-padding: 9 18; }
+.generation-modes .toggle-button:selected {
+    -fx-background-color: -color-accent-subtle; -fx-text-fill: -color-accent-emphasis;
+}
+.batch-document-selected { -fx-border-color: -color-accent-emphasis; -fx-border-width: 2; }
+.batch-button { -fx-padding: 7 9; -fx-graphic-text-gap: 6; }
+.batch-page .split-pane { -fx-background-color: transparent; -fx-padding: 0; }
+.excel-variable-drag { -fx-font-weight: bold; -fx-cursor: open-hand; -fx-padding: 6; }
+.excel-grid .table-cell { -fx-border-color: -color-border-default; -fx-padding: 7; }
+.excel-grid .table-cell.excel-cell-used {
+    -fx-background-color: -color-accent-subtle; -fx-text-fill: -color-fg-default;
+    -fx-border-color: -color-accent-emphasis;
+}
+.excel-validation { -fx-padding: 10; -fx-font-weight: bold; }

@@ -44,9 +44,9 @@ class MCTemplateCatalogUiTest {
                 MCinvoke(MCwindow,"MCshowLibrary");ListView<MCTemplateGroup> MCgroups=MCvalue(MCwindow,"MCgroupList");ListView<MCTemplate> MCcatalog=MCvalue(MCwindow,"MClibraryList");
                 assertThat(MCgroups.getItems()).containsExactlyElementsOf(MCstore.MCgroups());assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactlyInAnyOrder(MCfirst.MCid(),MCsecond.MCid(),MCunassigned.MCid());
                 MCgroups.getSelectionModel().select(MCgroups.getItems().stream().filter(MCg->MCg.MCid()==MCrequests.MCid()).findFirst().orElseThrow());
-                assertThat(MCcatalog.getItems()).hasSize(3);ListCell<MCTemplate> MCcell=MCcatalog.getCellFactory().call(MCcatalog);MCupdateCell(MCcell,MCfirst);assertThat(MCcell.getStyleClass()).contains("library-associated");MCupdateCell(MCcell,MCsecond);assertThat(MCcell.getStyleClass()).doesNotContain("library-associated");
+                assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactly(MCfirst.MCid(),MCsecond.MCid(),MCunassigned.MCid());ListCell<MCTemplate> MCcell=MCcatalog.getCellFactory().call(MCcatalog);MCupdateCell(MCcell,MCfirst);assertThat(MCcell.getStyleClass()).contains("library-associated");MCupdateCell(MCcell,MCsecond);assertThat(MCcell.getStyleClass()).doesNotContain("library-associated");
                 MCgroups.getSelectionModel().select(MCgroups.getItems().stream().filter(MCg->MCg.MCid()==MCletters.MCid()).findFirst().orElseThrow());
-                assertThat(MCcatalog.getItems()).hasSize(3);MCupdateCell(MCcell,MCfirst);assertThat(MCcell.getStyleClass()).doesNotContain("library-associated");MCupdateCell(MCcell,MCsecond);assertThat(MCcell.getStyleClass()).contains("library-associated");
+                assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactly(MCsecond.MCid(),MCunassigned.MCid(),MCfirst.MCid());MCupdateCell(MCcell,MCfirst);assertThat(MCcell.getStyleClass()).doesNotContain("library-associated");MCupdateCell(MCcell,MCsecond);assertThat(MCcell.getStyleClass()).contains("library-associated");
                 TextField MCsearch=MCvalue(MCwindow,"MClibrarySearch");MCsearch.setText("sol");assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactly(MCfirst.MCid());MCsearch.clear();assertThat(MCcatalog.getItems()).hasSize(3);
                 for(MCTemplateGroup MCgroup:MCstore.MCgroups())MCstore.MCdeleteGroup(MCgroup.MCid(),null);MCinvoke(MCwindow,"MCrefreshLibrary");assertThat(MCgroups.getItems()).isEmpty();assertThat(MCcatalog.getItems()).hasSize(3);MCupdateCell(MCcell,MCsecond);assertThat(MCcell.getStyleClass()).doesNotContain("library-associated");
                 MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();BorderPane MCpage=MCvalue(MCwindow,"MClibraryPage");assertThat(MCbuttonLabels(MCpage)).containsExactlyInAnyOrder("Nuevo grupo","Renombrar grupo","Eliminar grupo","Abrir en editor","Renombrar plantilla","Duplicar plantilla","Eliminar plantilla","Añadir plantilla al grupo","Quitar del grupo");
@@ -327,8 +327,8 @@ class MCTemplateCatalogUiTest {
         MCTemplate MCtemplate=MCtemplate(MCstore,"Complementos","{{Dirigido}} {{Cargo}} {{objeto}} {{precio}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCTemplate MCsingle=MCtemplate(MCstore,"Solo objeto","{{objeto}}");MCstore.MCsetTemplateGroups(MCsingle.MCid(),List.of(MCgroup.MCid()));for(MCDefinition MCd:List.of(MCname,MCrole,MCobject,MCprice))MCstore.MCbindDefinition(MCtemplate.MCid(),MCd.MCid(),false,(int)MCd.MCid());
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();return MCcreated;});
         try{MCfx(()->{
-            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCname);((ComboBox<MCDefinition>)MCvalue(MCwindow,"MCcomplementChoice")).getSelectionModel().select(MCrole);assertThat(((CheckBox)MCvalue(MCwindow,"MCcomplementBoth")).isSelected()).isTrue();MCinvoke(MCwindow,"MClinkComplement");MCstore.MCsaveComplement(MCobject.MCid(),MCprice.MCid(),true);
-            MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();BorderPane MCpage=MCvalue(MCwindow,"MCdefinitionsPage");assertThat(MCpage.lookupAll(".binding-card")).hasSize(4);Node MCapi=((VBox)MCvalue(MCwindow,"MCdefinitionApiOptions")).getParent();Node MCcomplement=((VBox)MCvalue(MCwindow,"MCcomplementLinks")).getParent();assertThat(MCapi.getParent()).isSameAs(MCcomplement.getParent());assertThat(MCapi.getParent()).isInstanceOf(HBox.class);MCsnapshotConfigured(MCwindow,"complementos-variables");
+            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCname);((RadioButton)MCvalue(MCwindow,"MCcomplementScope")).fire();((ComboBox<MCDefinition>)MCvalue(MCwindow,"MCcomplementChoice")).getSelectionModel().select(MCrole);assertThat(((CheckBox)MCvalue(MCwindow,"MCcomplementBoth")).isSelected()).isTrue();MCinvoke(MCwindow,"MClinkComplement");MCstore.MCsaveComplement(MCobject.MCid(),MCprice.MCid(),true);
+            MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();BorderPane MCpage=MCvalue(MCwindow,"MCdefinitionsPage");assertThat(MCpage.lookupAll(".binding-card")).hasSize(4);Node MCapi=((VBox)MCvalue(MCwindow,"MCdefinitionApiOptions")).getParent();Node MCcomplement=((VBox)MCvalue(MCwindow,"MCcomplementLinks")).getParent();assertThat(MCapi.getParent()).isSameAs(MCcomplement.getParent());assertThat(MCapi.getParent()).isInstanceOf(VBox.class);assertThat(MCapi.isManaged()).isFalse();assertThat(MCcomplement.isManaged()).isTrue();MCsnapshotConfigured(MCwindow,"complementos-variables");
             MCinvoke(MCwindow,"MCshowContacts");MCinvoke(MCwindow,"MCnewContact");((TextField)MCvalue(MCwindow,"MCcontactGiven")).setText("Luisito");((ComboBox<MCDefinition>)MCvalue(MCwindow,"MCcontactExtraChoice")).getSelectionModel().select(MCrole);((TextField)MCvalue(MCwindow,"MCcontactExtraValue")).setText("Presidente");MCinvoke(MCwindow,"MCwriteContactExtra",new Class<?>[]{String.class,String.class,boolean.class},"Cargo","Presidente",false);MCinvoke(MCwindow,"MCsaveContact");assertThat(MCdata.MCcontacts()).hasSize(1);assertThat(MCdata.MCcontacts().get(0).MCnumber()).isEmpty();assertThat(((TableView<?>)MCvalue(MCwindow,"MCcontactVariableTable")).getItems()).hasSize(1);
             MCinvoke(MCwindow,"MCwriteContactExtra",new Class<?>[]{String.class,String.class,boolean.class},"Asociacion","Los Pinos",false);assertThat(MCdata.MCcontacts().get(0).MCextrasJson()).contains("Los Pinos");MCsnapshotConfigured(MCwindow,"complementos-clientes");
             MCinvoke(MCwindow,"MCshowGenerator");((ComboBox<MCTemplate>)MCvalue(MCwindow,"MCgenerateTemplate")).getSelectionModel().select(MCtemplate);MCinvoke(MCwindow,"MCbuildDynamicForm");Map<String,Control> MCinputs=MCvalue(MCwindow,"MCinputs");TextField MCsource=(TextField)MCinputs.get("Dirigido");MCsource.setText("Luisito");MCsource.fireEvent(new javafx.event.ActionEvent());assertThat(((TextField)MCinputs.get("Cargo")).getText()).isEqualTo("Presidente");
@@ -398,7 +398,7 @@ class MCTemplateCatalogUiTest {
             MCjs(MCwindow,"var p=document.querySelector('#editor p'),r=document.createRange();r.selectNodeContents(p);r.collapse(false);var selection=window.getSelection();selection.removeAllRanges();selection.addRange(r);document.dispatchEvent(new Event('selectionchange'))");MCinvoke(MCwindow,"MCinsertSelected");assertThat(MCjs(MCwindow,"document.querySelector('#editor .variable').dataset.key")).isEqualTo("Persona_2.DNI");assertThat(MCjs(MCwindow,"document.querySelector('#editor .variable').textContent")).isEqualTo("⟦Dirigido · DNI⟧");
             MCpeople.getSelectionModel().select(1);MCinvoke(MCwindow,"MCinsertSelected");assertThat(((Number)MCjs(MCwindow,"document.querySelectorAll('#editor .variable').length")).intValue()).isEqualTo(2);assertThat(MCstore.MCvariables(MCtemplate.MCid())).extracting(MCVariable::MCkey).containsExactly("Persona_2.DNI","Persona_1.DNI");MCinvoke(MCwindow,"MCsaveTemplate");
             AtomicReference<Throwable> MCproblem=MCanswerDialog(ButtonType.OK,MCpane->((TextField)MCpane.lookup(".text-field")).setText("Arrendador"));MCinvoke(MCwindow,"MCaddEditorPersona");assertThat(MCproblem.get()).isNull();assertThat(MCpeople.getValue().MCpersonaKey()).isEqualTo("Persona_3");MCproblem=MCanswerDialog(ButtonType.OK,MCpane->((TextField)MCpane.lookup(".text-field")).setText("Arrendatario"));MCinvoke(MCwindow,"MCrenameEditorPersona");assertThat(MCproblem.get()).isNull();assertThat(MCstore.MCpersonas(MCtemplate.MCid()).get(2).MCdisplayName()).isEqualTo("Arrendatario");
-            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCdate);CheckBox MCautomatic=MCvalue(MCwindow,"MCautoCurrentDate");ComboBox<String> MCformat=MCvalue(MCwindow,"MCcurrentDateFormat");assertThat(MCformat.isDisabled()).isTrue();MCautomatic.setSelected(true);MCformat.setValue("d 'de' MMMM 'de' yyyy");assertThat(MCformat.isDisabled()).isFalse();String MCtoday=java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(MCformat.getValue(),Locale.forLanguageTag("es-PE")));assertThat(((Label)MCvalue(MCwindow,"MCcurrentDatePreview")).getText()).contains(MCtoday);MCinvoke(MCwindow,"MCsaveDefinition");MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCdate.MCid()).findFirst().orElseThrow();assertThat(MCsaved.MCautoCurrentDate()).isTrue();assertThat(MCsaved.MCcurrentDate()).isEqualTo(MCtoday);MCsnapshotConfigured(MCwindow,"fecha-automatica");return null;
+            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCdate);RadioButton MCautomatic=MCvalue(MCwindow,"MCdateScope");ComboBox<String> MCformat=MCvalue(MCwindow,"MCcurrentDateFormat");assertThat(MCformat.isDisabled()).isTrue();MCautomatic.setSelected(true);MCformat.setValue("d 'de' MMMM 'de' yyyy");assertThat(MCformat.isDisabled()).isFalse();String MCtoday=java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(MCformat.getValue(),Locale.forLanguageTag("es-PE")));assertThat(((Label)MCvalue(MCwindow,"MCcurrentDatePreview")).getText()).contains(MCtoday);MCinvoke(MCwindow,"MCsaveDefinition");MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCdate.MCid()).findFirst().orElseThrow();assertThat(MCsaved.MCautoCurrentDate()).isTrue();assertThat(MCsaved.MCcurrentDate()).isEqualTo(MCtoday);MCsnapshotConfigured(MCwindow,"fecha-automatica");return null;
         });MCawaitEditor(MCwindow);MCfx(()->{MCinvoke(MCwindow,"MCshowEditor");MCsnapshotConfigured(MCwindow,"personas-editor");ComboBox<MCDocumentStore.MCPersona> MCpeople=MCvalue(MCwindow,"MCeditorPersona");MCpeople.getSelectionModel().select(MCpeople.getItems().stream().filter(MCp->MCp.MCpersonaKey().equals("Persona_3")).findFirst().orElseThrow());AtomicReference<Throwable> MCproblem=MCanswerDialog(ButtonType.YES,MCpane->{});MCinvoke(MCwindow,"MCremoveEditorPersona");assertThat(MCproblem.get()).isNull();assertThat(MCstore.MCpersonas(MCtemplate.MCid())).hasSize(2);try(XWPFDocument MCsaved=MCDocumentEngine.MCopen(MCstore.MCtemplates().get(0).MCedited())){assertThat(MCDocumentEngine.MCmarkers(MCsaved)).containsExactlyInAnyOrder("Persona_1.DNI","Persona_2.DNI");}return null;});}finally{MCfx(()->{((Stage)MCvalue(MCwindow,"MCstage")).close();return null;});}
     }
     @Test void MCgenerationShowsCompleteEditableDocumentFromHeaderToFooterAndResetsOnTemplateChange()throws Exception{
@@ -474,7 +474,7 @@ class MCTemplateCatalogUiTest {
         MCTemplate MCtemplate=MCtemplate(MCstore,"Global","{{Persona_1.Nombre_del_Anio}} {{DNI}} {{nombre}} {{Persona_1.DNI}} {{Persona_1.nombre}}");MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Cartas");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));MCstore.MCaddPersona(MCtemplate.MCid(),"Dirigido");MCstore.MCbindDefinition(MCtemplate.MCid(),MCoriginal.MCid(),"Persona_1.Nombre_del_Anio",false,1);MCdata.MCsaveApiBinding(new MCApiBinding(MCoriginal.MCid(),"DNI","field:nombre_completo"));MCstore.MCsaveComplement(MCname.MCid(),MCoriginal.MCid(),true);MCdata.MCsaveContactBinding(new MCContactBinding(0,MCtemplate.MCid(),"viejo","Persona","extra:Nombre_del_Anio","Persona_1.Nombre_del_Anio"));
         MCStudioWindow MCwindow=MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCcreated=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCcreated));MCstage.show();return MCcreated;});
         try{MCfx(()->{
-            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCoriginal);RadioButton MCclient=MCvalue(MCwindow,"MCclientScope"),MCglobal=MCvalue(MCwindow,"MCglobalScope");assertThat(MCclient.isSelected()).isTrue();MCglobal.fire();assertThat(MCclient.isSelected()).isFalse();MCinvoke(MCwindow,"MCsaveDefinition");MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCoriginal.MCid()).findFirst().orElseThrow();assertThat(MCsaved.MCbindToClient()).isFalse();MCinvoke(MCwindow,"MCloadDefinition",new Class<?>[]{MCDefinition.class},MCsaved);assertThat(MCglobal.isSelected()).isTrue();MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();((ScrollPane)((BorderPane)MCvalue(MCwindow,"MCdefinitionsPage")).getCenter()).setVvalue(1);MCsnapshotConfigured(MCwindow,"alcance-global");
+            MCinvoke(MCwindow,"MCshowDefinitions");((ListView<MCDefinition>)MCvalue(MCwindow,"MCdefinitionList")).getSelectionModel().select(MCoriginal);RadioButton MCclient=MCvalue(MCwindow,"MCclientScope"),MCglobal=MCvalue(MCwindow,"MCglobalScope");assertThat(((RadioButton)MCvalue(MCwindow,"MCapiScope")).isSelected()).isTrue();MCglobal.fire();assertThat(MCclient.isSelected()).isFalse();MCinvoke(MCwindow,"MCsaveDefinition");MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCoriginal.MCid()).findFirst().orElseThrow();assertThat(MCsaved.MCbindToClient()).isFalse();MCinvoke(MCwindow,"MCloadDefinition",new Class<?>[]{MCDefinition.class},MCsaved);assertThat(((RadioButton)MCvalue(MCwindow,"MCcomplementScope")).isSelected()).isTrue();MCglobal.fire();MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();((ScrollPane)((BorderPane)MCvalue(MCwindow,"MCdefinitionsPage")).getCenter()).setVvalue(1);MCsnapshotConfigured(MCwindow,"alcance-global");
             MCinvoke(MCwindow,"MCshowEditor");MCinvoke(MCwindow,"MCopenTemplate",new Class<?>[]{MCTemplate.class},MCstore.MCtemplates().stream().filter(MCt->MCt.MCid()==MCtemplate.MCid()).findFirst().orElseThrow());return null;
         });MCawaitEditor(MCwindow);MCfx(()->{
             ((ComboBox<MCDocumentStore.MCPersona>)MCvalue(MCwindow,"MCeditorPersona")).getSelectionModel().select(1);MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCoriginal.MCid()).findFirst().orElseThrow();((ListView<MCDefinition>)MCvalue(MCwindow,"MCvariableList")).getSelectionModel().select(MCsaved);assertThat(MCinvoke(MCwindow,"MCeditorTokenKey",new Class<?>[]{MCDefinition.class},MCsaved)).isEqualTo("Nombre_del_Anio");
@@ -545,6 +545,106 @@ class MCTemplateCatalogUiTest {
         });}finally{MCfx(()->{((Stage)MCvalue(MCwindow,"MCstage")).close();Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());return null;});}
     }
 
+    @Test void MCvariableScopeHasFiveExclusiveModesAndOnlyTheSelectedExtraCardIsManaged()throws Exception{
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp,false);
+        MCDefinition MCclient=MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));
+        MCDefinition MCglobal=MCstore.MCsaveDefinition(new MCDefinition(0,"global","Global","Texto corto","",false,"dd/MM/yyyy",false));
+        MCDefinition MCdate=MCstore.MCsaveDefinition(new MCDefinition(0,"fecha","Fecha","Fecha","",true,"dd/MM/yyyy",true));
+        MCDefinition MCapi=MCstore.MCsaveDefinition(new MCDefinition(0,"api","API","Texto corto",""));
+        MCDefinition MCcomplement=MCstore.MCsaveDefinition(new MCDefinition(0,"extra","Extra","Texto corto",""));
+        MCstore.MCsaveComplement(MCcomplement.MCid(),MCclient.MCid(),false);
+        new MCStudioData(MCtemp).MCsaveApiBinding(new MCApiBinding(MCapi.MCid(),"DNI","field:nombres"));
+        MCfx(()->{
+            Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCwindow));
+            try{
+                ToggleGroup MCscope=MCvalue(MCwindow,"MCvariableScope");assertThat(MCscope.getToggles()).hasSize(5);
+                Map<MCDefinition,String> MCmodes=new LinkedHashMap<>();MCmodes.put(MCclient,"MCclientScope");MCmodes.put(MCglobal,"MCglobalScope");MCmodes.put(MCcomplement,"MCcomplementScope");MCmodes.put(MCapi,"MCapiScope");MCmodes.put(MCdate,"MCdateScope");
+                for(var MCentry:MCmodes.entrySet()){
+                    MCinvoke(MCwindow,"MCloadDefinition",new Class<?>[]{MCDefinition.class},MCentry.getKey());assertThat(MCscope.getSelectedToggle()).isSameAs(MCvalue(MCwindow,MCentry.getValue()));
+                    for(var MCcard:Map.of("MCdefinitionApiCard","MCapiScope","MCdefinitionComplementCard","MCcomplementScope","MCdefinitionDateCard","MCdateScope").entrySet()){
+                        Node MCnode=MCvalue(MCwindow,MCcard.getKey());boolean MCshown=MCentry.getValue().equals(MCcard.getValue());assertThat(MCnode.isVisible()).isEqualTo(MCshown);assertThat(MCnode.isManaged()).isEqualTo(MCshown);
+                    }
+                }
+                ((RadioButton)MCvalue(MCwindow,"MCapiScope")).fire();MCinvoke(MCwindow,"MCsaveDefinition");
+                MCDefinition MCsaved=MCstore.MCdefinitions().stream().filter(MCd->MCd.MCid()==MCdate.MCid()).findFirst().orElseThrow();assertThat(MCsaved.MCbindToClient()).isTrue();assertThat(MCsaved.MCautoCurrentDate()).isFalse();assertThat(new MCStudioData(MCtemp).MCapiBinding(MCsaved.MCid())).isNotNull();
+                MCinvoke(MCwindow,"MCnewDefinition");assertThat(((RadioButton)MCvalue(MCwindow,"MCclientScope")).isSelected()).isTrue();
+                for(String MCcard:List.of("MCdefinitionApiCard","MCdefinitionComplementCard","MCdefinitionDateCard"))assertThat(((Node)MCvalue(MCwindow,MCcard)).isManaged()).isFalse();
+            }finally{MCstage.close();}return null;
+        });
+    }
+
+    @Test void MCgodModeTogglesImmediatelyAndBatchFormsKeepSeparateEditableValuesAndPreviewMoreThanTenPages()throws Exception{
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp,false);byte[] MCbytes;
+        try(XWPFDocument MCdoc=new XWPFDocument()){
+            for(int MCi=0;MCi<12;MCi++){XWPFParagraph MCp=MCdoc.createParagraph();if(MCi>0)MCp.setPageBreak(true);MCp.createRun().setText("Página "+(MCi+1)+" · {{nombre}} · {{global}}");}MCbytes=MCDocumentEngine.MCbytes(MCdoc);
+        }
+        MCTemplate MCtemplate=MCstore.MCsaveTemplate(new MCTemplate(0,"Largo",MCbytes,MCbytes));MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Grupo");MCstore.MCsetTemplateGroups(MCtemplate.MCid(),List.of(MCgroup.MCid()));
+        MCstore.MCsaveDefinition(new MCDefinition(0,"nombre","Nombre","Texto corto",""));MCstore.MCsaveDefinition(new MCDefinition(0,"global","Global","Texto corto","",false,"dd/MM/yyyy",false));
+        AtomicReference<MCStudioWindow> MCref=new AtomicReference<>();
+        MCfx(()->{
+            Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCref.set(MCwindow);MCstage.setScene(MCscene(MCwindow));MCstage.show();
+            ((ComboBox<MCTemplate>)MCvalue(MCwindow,"MCgenerateTemplate")).getSelectionModel().selectFirst();
+            VBox MCheading=MCvalue(MCwindow,"MCgeneratorHeader");HBox MCmodes=MCvalue(MCwindow,"MCgenerationModes");assertThat(MCheading.getChildren()).doesNotContain(MCmodes);
+            CheckBox MCgod=MCvalue(MCwindow,"MCgodMode");MCgod.fire();assertThat(MCstore.MCgodModeEnabled()).isTrue();assertThat(MCheading.getChildren()).contains(MCmodes);
+            ((ToggleButton)MCvalue(MCwindow,"MCbatchMode")).fire();BorderPane MCpage=MCvalue(MCwindow,"MCbatchPage");MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();
+            assertThat(MCbuttonLabels(MCpage)).contains("Previsualizar","Descargar .ZIP","DOCX","PDF","Subir Excel","+ Agregar otro documento / cliente").doesNotContain("Imprimir","Abrir en Word","Guardar DOCX","Guardar PDF");
+            List<?> MCitems=MCvalue(MCwindow,"MCbatchItems");assertThat(MCitems).hasSize(1);MCinvoke(MCwindow,"MCaddBatchItem",new Class<?>[]{Map.class},Map.of("nombre","Luis","global","Común"));assertThat(MCitems).hasSize(2);
+            MCStudioWindow MCfirst=MCvalue(MCitems.get(0),"MCform"),MCsecond=MCvalue(MCitems.get(1),"MCform");Map<String,Control> MCfirstInputs=MCvalue(MCfirst,"MCinputs"),MCsecondInputs=MCvalue(MCsecond,"MCinputs");
+            ((TextField)MCfirstInputs.get("nombre")).setText("Ana");assertThat(((TextField)MCsecondInputs.get("nombre")).getText()).isEqualTo("Luis");assertThat(((TextField)MCsecondInputs.get("global")).getText()).isEqualTo("Común");
+            MCinvoke(MCwindow,"MCpreviewBatch");assertThat(((Label)MCvalue(MCwindow,"MCbatchPosition")).getText()).contains("Documento 1 de 2","Ana");
+            ((Button)MCvalue(MCwindow,"MCbatchNext")).fire();assertThat(((Label)MCvalue(MCwindow,"MCbatchPosition")).getText()).contains("Documento 2 de 2","Luis");
+            return null;
+        });
+        MCStudioWindow MCwindow=MCref.get();
+        try{
+            long MCdeadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);boolean MCready=false;
+            while(System.nanoTime()<MCdeadline){MCready=MCfx(()->Boolean.TRUE.equals(((javafx.scene.web.WebView)MCvalue(MCwindow,"MCbatchPreview")).getEngine().executeScript("window.previewReady===true")));if(MCready)break;Thread.sleep(25);}assertThat(MCready).isTrue();Thread.sleep(200);
+            MCfx(()->{
+                javafx.scene.web.WebView MCweb=MCvalue(MCwindow,"MCbatchPreview");assertThat(MCweb.getHeight()).isGreaterThan(100);assertThat(((Number)MCweb.getEngine().executeScript("document.querySelectorAll('.page-slot').length")).intValue()).isGreaterThan(10);
+                MCsnapshotConfigured(MCwindow,"generacion-masiva");MCweb.getEngine().executeScript("window.scrollTo(0,9999)");((Button)MCvalue(MCwindow,"MCbatchPrevious")).fire();return null;
+            });
+            long MCresetDeadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);boolean MCreset=false;
+            while(System.nanoTime()<MCresetDeadline){MCreset=MCfx(()->Boolean.TRUE.equals(((javafx.scene.web.WebView)MCvalue(MCwindow,"MCbatchPreview")).getEngine().executeScript("window.previewReady===true && document.body.textContent.indexOf('Ana')>=0 && document.documentElement.scrollTop===0")));if(MCreset)break;Thread.sleep(25);}assertThat(MCreset).isTrue();
+            MCfx(()->{
+                MCinvoke(MCwindow,"MCpopulateBatch",new Class<?>[]{List.class},List.of(Map.of("nombre","Excel 1","global","Común"),Map.of("nombre","Excel 2","global","Común"),Map.of("nombre","Excel 3","global","Común")));
+                List<?> MCimported=MCvalue(MCwindow,"MCbatchItems");assertThat(MCimported).hasSize(3);MCStudioWindow MCthird=MCvalue(MCimported.get(2),"MCform");assertThat(((Map<String,Control>)MCvalue(MCthird,"MCinputs"))).containsKeys("nombre","global");assertThat(((byte[])MCvalue(MCthird,"MCgeneratedBytes"))).isNotEmpty();
+                ((TextField)((Map<String,Control>)MCvalue(MCthird,"MCinputs")).get("nombre")).setText("Editable");assertThat(((TextField)((Map<String,Control>)MCvalue(MCthird,"MCinputs")).get("nombre")).getText()).isEqualTo("Editable");
+                CheckBox MCgod=MCvalue(MCwindow,"MCgodMode");MCgod.fire();assertThat(MCstore.MCgodModeEnabled()).isFalse();assertThat(((VBox)MCvalue(MCwindow,"MCgeneratorHeader")).getChildren()).doesNotContain((HBox)MCvalue(MCwindow,"MCgenerationModes"));
+                assertThat(((BorderPane)MCvalue(MCwindow,"MCgeneratorPage")).getCenter()).isSameAs(MCvalue(MCwindow,"MCgeneratorColumns"));return null;
+            });
+        }finally{MCfx(()->{((Stage)MCvalue(MCwindow,"MCstage")).close();return null;});}
+    }
+
+    @Test void MCexcelMappingBlocksMissingVariablesHighlightsUsedCellsAndImportsEditableBatchRows()throws Exception{
+        MCfx(()->{
+            Stage MCowner=new Stage();Scene MCscene=new Scene(new StackPane(),1200,800);MCscene.getStylesheets().add(MCTemplateCatalogUiTest.class.getResource("/css/studio.css").toExternalForm());MCowner.setScene(MCscene);MCowner.show();
+            List<MCVariable> MCvariables=List.of(new MCVariable(0,0,"nombre","Nombre","Texto corto","",false,1),new MCVariable(0,0,"global","Global","Texto corto","",false,2));
+            var MCsheet=new MCExcelBatch.MCSheet("Datos",List.of(List.of("Nombre","Común"),List.of("Ana",""),List.of("Luis","")),2);
+            MCExcelMappingDialog MCmapping=new MCExcelMappingDialog(MCowner,List.of(MCsheet),MCvariables);Dialog<List<Map<String,String>>> MCdialog=MCvalue(MCmapping,"MCdialog");
+            try{
+                MCdialog.show();ButtonType MCgenerate=MCvalue(MCmapping,"MCgenerate");Button MCbutton=(Button)MCdialog.getDialogPane().lookupButton(MCgenerate);assertThat(MCbutton.isDisabled()).isTrue();
+                Map<String,?> MCcontrols=MCvalue(MCmapping,"MCcontrols");MCinvoke(MCcontrols.get("nombre"),"MCplace",new Class<?>[]{String.class},"A2");assertThat(MCbutton.isDisabled()).isTrue();assertThat(((Label)MCvalue(MCmapping,"MCvalidation")).getText()).contains("global");
+                MCinvoke(MCcontrols.get("global"),"MCplace",new Class<?>[]{String.class},"B1");assertThat(MCbutton.isDisabled()).isFalse();assertThat(((Label)MCvalue(MCmapping,"MCvalidation")).getText()).contains("100%","2 documentos");
+                MCdialog.getDialogPane().applyCss();MCdialog.getDialogPane().layout();TableView<?> MCtable=MCvalue(MCmapping,"MCtable");MCtable.refresh();MCtable.layout();
+                assertThat(MCtable.lookupAll(".excel-cell-used")).isNotEmpty();MCsnapshotNode(MCdialog.getDialogPane(),"excel-mapping");assertThat(((TextField)MCvalue(MCcontrols.get("nombre"),"MCto")).getText()).isEqualTo("A3");
+                ((TextField)MCvalue(MCcontrols.get("global"),"MCto")).setText("B2");assertThat(MCbutton.isDisabled()).isFalse();
+                ((TextField)MCvalue(MCcontrols.get("global"),"MCto")).setText("A9");assertThat(MCbutton.isDisabled()).isTrue();assertThat(((Label)MCvalue(MCmapping,"MCvalidation")).getText()).contains("columna");
+                ((TextField)MCvalue(MCcontrols.get("global"),"MCto")).setText("B1");MCbutton.fire();
+                assertThat(MCdialog.getResult()).containsExactly(Map.of("nombre","Ana","global","Común"),Map.of("nombre","Luis","global","Común"));
+            }finally{MCdialog.close();MCowner.close();}return null;
+        });
+    }
+
+    @Test void MClibraryKeepsSecondarySortInsideMemberAndNonmemberBlocks()throws Exception{
+        MCDocumentStore MCstore=new MCDocumentStore(MCtemp,false);MCTemplateGroup MCgroup=MCstore.MCsaveGroup(0,"Grupo");
+        MCTemplate MCz=MCtemplate(MCstore,"Zeta",""),MCb=MCtemplate(MCstore,"Beta",""),MCa=MCtemplate(MCstore,"Alfa",""),MCc=MCtemplate(MCstore,"Carta","");
+        MCstore.MCsetTemplateGroups(MCz.MCid(),List.of(MCgroup.MCid()));MCstore.MCsetTemplateGroups(MCb.MCid(),List.of(MCgroup.MCid()));
+        MCfx(()->{Stage MCstage=new Stage();MCStudioWindow MCwindow=new MCStudioWindow(MCstage,MCstore);MCstage.setScene(MCscene(MCwindow));try{
+            MCinvoke(MCwindow,"MCshowLibrary");ListView<MCTemplate> MCcatalog=MCvalue(MCwindow,"MClibraryList");assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactly(MCb.MCid(),MCz.MCid(),MCa.MCid(),MCc.MCid());
+            ((ComboBox<String>)MCvalue(MCwindow,"MClibrarySort")).setValue("Nombre Z-A");assertThat(MCcatalog.getItems()).extracting(MCTemplate::MCid).containsExactly(MCz.MCid(),MCb.MCid(),MCc.MCid(),MCa.MCid());
+        }finally{MCstage.close();}return null;});
+    }
+
     @FunctionalInterface private interface MCDialogCheck {void MCcheck(DialogPane MCpane)throws Exception;}
     private static AtomicReference<Throwable> MCanswerDialog(ButtonType MCanswer,MCDialogCheck MCcheck){AtomicReference<Throwable> MCproblem=new AtomicReference<>();Platform.runLater(()->{DialogPane MCpane=MCdialogPane();try{MCcheck.MCcheck(MCpane);}catch(Throwable MCe){MCproblem.set(MCe);}finally{((Button)MCpane.lookupButton(MCanswer)).fire();}});return MCproblem;}
     private static DialogPane MCdialogPane(){return javafx.stage.Window.getWindows().stream().filter(javafx.stage.Window::isShowing).map(MCw->MCw.getScene().getRoot()).filter(MCp->MCp instanceof DialogPane).map(MCp->(DialogPane)MCp).findFirst().orElseThrow();}
@@ -566,9 +666,10 @@ class MCTemplateCatalogUiTest {
         Node MCpage=((StackPane)MCvalue(MCwindow,"MCworkspace")).getChildren().get(0);MCpage.setOpacity(1);MCpage.setTranslateY(0);
         for(boolean MCdark:List.of(false,true)){Application.setUserAgentStylesheet(MCdark?new PrimerDark().getUserAgentStylesheet():new PrimerLight().getUserAgentStylesheet());MCwindow.MCroot().applyCss();MCwindow.MCroot().layout();MCsnapshot(MCwindow,MCname+(MCdark?"-dark":"-light"));}Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     }
-    private static void MCsnapshot(MCStudioWindow MCwindow,String MCname)throws Exception{
+    private static void MCsnapshot(MCStudioWindow MCwindow,String MCname)throws Exception{MCsnapshotNode(MCwindow.MCroot(),MCname);}
+    private static void MCsnapshotNode(Node MCnode,String MCname)throws Exception{
         String MCdirectory=System.getProperty("studio.ui.snapshots");if(MCdirectory==null)return;
-        javafx.scene.image.WritableImage MCpixels=MCwindow.MCroot().snapshot(null,null);java.awt.image.BufferedImage MCimage=new java.awt.image.BufferedImage((int)MCpixels.getWidth(),(int)MCpixels.getHeight(),java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        javafx.scene.image.WritableImage MCpixels=MCnode.snapshot(null,null);java.awt.image.BufferedImage MCimage=new java.awt.image.BufferedImage((int)MCpixels.getWidth(),(int)MCpixels.getHeight(),java.awt.image.BufferedImage.TYPE_INT_ARGB);
         for(int MCy=0;MCy<MCimage.getHeight();MCy++)for(int MCx=0;MCx<MCimage.getWidth();MCx++)MCimage.setRGB(MCx,MCy,MCpixels.getPixelReader().getArgb(MCx,MCy));Path MCpath=Path.of(MCdirectory);Files.createDirectories(MCpath);javax.imageio.ImageIO.write(MCimage,"png",MCpath.resolve(MCname+".png").toFile());
     }
     private static <T> T MCfx(Callable<T> MCaction)throws Exception{CompletableFuture<T> MCresult=new CompletableFuture<>();Platform.runLater(()->{try{MCresult.complete(MCaction.call());}catch(Throwable MCe){MCresult.completeExceptionally(MCe);}});return MCresult.get(30,TimeUnit.SECONDS);}

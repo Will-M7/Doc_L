@@ -68,6 +68,7 @@ public final class MCDocumentStore {
         MCurl = "jdbc:sqlite:" + MCdirectory.resolve("studio.db");
         Class.forName("org.sqlite.JDBC");
         try (Connection MCc = MCconnect(); Statement MCs = MCc.createStatement()) {
+            MCs.executeUpdate("CREATE TABLE IF NOT EXISTS studio_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL)");
             MCs.executeUpdate("CREATE TABLE IF NOT EXISTS template (id INTEGER PRIMARY KEY, name TEXT NOT NULL, original BLOB NOT NULL, edited BLOB NOT NULL)");
             MCs.executeUpdate("CREATE TABLE IF NOT EXISTS template_group (id INTEGER PRIMARY KEY, name TEXT NOT NULL COLLATE NOCASE UNIQUE)");
             MCs.executeUpdate("CREATE TABLE IF NOT EXISTS template_group_member (template_id INTEGER PRIMARY KEY REFERENCES template(id) ON DELETE CASCADE, group_id INTEGER NOT NULL REFERENCES template_group(id) ON DELETE CASCADE)");
@@ -142,6 +143,17 @@ public final class MCDocumentStore {
         MCsaveDate(MCc, MCid, MCdefinition);
         if (MCservice != null) try (PreparedStatement MCbinding = MCc.prepareStatement("INSERT OR IGNORE INTO variable_api_binding(definition_id,service,path) VALUES(?,?,?)")) {
             MCbinding.setLong(1, MCid); MCbinding.setString(2, MCservice); MCbinding.setString(3, MCpath); MCbinding.executeUpdate();
+        }
+    }
+
+    public boolean MCgodModeEnabled() throws SQLException {
+        try (Connection MCc=MCconnect(); PreparedStatement MCs=MCc.prepareStatement("SELECT value FROM studio_meta WHERE key='god_mode_enabled'"); ResultSet MCr=MCs.executeQuery()) {
+            return MCr.next() && "true".equalsIgnoreCase(MCr.getString(1));
+        }
+    }
+    public void MCsetGodModeEnabled(boolean MCenabled) throws SQLException {
+        try (Connection MCc=MCconnect(); PreparedStatement MCs=MCc.prepareStatement("INSERT INTO studio_meta(key,value) VALUES('god_mode_enabled',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")) {
+            MCs.setString(1,Boolean.toString(MCenabled)); MCs.executeUpdate();
         }
     }
 
